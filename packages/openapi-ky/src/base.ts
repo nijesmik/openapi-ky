@@ -56,7 +56,7 @@ export class API<Paths extends object> {
     return this.request("delete", path, options);
   }
 
-  request<
+  async request<
     Method extends Extract<HttpMethod, "delete" | "get" | "patch" | "post" | "put">,
     Path extends PathOf<Paths, Method>,
     Body extends BodyOf<Paths, Path, Method>,
@@ -65,7 +65,7 @@ export class API<Paths extends object> {
     const url = buildUrl(path, params);
 
     try {
-      return this.api[method](url, kyOptions).json<SuccessOf<Paths, Path, Method>>();
+      return await this.api[method](url, kyOptions).json<SuccessOf<Paths, Path, Method>>();
     } catch (error) {
       this.handleError(error);
       throw error;

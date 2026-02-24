@@ -18,7 +18,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
 
   function keyOf<Path extends PathOf<Paths, "get">>(
     path: Path,
-    options?: { params?: Params; searchParams?: Options["searchParams"] },
+    options?: Pick<Options, "params" | "searchParams">,
   ) {
     return buildQueryKey(path, options);
   }

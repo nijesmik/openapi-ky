@@ -15,14 +15,13 @@
     "build": "tsup",
     "dev": "tsup --watch"
   },
-  "dependencies": {
-    "@nijesmik/openapi-ky": "workspace:*"
-  },
   "peerDependencies": {
-    "@tanstack/react-query": "^5"
+    "@nijesmik/openapi-ky": "workspace:*",
+    "@tanstack/react-query": "^5.45.1"
   },
   "devDependencies": {
-    "@tanstack/react-query": "^5",
+    "@nijesmik/openapi-ky": "workspace:*",
+    "@tanstack/react-query": "^5.45.1",
     "tsup": "^8.4.0",
     "typescript": "5.9.3"
   }

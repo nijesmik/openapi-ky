@@ -1,4 +1,4 @@
-import type { API, Options, Params, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
+import type { API, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as createInfiniteQueryOptions,
@@ -35,7 +35,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     ...queryOptions
   }: {
     path: Path;
-    params?: Params | null;
+    params?: Options["params"] | null;
     searchParams?: Options["searchParams"];
     kyOption?: Omit<Options, "params" | "searchParams">;
   } & Omit<QueryOptions, "queryFn" | "queryKey">) {
@@ -62,7 +62,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     ...queryOptions
   }: {
     path: Path;
-    params?: Params;
+    params?: Options["params"];
     searchParams?: Options["searchParams"];
     kyOption?: Omit<Options, "params" | "searchParams">;
   } & Omit<
@@ -99,7 +99,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     ...queryOptions
   }: {
     path: Path;
-    params?: Params;
+    params?: Options["params"];
     searchParams?: Record<string, string | number | boolean | undefined>;
     kyOption?: Omit<Options, "params" | "searchParams">;
     pageParamKey?: string;

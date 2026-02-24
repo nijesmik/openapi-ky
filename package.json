@@ -11,6 +11,7 @@
   "devDependencies": {
     "@nijesmik/config": "workspace:*",
     "eslint": "^9.39.1",
+    "jiti": "^2.6.1",
     "prettier": "^3.7.4",
     "typescript": "5.9.2",
     "vitest": "^4.0.18"

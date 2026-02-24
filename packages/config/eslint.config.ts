@@ -20,7 +20,7 @@ const sortOptions = {
 
 export default defineConfig([
   {
-    ignores: ["**/*.gen.ts"],
+    ignores: ["**/*.gen.ts", "**/dist/**"],
   },
   ...tseslint.configs.recommended,
   {

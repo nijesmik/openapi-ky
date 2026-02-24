@@ -30,6 +30,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
   >({
     path,
     params,
+    searchParams,
     kyOption,
     enabled,
     select,
@@ -37,12 +38,13 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
   }: {
     path: Path;
     params?: Params | null;
-    kyOption?: Omit<Options, "params">;
+    searchParams?: Options["searchParams"];
+    kyOption?: Omit<Options, "params" | "searchParams">;
     enabled?: QueryOptions["enabled"];
     select?: (data: ResponseOf<Path>) => Data;
   } & Omit<QueryOptions, "queryFn" | "queryKey" | "select" | "enabled">) {
     if (params !== null) {
-      const requestOptions = { params, ...kyOption };
+      const requestOptions = { params, searchParams, ...kyOption };
       return createQueryOptions({
         queryKey: buildQueryKey(path, requestOptions),
         queryFn: () => api.get(path, requestOptions),
@@ -61,19 +63,21 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
   function suspenseOptions<Path extends PathOf<Paths, "get">, Data>({
     path,
     params,
+    searchParams,
     kyOption,
     select,
     ...queryOptions
   }: {
     path: Path;
     params?: Params;
-    kyOption?: Omit<Options, "params">;
+    searchParams?: Options["searchParams"];
+    kyOption?: Omit<Options, "params" | "searchParams">;
     select?: (data: ResponseOf<Path>) => Data;
   } & Omit<
     UseQueryOptions<ResponseOf<Path>, Error, Data>,
     "queryFn" | "queryKey" | "select"
   >) {
-    const requestOptions = { params, ...kyOption };
+    const requestOptions = { params, searchParams, ...kyOption };
     return createQueryOptions({
       queryKey: buildQueryKey(path, requestOptions),
       queryFn: () => api.get(path, requestOptions),
@@ -96,6 +100,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
   >({
     path,
     params,
+    searchParams,
     kyOption,
     pageParamKey = "cursor",
     initialPageParam,
@@ -106,9 +111,8 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
   }: {
     path: Path;
     params?: Params;
-    kyOption?: Omit<Options, "params" | "searchParams"> & {
-      searchParams?: Record<string, string | number | boolean | undefined>;
-    };
+    searchParams?: Record<string, string | number | boolean | undefined>;
+    kyOption?: Omit<Options, "params" | "searchParams">;
     pageParamKey?: string;
     initialPageParam: PageParam;
     enabled?: InfiniteQueryOptions["enabled"];
@@ -123,8 +127,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     InfiniteQueryOptions,
     "queryFn" | "queryKey" | "initialPageParam" | "getNextPageParam" | "select" | "enabled"
   >) {
-    const searchParams = kyOption?.searchParams ?? {};
-    const requestOptions = { params, ...kyOption };
+    const requestOptions = { params, searchParams, ...kyOption };
 
     return createInfiniteQueryOptions({
       queryKey: buildQueryKey(path, requestOptions),

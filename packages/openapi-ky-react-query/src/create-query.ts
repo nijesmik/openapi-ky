@@ -1,4 +1,4 @@
-import type { API, Options, Params, PathOf, SuccessOf } from "openapi-ky";
+import type { API, Options, Params, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as createInfiniteQueryOptions,

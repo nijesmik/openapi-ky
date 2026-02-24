@@ -6,5 +6,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ["openapi-ky", "@tanstack/react-query"],
+  external: ["@nijesmik/openapi-ky", "@tanstack/react-query"],
 });

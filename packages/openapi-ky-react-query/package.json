@@ -1,5 +1,5 @@
 {
-  "name": "openapi-ky-react-query",
+  "name": "@nijesmik/openapi-ky-react-query",
   "version": "0.0.0",
   "type": "module",
   "exports": {
@@ -14,7 +14,7 @@
     "dev": "tsup --watch"
   },
   "dependencies": {
-    "openapi-ky": "workspace:*"
+    "@nijesmik/openapi-ky": "workspace:*"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5"

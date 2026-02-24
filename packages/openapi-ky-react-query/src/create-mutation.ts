@@ -1,8 +1,8 @@
-import type { BodyOf, Options, PathOf, SuccessOf } from "openapi-ky";
+import type { BodyOf, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
 
 import { mutationOptions, type UseMutationOptions } from "@tanstack/react-query";
 
-import type { API } from "openapi-ky";
+import type { API } from "@nijesmik/openapi-ky";
 
 type MutationMethod = "delete" | "patch" | "post" | "put";
 

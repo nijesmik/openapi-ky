@@ -1,4 +1,4 @@
-import type { Options } from "openapi-ky";
+import type { Options } from "@nijesmik/openapi-ky";
 
 type QueryKey = (string | Options["params"])[];
 

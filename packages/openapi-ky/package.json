@@ -1,0 +1,27 @@
+{
+  "name": "openapi-ky",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "ky": "^1.14.3"
+  },
+  "peerDependencies": {
+    "openapi-typescript-helpers": "^0.1.0"
+  },
+  "devDependencies": {
+    "openapi-typescript-helpers": "^0.1.0",
+    "tsup": "^8.4.0",
+    "typescript": "5.9.2"
+  }
+}

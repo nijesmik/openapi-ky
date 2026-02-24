@@ -8,7 +8,9 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch"
@@ -22,6 +24,6 @@
   "devDependencies": {
     "@tanstack/react-query": "^5",
     "tsup": "^8.4.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.3"
   }
 }

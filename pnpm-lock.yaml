@@ -8,18 +8,12 @@ importers:
 
   .:
     devDependencies:
-      '@nijesmik/config':
+      '@nijesmik/eslint':
         specifier: workspace:*
-        version: link:packages/config
-      eslint:
-        specifier: ^9.39.1
-        version: 9.39.3(jiti@2.6.1)
-      jiti:
-        specifier: ^2.6.1
-        version: 2.6.1
-      prettier:
-        specifier: ^3.7.4
-        version: 3.8.1
+        version: link:packages/eslint
+      '@nijesmik/prettier':
+        specifier: workspace:*
+        version: link:packages/prettier
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -27,11 +21,14 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.0)(jiti@2.6.1)
 
-  packages/config:
+  packages/eslint:
     dependencies:
       '@eslint/json':
         specifier: ^1.0.1
         version: 1.0.1
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.3(jiti@2.6.1)
       eslint-plugin-import:
         specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))
@@ -48,12 +45,6 @@ importers:
       '@types/node':
         specifier: ^25.3.0
         version: 25.3.0
-      eslint:
-        specifier: ^9.39.1
-        version: 9.39.3(jiti@2.6.1)
-      prettier:
-        specifier: ^3.7.4
-        version: 3.8.1
 
   packages/openapi-ky:
     dependencies:
@@ -86,6 +77,15 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+
+  packages/prettier:
+    dependencies:
+      prettier:
+        specifier: ^3.7.4
+        version: 3.8.1
+      prettier-plugin-tailwindcss:
+        specifier: ^0.7.2
+        version: 0.7.2(prettier@3.8.1)
 
 packages:
 
@@ -1338,6 +1338,61 @@ packages:
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
+
+  prettier-plugin-tailwindcss@0.7.2:
+    resolution: {integrity: sha512-LkphyK3Fw+q2HdMOoiEHWf93fNtYJwfamoKPl7UwtjFQdei/iIBoX11G6j706FzN3ymX9mPVi97qIY8328vdnA==}
+    engines: {node: '>=20.19'}
+    peerDependencies:
+      '@ianvs/prettier-plugin-sort-imports': '*'
+      '@prettier/plugin-hermes': '*'
+      '@prettier/plugin-oxc': '*'
+      '@prettier/plugin-pug': '*'
+      '@shopify/prettier-plugin-liquid': '*'
+      '@trivago/prettier-plugin-sort-imports': '*'
+      '@zackad/prettier-plugin-twig': '*'
+      prettier: ^3.0
+      prettier-plugin-astro: '*'
+      prettier-plugin-css-order: '*'
+      prettier-plugin-jsdoc: '*'
+      prettier-plugin-marko: '*'
+      prettier-plugin-multiline-arrays: '*'
+      prettier-plugin-organize-attributes: '*'
+      prettier-plugin-organize-imports: '*'
+      prettier-plugin-sort-imports: '*'
+      prettier-plugin-svelte: '*'
+    peerDependenciesMeta:
+      '@ianvs/prettier-plugin-sort-imports':
+        optional: true
+      '@prettier/plugin-hermes':
+        optional: true
+      '@prettier/plugin-oxc':
+        optional: true
+      '@prettier/plugin-pug':
+        optional: true
+      '@shopify/prettier-plugin-liquid':
+        optional: true
+      '@trivago/prettier-plugin-sort-imports':
+        optional: true
+      '@zackad/prettier-plugin-twig':
+        optional: true
+      prettier-plugin-astro:
+        optional: true
+      prettier-plugin-css-order:
+        optional: true
+      prettier-plugin-jsdoc:
+        optional: true
+      prettier-plugin-marko:
+        optional: true
+      prettier-plugin-multiline-arrays:
+        optional: true
+      prettier-plugin-organize-attributes:
+        optional: true
+      prettier-plugin-organize-imports:
+        optional: true
+      prettier-plugin-sort-imports:
+        optional: true
+      prettier-plugin-svelte:
+        optional: true
 
   prettier@3.8.1:
     resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
@@ -2800,7 +2855,8 @@ snapshots:
 
   isexe@2.0.0: {}
 
-  jiti@2.6.1: {}
+  jiti@2.6.1:
+    optional: true
 
   joycon@3.1.1: {}
 
@@ -2980,6 +3036,10 @@ snapshots:
       source-map-js: 1.2.1
 
   prelude-ls@1.2.1: {}
+
+  prettier-plugin-tailwindcss@0.7.2(prettier@3.8.1):
+    dependencies:
+      prettier: 3.8.1
 
   prettier@3.8.1: {}
 

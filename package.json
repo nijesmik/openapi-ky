@@ -9,10 +9,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "@nijesmik/config": "workspace:*",
-    "eslint": "^9.39.1",
-    "jiti": "^2.6.1",
-    "prettier": "^3.7.4",
+    "@nijesmik/eslint": "workspace:*",
+    "@nijesmik/prettier": "workspace:*",
     "typescript": "5.9.3",
     "vitest": "^4.0.18"
   },

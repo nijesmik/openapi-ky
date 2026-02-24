@@ -1,1 +1,1 @@
-export { default } from "@nijesmik/config/eslint";
+export { default } from "@nijesmik/eslint/config";

@@ -1,29 +1,22 @@
 {
-  "name": "@nijesmik/config",
+  "name": "@nijesmik/eslint",
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    "./eslint": "./eslint.config.ts",
-    "./prettier": "./prettier.config.ts"
+    "./config": "./config/base.ts"
   },
   "files": [
-    "eslint.config.ts",
-    "prettier.config.ts"
+    "config"
   ],
   "dependencies": {
     "@eslint/json": "^1.0.1",
+    "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-perfectionist": "^5.4.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "typescript-eslint": "^8.46.4"
   },
-  "peerDependencies": {
-    "eslint": "^9",
-    "prettier": "^3"
-  },
   "devDependencies": {
-    "@types/node": "^25.3.0",
-    "eslint": "^9.39.1",
-    "prettier": "^3.7.4"
+    "@types/node": "^25.3.0"
   }
 }

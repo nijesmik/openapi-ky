@@ -6,9 +6,13 @@
     "build": "pnpm -r run build",
     "test": "vitest run",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
     "@nijesmik/eslint": "workspace:*",
     "@nijesmik/prettier": "workspace:*",
     "typescript": "5.9.3",

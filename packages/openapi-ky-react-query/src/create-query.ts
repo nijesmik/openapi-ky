@@ -32,24 +32,18 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     params,
     searchParams,
     kyOption,
-    enabled,
-    select,
     ...queryOptions
   }: {
     path: Path;
     params?: Params | null;
     searchParams?: Options["searchParams"];
     kyOption?: Omit<Options, "params" | "searchParams">;
-    enabled?: QueryOptions["enabled"];
-    select?: (data: ResponseOf<Path>) => Data;
-  } & Omit<QueryOptions, "queryFn" | "queryKey" | "select" | "enabled">) {
+  } & Omit<QueryOptions, "queryFn" | "queryKey">) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOption };
       return createQueryOptions({
         queryKey: buildQueryKey(path, requestOptions),
         queryFn: () => api.get(path, requestOptions),
-        enabled,
-        select,
         ...queryOptions,
       });
     }
@@ -65,23 +59,20 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     params,
     searchParams,
     kyOption,
-    select,
     ...queryOptions
   }: {
     path: Path;
     params?: Params;
     searchParams?: Options["searchParams"];
     kyOption?: Omit<Options, "params" | "searchParams">;
-    select?: (data: ResponseOf<Path>) => Data;
   } & Omit<
     UseQueryOptions<ResponseOf<Path>, Error, Data>,
-    "queryFn" | "queryKey" | "select"
+    "queryFn" | "queryKey"
   >) {
     const requestOptions = { params, searchParams, ...kyOption };
     return createQueryOptions({
       queryKey: buildQueryKey(path, requestOptions),
       queryFn: () => api.get(path, requestOptions),
-      select,
       ...queryOptions,
     });
   }
@@ -105,8 +96,6 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     pageParamKey = "cursor",
     initialPageParam,
     getNextPageParam,
-    enabled,
-    select,
     ...queryOptions
   }: {
     path: Path;
@@ -115,17 +104,15 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     kyOption?: Omit<Options, "params" | "searchParams">;
     pageParamKey?: string;
     initialPageParam: PageParam;
-    enabled?: InfiniteQueryOptions["enabled"];
     getNextPageParam: (
       lastPage: ResponseOf<Path>,
       allPages: ResponseOf<Path>[],
       lastPageParam: PageParam,
       allPageParams: PageParam[],
     ) => PageParam | undefined | null;
-    select?: (data: InfiniteData<ResponseOf<Path>, PageParam>) => Data;
   } & Omit<
     InfiniteQueryOptions,
-    "queryFn" | "queryKey" | "initialPageParam" | "getNextPageParam" | "select" | "enabled"
+    "queryFn" | "queryKey" | "initialPageParam" | "getNextPageParam"
   >) {
     const requestOptions = { params, searchParams, ...kyOption };
 
@@ -141,8 +128,6 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
         }),
       initialPageParam,
       getNextPageParam,
-      select,
-      enabled,
       ...queryOptions,
     });
   }

@@ -14,13 +14,10 @@
     "dev": "tsup --watch"
   },
   "dependencies": {
-    "ky": "^1.14.3"
-  },
-  "peerDependencies": {
+    "ky": "^1.14.3",
     "openapi-typescript-helpers": "^0.1.0"
   },
   "devDependencies": {
-    "openapi-typescript-helpers": "^0.1.0",
     "tsup": "^8.4.0",
     "typescript": "5.9.2"
   }

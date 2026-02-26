@@ -33,11 +33,8 @@ const mutation = createMutation(api);
 import { useQuery } from '@tanstack/react-query';
 
 // Simple query
-const { data: posts } = useQuery(
-  query.options({
-    path: '/posts',
-    select: (response) => response.data,
-  }),
+const { data } = useQuery(
+  query.options({ path: '/posts' }),
 );
 
 // Query with path parameters
@@ -45,19 +42,21 @@ const { data: user } = useQuery(
   query.options({
     path: '/users/{userId}',
     params: { userId },
-    select: (response) => response.data,
   }),
 );
 ```
 
-You can pass additional React Query options as a second argument:
+You can pass `select`, `staleTime`, and other React Query options in the same object.
+Use `kyOption` for ky-specific settings like `headers` or `timeout`:
 
 ```tsx
 const { data } = useQuery(
-  query.options(
-    { path: '/posts', select: (response) => response.data },
-    { staleTime: 1000 * 60 * 5 },
-  ),
+  query.options({
+    path: '/posts',
+    select: (response) => response.data,
+    staleTime: 1000 * 60 * 5,
+    kyOption: { headers: { 'X-Custom': 'value' } },
+  }),
 );
 ```
 
@@ -70,7 +69,6 @@ const { data } = useQuery(
   query.options({
     path: '/users/{userId}',
     params: userId ? { userId } : null,
-    select: (response) => response.data,
   }),
 );
 ```
@@ -81,13 +79,10 @@ const { data } = useQuery(
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 const { data: categories } = useSuspenseQuery(
-  query.suspenseOptions(
-    {
-      path: '/categories',
-      select: (response) => response.data,
-    },
-    { staleTime: 1000 * 60 * 10 }, // additional options (optional)
-  ),
+  query.suspenseOptions({
+    path: '/categories',
+    staleTime: 1000 * 60 * 10,
+  }),
 );
 ```
 
@@ -113,7 +108,6 @@ const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
 | `searchParams` | Query string parameters | — |
 | `pageParamKey` | Pagination key name | `'cursor'` |
 | `initialPageParam` | First page parameter | — |
-| `getNextPageParam` | Function returning next page parameter | — |
 
 ### Mutation — `mutation.options`
 
@@ -175,9 +169,9 @@ await queryClient.invalidateQueries({
 |---|---|
 | `createQuery(api)` | Create query option factory |
 | `createMutation(api)` | Create mutation option factory |
-| `query.options(config, queryOptions?)` | Options for `useQuery` |
-| `query.suspenseOptions(config, queryOptions?)` | Options for `useSuspenseQuery` |
-| `query.infiniteOptions(config, queryOptions?)` | Options for `useInfiniteQuery` |
+| `query.options({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | Options for `useQuery` |
+| `query.suspenseOptions({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
+| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOption?, initialPageParam, ...queryOptions })` | Options for `useInfiniteQuery` |
 | `query.keyOf(path, { params?, searchParams? })` | Generate cache key |
 | `mutation.options({ method, path, ...mutationOptions })` | Options for `useMutation` |
 
@@ -220,11 +214,8 @@ const mutation = createMutation(api);
 import { useQuery } from '@tanstack/react-query';
 
 // 파라미터 없는 단순 조회
-const { data: posts } = useQuery(
-  query.options({
-    path: '/posts',
-    select: (response) => response.data,
-  }),
+const { data } = useQuery(
+  query.options({ path: '/posts' }),
 );
 
 // path parameter가 있는 조회
@@ -232,19 +223,21 @@ const { data: user } = useQuery(
   query.options({
     path: '/users/{userId}',
     params: { userId },
-    select: (response) => response.data,
   }),
 );
 ```
 
-두 번째 인자로 React Query 옵션을 추가할 수 있습니다:
+`select`, `staleTime` 등 React Query 옵션을 같은 객체에 직접 전달할 수 있습니다.
+`kyOption`으로 `headers`, `timeout` 등 ky 전용 설정을 지정합니다:
 
 ```tsx
 const { data } = useQuery(
-  query.options(
-    { path: '/posts', select: (response) => response.data },
-    { staleTime: 1000 * 60 * 5 },
-  ),
+  query.options({
+    path: '/posts',
+    select: (response) => response.data,
+    staleTime: 1000 * 60 * 5,
+    kyOption: { headers: { 'X-Custom': 'value' } },
+  }),
 );
 ```
 
@@ -257,7 +250,6 @@ const { data } = useQuery(
   query.options({
     path: '/users/{userId}',
     params: userId ? { userId } : null,
-    select: (response) => response.data,
   }),
 );
 ```
@@ -268,13 +260,10 @@ const { data } = useQuery(
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 const { data: categories } = useSuspenseQuery(
-  query.suspenseOptions(
-    {
-      path: '/categories',
-      select: (response) => response.data,
-    },
-    { staleTime: 1000 * 60 * 10 }, // 추가 옵션 (선택)
-  ),
+  query.suspenseOptions({
+    path: '/categories',
+    staleTime: 1000 * 60 * 10,
+  }),
 );
 ```
 
@@ -300,7 +289,6 @@ const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
 | `searchParams` | 쿼리스트링 파라미터 | — |
 | `pageParamKey` | 페이지네이션 키 이름 | `'cursor'` |
 | `initialPageParam` | 첫 페이지 파라미터 | — |
-| `getNextPageParam` | 다음 페이지 파라미터 반환 함수 | — |
 
 #### Mutation — `mutation.options`
 
@@ -362,9 +350,9 @@ await queryClient.invalidateQueries({
 |---|---|
 | `createQuery(api)` | Query 옵션 팩토리 생성 |
 | `createMutation(api)` | Mutation 옵션 팩토리 생성 |
-| `query.options(config, queryOptions?)` | `useQuery` 옵션 |
-| `query.suspenseOptions(config, queryOptions?)` | `useSuspenseQuery` 옵션 |
-| `query.infiniteOptions(config, queryOptions?)` | `useInfiniteQuery` 옵션 |
+| `query.options({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | `useQuery` 옵션 |
+| `query.suspenseOptions({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |
+| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOption?, initialPageParam, ...queryOptions })` | `useInfiniteQuery` 옵션 |
 | `query.keyOf(path, { params?, searchParams? })` | 캐시 키 생성 |
 | `mutation.options({ method, path, ...mutationOptions })` | `useMutation` 옵션 |
 

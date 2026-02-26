@@ -1,4 +1,4 @@
-import type { API, Options, Params, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
+import type { API, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as createInfiniteQueryOptions,
@@ -27,25 +27,26 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     Path extends PathOf<Paths, "get">,
     Data,
     QueryOptions extends UseQueryOptions<ResponseOf<Path>, Error, Data>,
-  >(
-    {
-      enabled,
-      path,
-      select,
-      ...requestOptions
-    }: Omit<Options, "params"> & {
-      path: Path;
-      params?: Options["params"] | null;
-      enabled?: QueryOptions["enabled"];
-      select?: (data: ResponseOf<Path>) => Data;
-    },
-    queryOptions?: Omit<QueryOptions, "queryFn" | "queryKey" | "select" | "enabled">,
-  ) {
-    if (hasParams(requestOptions)) {
+  >({
+    path,
+    params,
+    searchParams,
+    kyOption,
+    select,
+    ...queryOptions
+  }: {
+    path: Path;
+    params?: Options["params"] | null;
+    searchParams?: Options["searchParams"];
+    kyOption?: Omit<Options, "params" | "searchParams">;
+    select?: (data: ResponseOf<Path>) => Data;
+  } & Omit<QueryOptions, "queryFn" | "queryKey" | "select">) {
+    if (params !== null) {
+      const requestOptions = { params, searchParams, ...kyOption };
+
       return createQueryOptions({
         queryKey: buildQueryKey(path, requestOptions),
         queryFn: () => api.get(path, requestOptions),
-        enabled,
         select,
         ...queryOptions,
       });
@@ -57,20 +58,22 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     });
   }
 
-  function suspenseOptions<Path extends PathOf<Paths, "get">, Data>(
-    {
-      path,
-      select,
-      ...requestOptions
-    }: Options & {
-      path: Path;
-      select?: (data: ResponseOf<Path>) => Data;
-    },
-    queryOptions?: Omit<
-      UseQueryOptions<ResponseOf<Path>, Error, Data>,
-      "queryFn" | "queryKey" | "select"
-    >,
-  ) {
+  function suspenseOptions<Path extends PathOf<Paths, "get">, Data>({
+    path,
+    params,
+    searchParams,
+    kyOption,
+    select,
+    ...queryOptions
+  }: {
+    path: Path;
+    params?: Options["params"];
+    searchParams?: Options["searchParams"];
+    kyOption?: Omit<Options, "params" | "searchParams">;
+    select?: (data: ResponseOf<Path>) => Data;
+  } & Omit<UseQueryOptions<ResponseOf<Path>, Error, Data>, "queryFn" | "queryKey" | "select">) {
+    const requestOptions = { params, searchParams, ...kyOption };
+
     return createQueryOptions({
       queryKey: buildQueryKey(path, requestOptions),
       queryFn: () => api.get(path, requestOptions),
@@ -90,59 +93,40 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
       QueryKey,
       PageParam
     > = UseInfiniteQueryOptions<ResponseOf<Path>, Error, Data, QueryKey, PageParam>,
-  >(
-    {
-      enabled,
-      getNextPageParam,
-      initialPageParam,
-      pageParamKey = "cursor",
-      path,
-      select,
-      ...requestOptions
-    }: Omit<Options, "searchParams"> & {
-      path: Path;
-      searchParams?: Record<string, string | number | boolean | undefined>;
-      pageParamKey?: string;
-      initialPageParam: PageParam;
-      enabled?: InfiniteQueryOptions["enabled"];
-      getNextPageParam: (
-        lastPage: ResponseOf<Path>,
-        allPages: ResponseOf<Path>[],
-        lastPageParam: PageParam,
-        allPageParams: PageParam[],
-      ) => PageParam | undefined | null;
-      select?: (data: InfiniteData<ResponseOf<Path>, PageParam>) => Data;
-    },
-    queryOptions?: Omit<
-      InfiniteQueryOptions,
-      "queryFn" | "queryKey" | "initialPageParam" | "getNextPageParam" | "select" | "enabled"
-    >,
-  ) {
-    const searchParams = requestOptions.searchParams ?? {};
-
+  >({
+    path,
+    params,
+    searchParams,
+    pageParamKey = "cursor",
+    kyOption,
+    initialPageParam,
+    select,
+    ...queryOptions
+  }: {
+    path: Path;
+    params?: Options["params"];
+    searchParams?: Record<string, string | number | boolean | undefined>;
+    pageParamKey?: string;
+    kyOption?: Omit<Options, "params" | "searchParams">;
+    initialPageParam: PageParam;
+    select?: (data: InfiniteData<ResponseOf<Path>, PageParam>) => Data;
+  } & Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">) {
     return createInfiniteQueryOptions({
-      queryKey: buildQueryKey(path, requestOptions),
+      queryKey: buildQueryKey(path, { params, searchParams }),
       queryFn: ({ pageParam }) =>
         api.get(path, {
-          ...requestOptions,
+          params,
+          ...kyOption,
           searchParams: {
             ...searchParams,
-            ...{ [pageParamKey]: pageParam as PageParam },
+            [pageParamKey]: pageParam as PageParam,
           },
         }),
       initialPageParam,
-      getNextPageParam,
       select,
-      enabled,
       ...queryOptions,
     });
   }
 
   return { options, suspenseOptions, infiniteOptions, keyOf };
-}
-
-function hasParams<T extends { params?: Params | null }>(
-  options: T,
-): options is T & { params: Params } {
-  return options.params !== null;
 }

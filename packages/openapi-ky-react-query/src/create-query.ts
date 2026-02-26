@@ -71,7 +71,7 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     searchParams?: Options["searchParams"];
     kyOptions?: Omit<Options, "params" | "searchParams">;
     select?: (data: ResponseOf<Path>) => Data;
-  } & Omit<UseQueryOptions<ResponseOf<Path>, Error, Data>, "queryFn" | "queryKey" | "select">) {
+  } & Omit<UseQueryOptions<ResponseOf<Path>, Error, Data>, "queryFn" | "queryKey" | "select" | "enabled">) {
     const requestOptions = { params, searchParams, ...kyOptions };
 
     return createQueryOptions({

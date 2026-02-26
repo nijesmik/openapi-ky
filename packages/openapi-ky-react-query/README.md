@@ -44,6 +44,14 @@ const { data: user } = useQuery(
     params: { userId },
   }),
 );
+
+// Query with search parameters
+const { data: filtered } = useQuery(
+  query.options({
+    path: '/posts',
+    searchParams: { categoryId, size: 10 },
+  }),
+);
 ```
 
 You can pass `select`, `staleTime`, and other React Query options in the same object.
@@ -74,6 +82,9 @@ const { data } = useQuery(
 ```
 
 ### Suspense Query — `query.suspenseOptions`
+
+`useSuspenseQuery` does not support `enabled` or `skipToken`, so `params: null` is not allowed.
+Use this when data should always be fetched:
 
 ```tsx
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -183,7 +194,7 @@ MIT
 
 ## 한국어
 
-`@nijesmik/openapi-ky`의 API 인스턴스를 받아 타입 세이프한 React Query 옵션 팩토리를 생성합니다.
+[@nijesmik/openapi-ky](https://www.npmjs.com/package/@nijesmik/openapi-ky)를 위한 타입 세이프한 [React Query](https://tanstack.com/query) 옵션 팩토리입니다.
 
 ### 설치
 
@@ -225,10 +236,18 @@ const { data: user } = useQuery(
     params: { userId },
   }),
 );
+
+// search parameter가 있는 조회
+const { data: filtered } = useQuery(
+  query.options({
+    path: '/posts',
+    searchParams: { categoryId, size: 10 },
+  }),
+);
 ```
 
 `select`, `staleTime` 등 React Query 옵션을 같은 객체에 직접 전달할 수 있습니다.
-`kyOptions`으로 `headers`, `timeout` 등 ky 전용 설정을 지정합니다:
+`kyOptions`로 `headers`, `timeout` 등 ky 전용 설정을 지정합니다:
 
 ```tsx
 const { data } = useQuery(
@@ -255,6 +274,9 @@ const { data } = useQuery(
 ```
 
 #### Suspense 조회 — `query.suspenseOptions`
+
+`useSuspenseQuery`는 `enabled`와 `skipToken`을 지원하지 않으므로 `params: null`이 허용되지 않습니다.
+데이터를 항상 fetch해야 하는 경우에 사용합니다:
 
 ```tsx
 import { useSuspenseQuery } from '@tanstack/react-query';

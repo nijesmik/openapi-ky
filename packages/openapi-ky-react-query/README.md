@@ -47,7 +47,7 @@ const { data: user } = useQuery(
 ```
 
 You can pass `select`, `staleTime`, and other React Query options in the same object.
-Use `kyOption` for ky-specific settings like `headers` or `timeout`:
+Use `kyOptions` for ky-specific settings like `headers` or `timeout`:
 
 ```tsx
 const { data } = useQuery(
@@ -55,7 +55,7 @@ const { data } = useQuery(
     path: '/posts',
     select: (response) => response.data,
     staleTime: 1000 * 60 * 5,
-    kyOption: { headers: { 'X-Custom': 'value' } },
+    kyOptions: { headers: { 'X-Custom': 'value' } },
   }),
 );
 ```
@@ -169,9 +169,9 @@ await queryClient.invalidateQueries({
 |---|---|
 | `createQuery(api)` | Create query option factory |
 | `createMutation(api)` | Create mutation option factory |
-| `query.options({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | Options for `useQuery` |
-| `query.suspenseOptions({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
-| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOption?, initialPageParam, ...queryOptions })` | Options for `useInfiniteQuery` |
+| `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useQuery` |
+| `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
+| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | Options for `useInfiniteQuery` |
 | `query.keyOf(path, { params?, searchParams? })` | Generate cache key |
 | `mutation.options({ method, path, ...mutationOptions })` | Options for `useMutation` |
 
@@ -228,7 +228,7 @@ const { data: user } = useQuery(
 ```
 
 `select`, `staleTime` 등 React Query 옵션을 같은 객체에 직접 전달할 수 있습니다.
-`kyOption`으로 `headers`, `timeout` 등 ky 전용 설정을 지정합니다:
+`kyOptions`으로 `headers`, `timeout` 등 ky 전용 설정을 지정합니다:
 
 ```tsx
 const { data } = useQuery(
@@ -236,7 +236,7 @@ const { data } = useQuery(
     path: '/posts',
     select: (response) => response.data,
     staleTime: 1000 * 60 * 5,
-    kyOption: { headers: { 'X-Custom': 'value' } },
+    kyOptions: { headers: { 'X-Custom': 'value' } },
   }),
 );
 ```
@@ -350,9 +350,9 @@ await queryClient.invalidateQueries({
 |---|---|
 | `createQuery(api)` | Query 옵션 팩토리 생성 |
 | `createMutation(api)` | Mutation 옵션 팩토리 생성 |
-| `query.options({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | `useQuery` 옵션 |
-| `query.suspenseOptions({ path, params?, searchParams?, kyOption?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |
-| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOption?, initialPageParam, ...queryOptions })` | `useInfiniteQuery` 옵션 |
+| `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useQuery` 옵션 |
+| `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |
+| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | `useInfiniteQuery` 옵션 |
 | `query.keyOf(path, { params?, searchParams? })` | 캐시 키 생성 |
 | `mutation.options({ method, path, ...mutationOptions })` | `useMutation` 옵션 |
 

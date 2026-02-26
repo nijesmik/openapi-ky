@@ -7,6 +7,7 @@ import {
   type InfiniteData,
   type UseInfiniteQueryOptions,
   type UseQueryOptions,
+  type UseSuspenseQueryOptions,
 } from "@tanstack/react-query";
 
 import { buildQueryKey } from "./lib/build-query-key";
@@ -71,7 +72,10 @@ export function createQuery<Paths extends object>(api: API<Paths>) {
     searchParams?: Options["searchParams"];
     kyOptions?: Omit<Options, "params" | "searchParams">;
     select?: (data: ResponseOf<Path>) => Data;
-  } & Omit<UseQueryOptions<ResponseOf<Path>, Error, Data>, "queryFn" | "queryKey" | "select" | "enabled">) {
+  } & Omit<
+    UseSuspenseQueryOptions<ResponseOf<Path>, Error, Data>,
+    "queryFn" | "queryKey" | "select"
+  >) {
     const requestOptions = { params, searchParams, ...kyOptions };
 
     return createQueryOptions({

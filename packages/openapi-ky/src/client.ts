@@ -1,30 +1,30 @@
 import type {
+  BeforeAnyErrorHook,
   BodyOf,
-  ErrorHook,
-  ErrorOptions,
-  HttpErrorHook,
+  ClientOptions,
   Options,
   PathOf,
   SuccessOf,
-  TimeoutErrorHook,
 } from "./types";
 import type { HttpMethod } from "openapi-typescript-helpers";
 
-import ky, { HTTPError, TimeoutError, type KyInstance, type Options as KyOptions } from "ky";
+import ky, { type KyInstance } from "ky";
 
 import { buildUrl } from "./lib/build-url";
 
-export class API<Paths extends object> {
+export class Client<Paths extends object> {
   protected api: KyInstance;
-  private readonly onError?: ErrorHook;
-  private readonly onHttpError?: HttpErrorHook;
-  private readonly onTimeoutError?: TimeoutErrorHook;
+  private readonly beforeAnyErrorHooks: BeforeAnyErrorHook[];
 
-  constructor(options: KyOptions, errorOptions?: ErrorOptions) {
-    this.api = ky.create(options);
-    this.onError = errorOptions?.onError;
-    this.onHttpError = errorOptions?.onHttpError ?? this.onError;
-    this.onTimeoutError = errorOptions?.onTimeoutError ?? this.onError;
+  constructor(options: ClientOptions) {
+    const { beforeAnyError, beforeHTTPError, ...kyHooks } = options.hooks ?? {};
+
+    this.api = ky.create({
+      ...options,
+      hooks: { ...kyHooks, beforeError: beforeHTTPError },
+    });
+
+    this.beforeAnyErrorHooks = beforeAnyError ?? [];
   }
 
   get<Path extends PathOf<Paths, "get">>(path: Path, options?: Options) {
@@ -77,12 +77,12 @@ export class API<Paths extends object> {
   }
 
   private handleError(error: unknown) {
-    if (error instanceof HTTPError) {
-      return this.onHttpError?.(error);
+    for (const hook of this.beforeAnyErrorHooks) {
+      hook(error);
     }
-    if (error instanceof TimeoutError) {
-      return this.onTimeoutError?.(error);
-    }
-    this.onError?.(error);
   }
+}
+
+export function createClient<Paths extends object>(options: ClientOptions) {
+  return new Client<Paths>(options);
 }

@@ -1,4 +1,4 @@
-import type { API, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
+import type { Client, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as createInfiniteQueryOptions,
@@ -14,7 +14,7 @@ import { buildQueryKey } from "./lib/build-query-key";
 
 type QueryKey = ReturnType<typeof buildQueryKey>;
 
-export function createQuery<Paths extends object>(api: API<Paths>) {
+export function createQuery<Paths extends object>(api: Client<Paths>) {
   type ResponseOf<Path extends PathOf<Paths, "get">> = SuccessOf<Paths, Path, "get">;
 
   function keyOf<Path extends PathOf<Paths, "get">>(

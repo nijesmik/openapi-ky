@@ -1,2 +1,2 @@
-export { API } from "./base";
-export type { BodyOf, ErrorOptions, Options, Params, PathOf, SuccessOf } from "./types";
+export { createClient, Client } from "./client";
+export type { BodyOf, Options, PathOf, SuccessOf } from "./types";

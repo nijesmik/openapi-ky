@@ -1,12 +1,10 @@
-import type { BodyOf, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
+import type { BodyOf, Client, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
 
 import { mutationOptions, type UseMutationOptions } from "@tanstack/react-query";
 
-import type { API } from "@nijesmik/openapi-ky";
-
 type MutationMethod = "delete" | "patch" | "post" | "put";
 
-export function createMutation<Paths extends object>(api: API<Paths>) {
+export function createMutation<Paths extends object>(api: Client<Paths>) {
   function options<
     Method extends MutationMethod,
     Path extends PathOf<Paths, Method>,

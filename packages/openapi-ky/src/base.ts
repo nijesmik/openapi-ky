@@ -65,7 +65,11 @@ export class API<Paths extends object> {
     const url = buildUrl(path, params);
 
     try {
-      return await this.api[method](url, kyOptions).json<SuccessOf<Paths, Path, Method>>();
+      const response = await this.api[method](url, kyOptions);
+      if (response.status === 204) {
+        return undefined as SuccessOf<Paths, Path, Method>;
+      }
+      return (await response.json()) as SuccessOf<Paths, Path, Method>;
     } catch (error) {
       this.handleError(error);
       throw error;

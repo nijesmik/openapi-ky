@@ -69,7 +69,7 @@ export class API<Paths extends object> {
       if (response.status === 204) {
         return undefined as SuccessOf<Paths, Path, Method>;
       }
-      return (await response.json()) as SuccessOf<Paths, Path, Method>;
+      return await response.json<SuccessOf<Paths, Path, Method>>();
     } catch (error) {
       this.handleError(error);
       throw error;

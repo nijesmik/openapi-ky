@@ -1,5 +1,11 @@
 # @nijesmik/openapi-ky-react-query
 
+## 0.3.1
+
+### Patch Changes
+
+- Update README setup examples from `API` to `createClient` / README 셋업 예제를 `API`에서 `createClient`로 업데이트
+
 ## 0.3.0
 
 ### Minor Changes

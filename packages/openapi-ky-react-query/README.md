@@ -17,14 +17,14 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 ### Setup
 
 ```ts
-import { API } from '@nijesmik/openapi-ky';
+import { createClient } from '@nijesmik/openapi-ky';
 import { createQuery, createMutation } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
-const api = new API<paths>({ prefixUrl: 'https://api.example.com' });
+const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-const query = createQuery(api);
-const mutation = createMutation(api);
+const query = createQuery(client);
+const mutation = createMutation(client);
 ```
 
 ### Basic Query — `query.options`
@@ -178,8 +178,8 @@ await queryClient.invalidateQueries({
 
 | Name | Description |
 |---|---|
-| `createQuery(api)` | Create query option factory |
-| `createMutation(api)` | Create mutation option factory |
+| `createQuery(client)` | Create query option factory |
+| `createMutation(client)` | Create mutation option factory |
 | `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useQuery` |
 | `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
 | `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | Options for `useInfiniteQuery` |
@@ -209,14 +209,14 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 #### 셋업
 
 ```ts
-import { API } from '@nijesmik/openapi-ky';
+import { createClient } from '@nijesmik/openapi-ky';
 import { createQuery, createMutation } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
-const api = new API<paths>({ prefixUrl: 'https://api.example.com' });
+const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-const query = createQuery(api);
-const mutation = createMutation(api);
+const query = createQuery(client);
+const mutation = createMutation(client);
 ```
 
 #### 기본 조회 — `query.options`
@@ -370,8 +370,8 @@ await queryClient.invalidateQueries({
 
 | 이름 | 설명 |
 |---|---|
-| `createQuery(api)` | Query 옵션 팩토리 생성 |
-| `createMutation(api)` | Mutation 옵션 팩토리 생성 |
+| `createQuery(client)` | Query 옵션 팩토리 생성 |
+| `createMutation(client)` | Mutation 옵션 팩토리 생성 |
 | `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useQuery` 옵션 |
 | `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |
 | `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | `useInfiniteQuery` 옵션 |

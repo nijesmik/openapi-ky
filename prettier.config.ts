@@ -1,1 +1,1 @@
-export { default } from "@nijesmik/prettier/config";
+export { default } from "@nijesmik/prettier-config";

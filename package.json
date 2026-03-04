@@ -13,8 +13,10 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
-    "@nijesmik/eslint": "workspace:*",
-    "@nijesmik/prettier": "workspace:*",
+    "@nijesmik/eslint-config": "^0.1.0",
+    "@nijesmik/prettier-config": "^0.1.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
     "typescript": "5.9.3",
     "vitest": "^4.0.18"
   },

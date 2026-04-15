@@ -66,6 +66,9 @@ export class Client<Paths extends object> {
 
     try {
       const response = await this.api[method]<SuccessOf<Paths, Path, Method>>(url, kyOptions);
+      if (!response) {
+        return undefined as SuccessOf<Paths, Path, Method>;
+      }
       if (response.status === 204) {
         return undefined as SuccessOf<Paths, Path, Method>;
       }

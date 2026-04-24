@@ -25,7 +25,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
   function options<
     Path extends PathsFor<Paths, "get">,
     Data,
-    QueryOptions extends UseQueryOptions<ResponseBody<Paths, Path, "get">, Error, Data>,
+    QueryOptions extends UseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
   >({
     path,
     params,
@@ -38,7 +38,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     params?: Options["params"] | null;
     searchParams?: Options["searchParams"];
     kyOptions?: Omit<Options, "params" | "searchParams">;
-    select?: (data: ResponseBody<Paths, Path, "get">) => Data;
+    select?: (data: ResponseBody<Paths, Path>) => Data;
   } & Omit<QueryOptions, "queryFn" | "queryKey" | "select">) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOptions };
@@ -51,7 +51,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
       });
     }
 
-    return createQueryOptions<ResponseBody<Paths, Path, "get">, Error, Data>({
+    return createQueryOptions<ResponseBody<Paths, Path>, Error, Data>({
       queryKey: buildQueryKey(path),
       queryFn: skipToken,
     });
@@ -69,9 +69,9 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     params?: Options["params"];
     searchParams?: Options["searchParams"];
     kyOptions?: Omit<Options, "params" | "searchParams">;
-    select?: (data: ResponseBody<Paths, Path, "get">) => Data;
+    select?: (data: ResponseBody<Paths, Path>) => Data;
   } & Omit<
-    UseSuspenseQueryOptions<ResponseBody<Paths, Path, "get">, Error, Data>,
+    UseSuspenseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
     "queryFn" | "queryKey" | "select"
   >) {
     const requestOptions = { params, searchParams, ...kyOptions };
@@ -87,14 +87,14 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
   function infiniteOptions<
     Path extends PathsFor<Paths, "get">,
     PageParam extends string | number | undefined = string | undefined,
-    Data = InfiniteData<ResponseBody<Paths, Path, "get">, PageParam>,
+    Data = InfiniteData<ResponseBody<Paths, Path>, PageParam>,
     InfiniteQueryOptions extends UseInfiniteQueryOptions<
-      ResponseBody<Paths, Path, "get">,
+      ResponseBody<Paths, Path>,
       Error,
       Data,
       QueryKey,
       PageParam
-    > = UseInfiniteQueryOptions<ResponseBody<Paths, Path, "get">, Error, Data, QueryKey, PageParam>,
+    > = UseInfiniteQueryOptions<ResponseBody<Paths, Path>, Error, Data, QueryKey, PageParam>,
   >({
     path,
     params,
@@ -111,7 +111,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     pageParamKey?: string;
     kyOptions?: Omit<Options, "params" | "searchParams">;
     initialPageParam: PageParam;
-    select?: (data: InfiniteData<ResponseBody<Paths, Path, "get">, PageParam>) => Data;
+    select?: (data: InfiniteData<ResponseBody<Paths, Path>, PageParam>) => Data;
   } & Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">) {
     return createInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { params, searchParams }),

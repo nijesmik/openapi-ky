@@ -24,7 +24,7 @@ export type RequestBody<
 export type ResponseBody<
   Paths,
   Path extends keyof Paths,
-  Method extends HttpMethod,
+  Method extends HttpMethod = "get",
 > = SuccessResponse<
   Extract<ResponseObjectMap<FilterKeys<Paths[Path], Method>>, Record<number | string, unknown>>
 >;

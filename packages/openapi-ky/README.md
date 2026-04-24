@@ -135,8 +135,11 @@ import type { paths } from './schema';
 // Extract POST request body type
 type CreatePostBody = RequestBody<paths, '/posts', 'post'>;
 
-// Extract success response body type
-type UserResponse = ResponseBody<paths, '/users/{userId}', 'get'>;
+// Extract success response body type (defaults to 'get')
+type UserResponse = ResponseBody<paths, '/users/{userId}'>;
+
+// Or specify method explicitly
+type CreatedPost = ResponseBody<paths, '/posts', 'post'>;
 ```
 
 `PathsFor` and `Options` are also available for advanced use cases.
@@ -282,8 +285,11 @@ import type { paths } from './schema';
 // POST request body 타입 추출
 type CreatePostBody = RequestBody<paths, '/posts', 'post'>;
 
-// 성공 응답 body 타입 추출
-type UserResponse = ResponseBody<paths, '/users/{userId}', 'get'>;
+// 성공 응답 body 타입 추출 (method는 기본값 'get')
+type UserResponse = ResponseBody<paths, '/users/{userId}'>;
+
+// 또는 method를 명시
+type CreatedPost = ResponseBody<paths, '/posts', 'post'>;
 ```
 
 `PathsFor`, `Options` 타입도 제공됩니다.

@@ -1,4 +1,4 @@
-import type { Client, Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
+import type { Client, Options, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as createInfiniteQueryOptions,
@@ -15,9 +15,9 @@ import { buildQueryKey } from "./lib/build-query-key";
 type QueryKey = ReturnType<typeof buildQueryKey>;
 
 export function createQuery<Paths extends object>(api: Client<Paths>) {
-  type ResponseOf<Path extends PathOf<Paths, "get">> = SuccessOf<Paths, Path, "get">;
+  type GetResponse<Path extends PathsFor<Paths, "get">> = ResponseBody<Paths, Path, "get">;
 
-  function keyOf<Path extends PathOf<Paths, "get">>(
+  function keyOf<Path extends PathsFor<Paths, "get">>(
     path: Path,
     options?: Pick<Options, "params" | "searchParams">,
   ) {
@@ -25,9 +25,9 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
   }
 
   function options<
-    Path extends PathOf<Paths, "get">,
+    Path extends PathsFor<Paths, "get">,
     Data,
-    QueryOptions extends UseQueryOptions<ResponseOf<Path>, Error, Data>,
+    QueryOptions extends UseQueryOptions<GetResponse<Path>, Error, Data>,
   >({
     path,
     params,
@@ -40,7 +40,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     params?: Options["params"] | null;
     searchParams?: Options["searchParams"];
     kyOptions?: Omit<Options, "params" | "searchParams">;
-    select?: (data: ResponseOf<Path>) => Data;
+    select?: (data: GetResponse<Path>) => Data;
   } & Omit<QueryOptions, "queryFn" | "queryKey" | "select">) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOptions };
@@ -53,13 +53,13 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
       });
     }
 
-    return createQueryOptions<ResponseOf<Path>, Error, Data>({
+    return createQueryOptions<GetResponse<Path>, Error, Data>({
       queryKey: buildQueryKey(path),
       queryFn: skipToken,
     });
   }
 
-  function suspenseOptions<Path extends PathOf<Paths, "get">, Data>({
+  function suspenseOptions<Path extends PathsFor<Paths, "get">, Data>({
     path,
     params,
     searchParams,
@@ -71,9 +71,9 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     params?: Options["params"];
     searchParams?: Options["searchParams"];
     kyOptions?: Omit<Options, "params" | "searchParams">;
-    select?: (data: ResponseOf<Path>) => Data;
+    select?: (data: GetResponse<Path>) => Data;
   } & Omit<
-    UseSuspenseQueryOptions<ResponseOf<Path>, Error, Data>,
+    UseSuspenseQueryOptions<GetResponse<Path>, Error, Data>,
     "queryFn" | "queryKey" | "select"
   >) {
     const requestOptions = { params, searchParams, ...kyOptions };
@@ -87,16 +87,16 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
   }
 
   function infiniteOptions<
-    Path extends PathOf<Paths, "get">,
+    Path extends PathsFor<Paths, "get">,
     PageParam extends string | number | undefined = string | undefined,
-    Data = InfiniteData<ResponseOf<Path>, PageParam>,
+    Data = InfiniteData<GetResponse<Path>, PageParam>,
     InfiniteQueryOptions extends UseInfiniteQueryOptions<
-      ResponseOf<Path>,
+      GetResponse<Path>,
       Error,
       Data,
       QueryKey,
       PageParam
-    > = UseInfiniteQueryOptions<ResponseOf<Path>, Error, Data, QueryKey, PageParam>,
+    > = UseInfiniteQueryOptions<GetResponse<Path>, Error, Data, QueryKey, PageParam>,
   >({
     path,
     params,
@@ -113,7 +113,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     pageParamKey?: string;
     kyOptions?: Omit<Options, "params" | "searchParams">;
     initialPageParam: PageParam;
-    select?: (data: InfiniteData<ResponseOf<Path>, PageParam>) => Data;
+    select?: (data: InfiniteData<GetResponse<Path>, PageParam>) => Data;
   } & Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">) {
     return createInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { params, searchParams }),

@@ -1,4 +1,4 @@
-import type { Options, PathOf, SuccessOf } from "@nijesmik/openapi-ky";
+import type { Options, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
   isServer,
@@ -12,7 +12,7 @@ import {
 import { buildQueryKey } from "./lib/build-query-key";
 
 export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
-  type ResponseOf<Path extends PathOf<Paths, "get">> = SuccessOf<Paths, Path, "get">;
+  type GetResponse<Path extends PathsFor<Paths, "get">> = ResponseBody<Paths, Path, "get">;
 
   let browserQueryClient: QueryClient | undefined;
 
@@ -22,14 +22,14 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     return browserQueryClient;
   }
 
-  function getQueryKey<Path extends PathOf<Paths, "get">>(
+  function getQueryKey<Path extends PathsFor<Paths, "get">>(
     path: Path,
     options?: Pick<Options, "params" | "searchParams">,
   ) {
     return buildQueryKey(path, options);
   }
 
-  function setQueryData<Path extends PathOf<Paths, "get">>({
+  function setQueryData<Path extends PathsFor<Paths, "get">>({
     path,
     params,
     searchParams,
@@ -38,15 +38,15 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     path: Path;
     params?: Options["params"];
     searchParams?: Options["searchParams"];
-    data: Updater<ResponseOf<Path> | undefined, ResponseOf<Path> | undefined>;
+    data: Updater<GetResponse<Path> | undefined, GetResponse<Path> | undefined>;
   }) {
-    return getQueryClient().setQueryData<ResponseOf<Path>>(
+    return getQueryClient().setQueryData<GetResponse<Path>>(
       getQueryKey(path, { params, searchParams }),
       data,
     );
   }
 
-  function invalidateQueries<Path extends PathOf<Paths, "get">>({
+  function invalidateQueries<Path extends PathsFor<Paths, "get">>({
     path,
     params,
     searchParams,

@@ -129,17 +129,17 @@ const client = createClient<paths>({
 ### Type Utilities
 
 ```ts
-import type { BodyOf, SuccessOf } from '@nijesmik/openapi-ky';
+import type { RequestBody, ResponseBody } from '@nijesmik/openapi-ky';
 import type { paths } from './schema';
 
-// Extract POST body type
-type CreatePostBody = BodyOf<paths, '/posts', 'post'>;
+// Extract POST request body type
+type CreatePostBody = RequestBody<paths, '/posts', 'post'>;
 
-// Extract success response type
-type UserResponse = SuccessOf<paths, '/users/{userId}', 'get'>;
+// Extract success response body type
+type UserResponse = ResponseBody<paths, '/users/{userId}', 'get'>;
 ```
 
-`PathOf` and `Options` are also available for advanced use cases.
+`PathsFor` and `Options` are also available for advanced use cases.
 
 ## License
 
@@ -276,17 +276,17 @@ const client = createClient<paths>({
 ### 타입 유틸리티
 
 ```ts
-import type { BodyOf, SuccessOf } from '@nijesmik/openapi-ky';
+import type { RequestBody, ResponseBody } from '@nijesmik/openapi-ky';
 import type { paths } from './schema';
 
-// POST body 타입 추출
-type CreatePostBody = BodyOf<paths, '/posts', 'post'>;
+// POST request body 타입 추출
+type CreatePostBody = RequestBody<paths, '/posts', 'post'>;
 
-// 성공 응답 타입 추출
-type UserResponse = SuccessOf<paths, '/users/{userId}', 'get'>;
+// 성공 응답 body 타입 추출
+type UserResponse = ResponseBody<paths, '/users/{userId}', 'get'>;
 ```
 
-`PathOf`, `Options` 타입도 제공됩니다.
+`PathsFor`, `Options` 타입도 제공됩니다.
 
 ### 라이선스
 

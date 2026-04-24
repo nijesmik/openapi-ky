@@ -27,6 +27,64 @@ const query = createQuery(client);
 const mutation = createMutation(client);
 ```
 
+### Query Client — `createQueryClient`
+
+A factory for cache access bound to a specific OpenAPI schema. Pass `paths` as the generic to get type-safe `getQueryKey`, `setQueryData`, `invalidateQueries` helpers alongside an environment-aware `getQueryClient` (a new `QueryClient` per request on the server, a closure-scoped singleton on the client).
+
+The return value is a **callable object**: calling it (`queryClient()`) returns the underlying `QueryClient`, and the same function is also exposed as the `.getQueryClient` property for destructuring.
+
+```ts
+// app/query-client.ts
+import { createQueryClient } from '@nijesmik/openapi-ky-react-query';
+import type { paths } from './schema';
+
+// Destructure
+export const {
+  getQueryClient,
+  getQueryKey,
+  setQueryData,
+  invalidateQueries,
+} = createQueryClient<paths>({
+  defaultOptions: { queries: { staleTime: 60_000 } },
+});
+
+// Or keep as single export and use dot-access / call syntax
+export const queryClient = createQueryClient<paths>();
+// queryClient() === queryClient.getQueryClient()
+```
+
+```ts
+// getQueryClient — SSR-safe access
+const queryClient = getQueryClient();
+
+// getQueryKey — type-safe cache key
+const key = getQueryKey('/posts/{postId}', { params: { postId } });
+
+// setQueryData — type-safe cache update
+setQueryData({
+  path: '/users/{userId}',
+  params: { userId },
+  data: userData,
+});
+
+// with updater function
+setQueryData({
+  path: '/posts',
+  data: (old) => [...(old ?? []), newPost],
+});
+
+// invalidateQueries — invalidate all queries under a path
+await invalidateQueries({ path: '/posts' });
+
+// specific resource
+await invalidateQueries({ path: '/posts/{postId}', params: { postId } });
+
+// with TanStack filters / options (flattened)
+await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
+```
+
+`config` is `QueryClientConfig` from `@tanstack/react-query`. It is captured in the factory's closure and passed to every `new QueryClient(config)` the factory creates — each server request, and the first client-side call (reused thereafter).
+
 ### Basic Query — `query.options`
 
 ```tsx
@@ -180,6 +238,11 @@ await queryClient.invalidateQueries({
 |---|---|
 | `createQuery(client)` | Create query option factory |
 | `createMutation(client)` | Create mutation option factory |
+| `createQueryClient<Paths>(config?)` | Create `{ getQueryClient, getQueryKey, setQueryData, invalidateQueries }` bound to `Paths` |
+| `getQueryClient()` | SSR-safe `QueryClient` accessor (singleton on client, new on server) |
+| `getQueryKey(path, { params?, searchParams? })` | Type-safe query key for a path |
+| `setQueryData({ path, params?, searchParams?, data })` | Type-safe cache update |
+| `invalidateQueries({ path, params?, searchParams?, ...filters })` | Type-safe cache invalidation (accepts TanStack filter + option fields) |
 | `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useQuery` |
 | `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
 | `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | Options for `useInfiniteQuery` |
@@ -218,6 +281,64 @@ const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
 const query = createQuery(client);
 const mutation = createMutation(client);
 ```
+
+#### Query Client — `createQueryClient`
+
+특정 OpenAPI 스키마에 바인딩된 캐시 접근 팩토리입니다. `paths`를 제네릭으로 전달하면 타입 세이프한 `getQueryKey`, `setQueryData`, `invalidateQueries` 헬퍼와 환경별로 동작하는 `getQueryClient`를 함께 얻을 수 있습니다 (서버에서는 요청마다 새 `QueryClient`, 클라이언트에서는 클로저 스코프 싱글톤).
+
+리턴 값은 **callable object**입니다. 함수로 호출(`queryClient()`)하면 내부 `QueryClient`를 반환하고, 같은 함수가 `.getQueryClient` 프로퍼티로도 노출되어 구조분해도 가능합니다.
+
+```ts
+// app/query-client.ts
+import { createQueryClient } from '@nijesmik/openapi-ky-react-query';
+import type { paths } from './schema';
+
+// 구조분해
+export const {
+  getQueryClient,
+  getQueryKey,
+  setQueryData,
+  invalidateQueries,
+} = createQueryClient<paths>({
+  defaultOptions: { queries: { staleTime: 60_000 } },
+});
+
+// 또는 단일 export + dot-access/호출 형태
+export const queryClient = createQueryClient<paths>();
+// queryClient() === queryClient.getQueryClient()
+```
+
+```ts
+// getQueryClient — SSR-safe 접근
+const queryClient = getQueryClient();
+
+// getQueryKey — 타입 세이프 캐시 키
+const key = getQueryKey('/posts/{postId}', { params: { postId } });
+
+// setQueryData — 타입 세이프 캐시 갱신
+setQueryData({
+  path: '/users/{userId}',
+  params: { userId },
+  data: userData,
+});
+
+// updater 함수 사용
+setQueryData({
+  path: '/posts',
+  data: (old) => [...(old ?? []), newPost],
+});
+
+// invalidateQueries — path 하위 전체 무효화
+await invalidateQueries({ path: '/posts' });
+
+// 특정 리소스
+await invalidateQueries({ path: '/posts/{postId}', params: { postId } });
+
+// TanStack 필터/옵션은 flat으로 함께 전달
+await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
+```
+
+`config`는 `@tanstack/react-query`의 `QueryClientConfig`입니다. 팩토리 클로저에 캡처되어 매 `new QueryClient(config)` 호출에 전달됩니다 — 서버는 매 요청마다, 클라이언트는 최초 호출 시 한 번 생성 후 재사용.
 
 #### 기본 조회 — `query.options`
 
@@ -372,6 +493,11 @@ await queryClient.invalidateQueries({
 |---|---|
 | `createQuery(client)` | Query 옵션 팩토리 생성 |
 | `createMutation(client)` | Mutation 옵션 팩토리 생성 |
+| `createQueryClient<Paths>(config?)` | `Paths`에 바인딩된 `{ getQueryClient, getQueryKey, setQueryData, invalidateQueries }` 생성 |
+| `getQueryClient()` | SSR-safe `QueryClient` 접근자 (클라이언트는 싱글톤, 서버는 매번 새로) |
+| `getQueryKey(path, { params?, searchParams? })` | 경로에 대한 타입 세이프 캐시 키 |
+| `setQueryData({ path, params?, searchParams?, data })` | 타입 세이프 캐시 갱신 |
+| `invalidateQueries({ path, params?, searchParams?, ...filters })` | 타입 세이프 캐시 무효화 (TanStack 필터/옵션 함께 전달) |
 | `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useQuery` 옵션 |
 | `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |
 | `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | `useInfiniteQuery` 옵션 |

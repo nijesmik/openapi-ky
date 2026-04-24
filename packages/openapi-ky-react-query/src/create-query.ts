@@ -47,7 +47,10 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
 
       return createQueryOptions({
         queryKey: buildQueryKey(path, requestOptions),
-        queryFn: () => api.get(path, requestOptions),
+        queryFn: async () => {
+          const response = await api.get(path, requestOptions);
+          return (await response!.json())!;
+        },
         select,
         ...queryOptions,
       });
@@ -80,7 +83,10 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
 
     return createQueryOptions({
       queryKey: buildQueryKey(path, requestOptions),
-      queryFn: () => api.get(path, requestOptions),
+      queryFn: async () => {
+        const response = await api.get(path, requestOptions);
+        return (await response!.json())!;
+      },
       select,
       ...queryOptions,
     });
@@ -117,15 +123,17 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
   } & Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">) {
     return createInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { params, searchParams }),
-      queryFn: ({ pageParam }) =>
-        api.get(path, {
+      queryFn: async ({ pageParam }) => {
+        const response = await api.get(path, {
           params,
           ...kyOptions,
           searchParams: {
             ...searchParams,
             [pageParamKey]: pageParam as PageParam,
           },
-        }),
+        });
+        return (await response!.json())!;
+      },
       initialPageParam,
       select,
       ...queryOptions,

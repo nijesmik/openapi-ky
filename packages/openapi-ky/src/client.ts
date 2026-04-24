@@ -2,6 +2,7 @@ import type {
   BeforeAnyErrorHook,
   BodyOf,
   ClientOptions,
+  ClientResponse,
   Options,
   PathOf,
   SuccessOf,
@@ -67,12 +68,19 @@ export class Client<Paths extends object> {
     try {
       const response = await this.api[method]<SuccessOf<Paths, Path, Method>>(url, kyOptions);
       if (!response) {
-        return undefined as SuccessOf<Paths, Path, Method>;
+        return undefined;
       }
-      if (response.status === 204) {
-        return undefined as SuccessOf<Paths, Path, Method>;
-      }
-      return await response.json();
+
+      const originalJson = response.json.bind(response);
+      const clientResponse = response as unknown as ClientResponse<SuccessOf<Paths, Path, Method>>;
+      clientResponse.json = async () => {
+        if (response.status === 204) {
+          return undefined;
+        }
+        return originalJson();
+      };
+
+      return clientResponse;
     } catch (error) {
       this.handleError(error);
       throw error;

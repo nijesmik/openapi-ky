@@ -13,12 +13,15 @@ export function createMutation<Paths extends object>(api: Client<Paths>) {
     method,
     path,
     ...mutationOpts
-  }: Omit<UseMutationOptions<SuccessOf<Paths, Path, Method>, Error, Variables>, "mutationFn"> & {
+  }: Omit<UseMutationOptions<SuccessOf<Paths, Path, Method> | undefined, Error, Variables>, "mutationFn"> & {
     method: Method;
     path: Path;
   }) {
     return mutationOptions({
-      mutationFn: (variables?: Variables) => api.request(method, path, variables),
+      mutationFn: async (variables?: Variables) => {
+        const response = await api.request(method, path, variables);
+        return await response?.json();
+      },
       ...mutationOpts,
     });
   }

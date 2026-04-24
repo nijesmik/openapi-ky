@@ -6,7 +6,7 @@ import type {
   ResponseObjectMap,
   SuccessResponse,
 } from "openapi-typescript-helpers";
-import type { BeforeErrorHook as KyBeforeErrorHook, Options as KyOptions } from "ky";
+import type { BeforeErrorHook as KyBeforeErrorHook, KyResponse, Options as KyOptions } from "ky";
 
 export type Params = Record<string, boolean | number | string>;
 
@@ -37,6 +37,10 @@ export type BeforeAnyErrorHook = (error: unknown) => void;
 export type Hooks = Omit<KyOptions["hooks"], "beforeError"> & {
   beforeHTTPError?: BeforeHTTPErrorHook[];
   beforeAnyError?: BeforeAnyErrorHook[];
+};
+
+export type ClientResponse<T> = Omit<KyResponse, "json"> & {
+  json: () => Promise<T | undefined>;
 };
 
 export type ClientOptions = Omit<KyOptions, "hooks"> & {

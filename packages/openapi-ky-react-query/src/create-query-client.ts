@@ -12,8 +12,6 @@ import {
 import { buildQueryKey } from "./lib/build-query-key";
 
 export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
-  type GetResponse<Path extends PathsFor<Paths, "get">> = ResponseBody<Paths, Path, "get">;
-
   let browserQueryClient: QueryClient | undefined;
 
   function getQueryClient() {
@@ -38,9 +36,9 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     path: Path;
     params?: Options["params"];
     searchParams?: Options["searchParams"];
-    data: Updater<GetResponse<Path> | undefined, GetResponse<Path> | undefined>;
+    data: Updater<ResponseBody<Paths, Path, "get"> | undefined, ResponseBody<Paths, Path, "get"> | undefined>;
   }) {
-    return getQueryClient().setQueryData<GetResponse<Path>>(
+    return getQueryClient().setQueryData<ResponseBody<Paths, Path, "get">>(
       getQueryKey(path, { params, searchParams }),
       data,
     );

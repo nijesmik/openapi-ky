@@ -1,2 +1,2 @@
 export { createClient, Client } from "./client";
-export type { BodyOf, Options, PathOf, SuccessOf } from "./types";
+export type { Options, PathsFor, RequestBody, ResponseBody } from "./types";

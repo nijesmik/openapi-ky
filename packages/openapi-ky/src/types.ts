@@ -15,17 +15,21 @@ export type Options<Body = never> = Omit<KyOptions, "json"> &
     params?: Params;
   };
 
-export type BodyOf<
+export type RequestBody<
   Paths,
   Path extends keyof Paths,
   Method extends HttpMethod,
 > = OperationRequestBodyContent<FilterKeys<Paths[Path], Method>>;
 
-export type SuccessOf<Paths, Path extends keyof Paths, Method extends HttpMethod> = SuccessResponse<
+export type ResponseBody<
+  Paths,
+  Path extends keyof Paths,
+  Method extends HttpMethod,
+> = SuccessResponse<
   Extract<ResponseObjectMap<FilterKeys<Paths[Path], Method>>, Record<number | string, unknown>>
 >;
 
-export type PathOf<Paths extends object, Method extends HttpMethod> = PathsWithMethod<
+export type PathsFor<Paths extends object, Method extends HttpMethod> = PathsWithMethod<
   Paths,
   Method
 > &

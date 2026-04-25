@@ -1,21 +1,11 @@
-import type { Client, Options, PathsFor, RequestBody, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Client, Options, PathsFor, RequestBody } from "@nijesmik/openapi-ky";
 
-import {
-  mutationOptions as buildMutationOptions,
-  type UseMutationOptions,
-} from "@tanstack/react-query";
+import { mutationOptions as buildMutationOptions } from "@tanstack/react-query";
 
-type MutationMethod = "delete" | "patch" | "post" | "put";
-
-type MutationOptionsParams<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends MutationMethod,
-  Variables extends Options<RequestBody<Paths, Path, Method>>,
-> = Omit<UseMutationOptions<ResponseBody<Paths, Path, Method>, Error, Variables>, "mutationFn"> & {
-  method: Method;
-  path: Path;
-};
+import type {
+  MutationMethod,
+  MutationOptionsParams,
+} from "./create-mutation-options.types";
 
 export function createMutationOptions<Paths extends object>(api: Client<Paths>) {
   function mutationOptions<

@@ -10,9 +10,12 @@ import {
   type UseSuspenseQueryOptions,
 } from "@tanstack/react-query";
 
+import type {
+  InfiniteQueryOptionsParams,
+  QueryKey,
+  QueryOptionsParams,
+} from "./create-query-options.types";
 import { buildQueryKey } from "./lib/build-query-key";
-
-type QueryKey = ReturnType<typeof buildQueryKey>;
 
 export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
   function queryOptions<
@@ -26,13 +29,8 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     kyOptions,
     select,
     ...queryOptions
-  }: {
-    path: Path;
-    params?: Options["params"] | null;
-    searchParams?: Options["searchParams"];
-    kyOptions?: Omit<Options, "params" | "searchParams">;
-    select?: (data: ResponseBody<Paths, Path>) => Data;
-  } & Omit<QueryOptions, "queryFn" | "queryKey" | "select">) {
+  }: QueryOptionsParams<Paths, Path, Data, Options["params"] | null> &
+    Omit<QueryOptions, "queryFn" | "queryKey" | "select">) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOptions };
 
@@ -57,16 +55,11 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     kyOptions,
     select,
     ...queryOptions
-  }: {
-    path: Path;
-    params?: Options["params"];
-    searchParams?: Options["searchParams"];
-    kyOptions?: Omit<Options, "params" | "searchParams">;
-    select?: (data: ResponseBody<Paths, Path>) => Data;
-  } & Omit<
-    UseSuspenseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
-    "queryFn" | "queryKey" | "select"
-  >) {
+  }: QueryOptionsParams<Paths, Path, Data> &
+    Omit<
+      UseSuspenseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
+      "queryFn" | "queryKey" | "select"
+    >) {
     const requestOptions = { params, searchParams, ...kyOptions };
 
     return buildQueryOptions({
@@ -97,15 +90,8 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     initialPageParam,
     select,
     ...queryOptions
-  }: {
-    path: Path;
-    params?: Options["params"];
-    searchParams?: Record<string, string | number | boolean | undefined>;
-    pageParamKey?: string;
-    kyOptions?: Omit<Options, "params" | "searchParams">;
-    initialPageParam: PageParam;
-    select?: (data: InfiniteData<ResponseBody<Paths, Path>, PageParam>) => Data;
-  } & Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">) {
+  }: InfiniteQueryOptionsParams<Paths, Path, PageParam, Data> &
+    Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">) {
     return buildInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { params, searchParams }),
       queryFn: ({ pageParam }) =>

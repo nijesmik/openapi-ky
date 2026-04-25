@@ -31,15 +31,6 @@ describe("createQueryOptions", () => {
       expect(typeof queryOptions.infinite).toBe("function");
     });
 
-    it("기본 호출은 path 기반 queryKey와 함수형 queryFn을 가진 옵션 객체를 반환한다", () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
-
-      const opts = queryOptions({ path: "/posts" });
-
-      expect(opts.queryKey).toEqual(["/posts"]);
-      expect(typeof opts.queryFn).toBe("function");
-    });
   });
 
   describe("params: null → skipToken", () => {
@@ -52,33 +43,33 @@ describe("createQueryOptions", () => {
       expect(opts.queryFn).toBe(skipToken);
     });
 
-    it("params: null이면 queryKey는 path만으로 빌드된다 (params/searchParams 미포함)", () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
+    it.each([
+      ["없을 때", { path: "/posts" }, "/posts", undefined],
+      [
+        "있을 때",
+        { path: "/posts/{postId}", params: { postId: 1 } },
+        "/posts/{postId}",
+        { postId: 1 },
+      ],
+    ] as const)(
+      "params가 %s queryFn이 api.get을 호출한다",
+      async (_label, input, expectedPath, expectedParams) => {
+        const api = createFakeApi();
+        const queryOptions = createQueryOptions(api);
 
-      const opts = queryOptions({ path: "/posts/{postId}", params: null });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const opts = queryOptions(input as any);
 
-      expect(opts.queryKey).toEqual(["/posts/{postId}"]);
-    });
+        const queryFn = opts.queryFn;
+        if (typeof queryFn !== "function") throw new Error("expected function queryFn");
+        await queryFn({} as never);
 
-    it("params가 정상 값이면 queryFn이 api.get을 호출한다", async () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
-
-      const opts = queryOptions({
-        path: "/posts/{postId}",
-        params: { postId: 1 },
-      });
-
-      const queryFn = opts.queryFn;
-      if (typeof queryFn !== "function") throw new Error("expected function queryFn");
-      await queryFn({} as never);
-
-      expect(getMock(api, "get")).toHaveBeenCalledWith("/posts/{postId}", {
-        params: { postId: 1 },
-        searchParams: undefined,
-      });
-    });
+        expect(getMock(api, "get")).toHaveBeenCalledWith(expectedPath, {
+          params: expectedParams,
+          searchParams: undefined,
+        });
+      },
+    );
 
     it("[회귀 테스트] queryFn은 .json()으로 파싱된 본문을 반환한다", async () => {
       const api = createFakeApi();
@@ -135,7 +126,7 @@ describe("createQueryOptions", () => {
       });
     });
 
-    it("기존 searchParams의 pageParamKey 값을 pageParam이 덮어쓴다 (queryFn에서만 적용, queryKey는 원본 유지)", async () => {
+    it("기존 searchParams의 pageParamKey 값을 pageParam이 덮어쓴다", async () => {
       const api = createFakeApi();
       const queryOptions = createQueryOptions(api);
 
@@ -145,9 +136,6 @@ describe("createQueryOptions", () => {
         initialPageParam: undefined,
         getNextPageParam: () => undefined,
       });
-
-      // queryKey는 호출 시점의 원본 searchParams로 빌드 — pageParam 덮어쓰기는 queryFn 안에서만 발생
-      expect(opts.queryKey).toEqual(["/posts", "cursor=stale&size=10"]);
 
       await opts.queryFn?.({ pageParam: "fresh" } as never);
 

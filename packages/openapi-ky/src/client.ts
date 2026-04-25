@@ -30,8 +30,8 @@ export interface Client<
     options?: Options<Paths, Path, DefaultMethod>,
   ): ResponsePromise<ResponseBody<Paths, Path, DefaultMethod>>;
   <
-    Path extends keyof Paths & string,
-    Method extends keyof Paths[Path] & HttpMethod,
+    Method extends HttpMethod,
+    Path extends PathsFor<Paths, Method>,
   >(
     path: Path,
     options: Options<Paths, Path, Method> & { method: Method },

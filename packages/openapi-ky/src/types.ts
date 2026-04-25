@@ -10,10 +10,16 @@ import type { Options as KyOptions } from "ky";
 
 export type Params = Record<string, boolean | number | string>;
 
-export type Options<Body = never> = Omit<KyOptions, "json"> &
-  ([Body] extends [never | undefined] ? unknown : { json: Body }) & {
-    params?: Params;
-  };
+export type Options<
+  Paths,
+  Path extends keyof Paths,
+  Method extends HttpMethod = "get",
+> = Omit<KyOptions, "json" | "method"> & {
+  method?: Method;
+  params?: Params;
+} & ([RequestBody<Paths, Path, Method>] extends [never | undefined]
+    ? unknown
+    : { json: RequestBody<Paths, Path, Method> });
 
 export type RequestBody<
   Paths,

@@ -18,14 +18,16 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 
 ```ts
 import { createClient } from '@nijesmik/openapi-ky';
-import { createQuery, createMutation } from '@nijesmik/openapi-ky-react-query';
+import { createQueryOptions, createMutationOptions } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
 const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-const query = createQuery(client);
-const mutation = createMutation(client);
+const queryOptions = createQueryOptions(client);
+const mutationOptions = createMutationOptions(client);
 ```
+
+> Both factories return a **callable object**. Calling `queryOptions(...)` produces options for `useQuery`; method properties (`.suspense`, `.infinite`) cover the other query variants. `mutationOptions(...)` accepts `method` explicitly, and shortcut properties (`.post`, `.put`, `.patch`, `.delete`) inject the method for you.
 
 ### Query Client — `createQueryClient`
 
@@ -85,19 +87,19 @@ await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 
 `config` is `QueryClientConfig` from `@tanstack/react-query`. It is captured in the factory's closure and passed to every `new QueryClient(config)` the factory creates — each server request, and the first client-side call (reused thereafter).
 
-### Basic Query — `query.options`
+### Basic Query — `queryOptions(...)`
 
 ```tsx
 import { useQuery } from '@tanstack/react-query';
 
 // Simple query
 const { data } = useQuery(
-  query.options({ path: '/posts' }),
+  queryOptions({ path: '/posts' }),
 );
 
 // Query with path parameters
 const { data: user } = useQuery(
-  query.options({
+  queryOptions({
     path: '/users/{userId}',
     params: { userId },
   }),
@@ -105,7 +107,7 @@ const { data: user } = useQuery(
 
 // Query with search parameters
 const { data: filtered } = useQuery(
-  query.options({
+  queryOptions({
     path: '/posts',
     searchParams: { categoryId, size: 10 },
   }),
@@ -117,7 +119,7 @@ Use `kyOptions` for ky-specific settings like `headers` or `timeout`:
 
 ```tsx
 const { data } = useQuery(
-  query.options({
+  queryOptions({
     path: '/posts',
     select: (response) => response.data,
     staleTime: 1000 * 60 * 5,
@@ -132,14 +134,14 @@ Passing `params: null` disables the query (`skipToken`).
 
 ```tsx
 const { data } = useQuery(
-  query.options({
+  queryOptions({
     path: '/users/{userId}',
     params: userId ? { userId } : null,
   }),
 );
 ```
 
-### Suspense Query — `query.suspenseOptions`
+### Suspense Query — `queryOptions.suspense`
 
 `useSuspenseQuery` does not support `enabled` or `skipToken`, so `params: null` is not allowed.
 Use this when data should always be fetched:
@@ -148,20 +150,20 @@ Use this when data should always be fetched:
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 const { data: categories } = useSuspenseQuery(
-  query.suspenseOptions({
+  queryOptions.suspense({
     path: '/categories',
     staleTime: 1000 * 60 * 10,
   }),
 );
 ```
 
-### Infinite Query — `query.infiniteOptions`
+### Infinite Query — `queryOptions.infinite`
 
 ```tsx
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
-  query.infiniteOptions({
+  queryOptions.infinite({
     path: '/posts',
     searchParams: { categoryId, size: 10 },
     initialPageParam: undefined,
@@ -178,15 +180,16 @@ const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
 | `pageParamKey` | Pagination key name | `'cursor'` |
 | `initialPageParam` | First page parameter | — |
 
-### Mutation — `mutation.options`
+### Mutation — `mutationOptions(...)` / `mutationOptions.<method>`
+
+`mutationOptions` accepts an explicit `method`; `.post` / `.put` / `.patch` / `.delete` shortcuts inject the method for you.
 
 ```tsx
 import { useMutation } from '@tanstack/react-query';
 
-// POST
+// POST — shortcut
 const { mutate: createPost } = useMutation(
-  mutation.options({
-    method: 'post',
+  mutationOptions.post({
     path: '/posts',
     onSuccess: (data) => {
       router.push(`/posts/${data.data.id}`);
@@ -196,58 +199,63 @@ const { mutate: createPost } = useMutation(
 
 createPost({ json: { title: 'Hello', content: 'World' } });
 
-// PATCH with path params
+// PATCH — shortcut with path params
 const { mutate: updatePost } = useMutation(
-  mutation.options({
-    method: 'patch',
-    path: '/posts/{postId}',
-  }),
+  mutationOptions.patch({ path: '/posts/{postId}' }),
 );
 
 updatePost({ params: { postId: 1 }, json: { title: 'Updated' } });
+
+// Explicit method (useful when method is dynamic)
+const { mutate } = useMutation(
+  mutationOptions({ method, path: '/posts/{postId}' }),
+);
 ```
 
-### Cache Invalidation — `query.keyOf`
+### Cache Invalidation
+
+Use `getQueryKey` from `createQueryClient` to build a key for a path.
 
 ```tsx
+import { useQueryClient } from '@tanstack/react-query';
+import { getQueryKey } from './query-client';
+
 const queryClient = useQueryClient();
 
 // Invalidate a specific resource
 await queryClient.invalidateQueries({
-  queryKey: query.keyOf('/posts/{postId}', {
-    params: { postId },
-  }),
+  queryKey: getQueryKey('/posts/{postId}', { params: { postId } }),
 });
 
 // Invalidate with searchParams
 await queryClient.invalidateQueries({
-  queryKey: query.keyOf('/posts', {
-    searchParams: { categoryId },
-  }),
+  queryKey: getQueryKey('/posts', { searchParams: { categoryId } }),
 });
 
 // Invalidate all queries for a path
 await queryClient.invalidateQueries({
-  queryKey: query.keyOf('/posts'),
+  queryKey: getQueryKey('/posts'),
 });
 ```
+
+For most cases, prefer `invalidateQueries` from `createQueryClient` directly — see [Query Client](#query-client--createqueryclient) above.
 
 ## API
 
 | Name | Description |
 |---|---|
-| `createQuery(client)` | Create query option factory |
-| `createMutation(client)` | Create mutation option factory |
+| `createQueryOptions(client)` | Create query options factory (callable + `.suspense` + `.infinite`) |
+| `createMutationOptions(client)` | Create mutation options factory (callable + `.post` / `.put` / `.patch` / `.delete`) |
 | `createQueryClient<Paths>(config?)` | Create `{ getQueryClient, getQueryKey, setQueryData, invalidateQueries }` bound to `Paths` |
 | `getQueryClient()` | SSR-safe `QueryClient` accessor (singleton on client, new on server) |
 | `getQueryKey(path, { params?, searchParams? })` | Type-safe query key for a path |
 | `setQueryData({ path, params?, searchParams?, data })` | Type-safe cache update |
 | `invalidateQueries({ path, params?, searchParams?, ...filters })` | Type-safe cache invalidation (accepts TanStack filter + option fields) |
-| `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useQuery` |
-| `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
-| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | Options for `useInfiniteQuery` |
-| `query.keyOf(path, { params?, searchParams? })` | Generate cache key |
-| `mutation.options({ method, path, ...mutationOptions })` | Options for `useMutation` |
+| `queryOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useQuery` |
+| `queryOptions.suspense({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
+| `queryOptions.infinite({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | Options for `useInfiniteQuery` |
+| `mutationOptions({ method, path, ...mutationOptions })` | Options for `useMutation` (explicit method) |
+| `mutationOptions.<post\|put\|patch\|delete>({ path, ...mutationOptions })` | Options for `useMutation` (method shortcut) |
 
 ## License
 
@@ -273,14 +281,16 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 
 ```ts
 import { createClient } from '@nijesmik/openapi-ky';
-import { createQuery, createMutation } from '@nijesmik/openapi-ky-react-query';
+import { createQueryOptions, createMutationOptions } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
 const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-const query = createQuery(client);
-const mutation = createMutation(client);
+const queryOptions = createQueryOptions(client);
+const mutationOptions = createMutationOptions(client);
 ```
+
+> 두 팩토리 모두 **callable object**를 반환합니다. `queryOptions(...)`는 `useQuery`용 옵션을 만들고, `.suspense`, `.infinite` 메서드로 다른 쿼리 변형을 지원합니다. `mutationOptions(...)`는 `method`를 명시하는 형태이고, `.post`, `.put`, `.patch`, `.delete` 단축 메서드는 `method`를 자동으로 채워줍니다.
 
 #### Query Client — `createQueryClient`
 
@@ -340,19 +350,19 @@ await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 
 `config`는 `@tanstack/react-query`의 `QueryClientConfig`입니다. 팩토리 클로저에 캡처되어 매 `new QueryClient(config)` 호출에 전달됩니다 — 서버는 매 요청마다, 클라이언트는 최초 호출 시 한 번 생성 후 재사용.
 
-#### 기본 조회 — `query.options`
+#### 기본 조회 — `queryOptions(...)`
 
 ```tsx
 import { useQuery } from '@tanstack/react-query';
 
 // 파라미터 없는 단순 조회
 const { data } = useQuery(
-  query.options({ path: '/posts' }),
+  queryOptions({ path: '/posts' }),
 );
 
 // path parameter가 있는 조회
 const { data: user } = useQuery(
-  query.options({
+  queryOptions({
     path: '/users/{userId}',
     params: { userId },
   }),
@@ -360,7 +370,7 @@ const { data: user } = useQuery(
 
 // search parameter가 있는 조회
 const { data: filtered } = useQuery(
-  query.options({
+  queryOptions({
     path: '/posts',
     searchParams: { categoryId, size: 10 },
   }),
@@ -372,7 +382,7 @@ const { data: filtered } = useQuery(
 
 ```tsx
 const { data } = useQuery(
-  query.options({
+  queryOptions({
     path: '/posts',
     select: (response) => response.data,
     staleTime: 1000 * 60 * 5,
@@ -387,14 +397,14 @@ const { data } = useQuery(
 
 ```tsx
 const { data } = useQuery(
-  query.options({
+  queryOptions({
     path: '/users/{userId}',
     params: userId ? { userId } : null,
   }),
 );
 ```
 
-#### Suspense 조회 — `query.suspenseOptions`
+#### Suspense 조회 — `queryOptions.suspense`
 
 `useSuspenseQuery`는 `enabled`와 `skipToken`을 지원하지 않으므로 `params: null`이 허용되지 않습니다.
 데이터를 항상 fetch해야 하는 경우에 사용합니다:
@@ -403,20 +413,20 @@ const { data } = useQuery(
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 const { data: categories } = useSuspenseQuery(
-  query.suspenseOptions({
+  queryOptions.suspense({
     path: '/categories',
     staleTime: 1000 * 60 * 10,
   }),
 );
 ```
 
-#### 무한 스크롤 — `query.infiniteOptions`
+#### 무한 스크롤 — `queryOptions.infinite`
 
 ```tsx
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
-  query.infiniteOptions({
+  queryOptions.infinite({
     path: '/posts',
     searchParams: { categoryId, size: 10 },
     initialPageParam: undefined,
@@ -433,15 +443,16 @@ const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
 | `pageParamKey` | 페이지네이션 키 이름 | `'cursor'` |
 | `initialPageParam` | 첫 페이지 파라미터 | — |
 
-#### Mutation — `mutation.options`
+#### Mutation — `mutationOptions(...)` / `mutationOptions.<method>`
+
+`mutationOptions`는 `method`를 명시하는 형태이고, `.post` / `.put` / `.patch` / `.delete` 단축 메서드는 `method`를 자동으로 채워줍니다.
 
 ```tsx
 import { useMutation } from '@tanstack/react-query';
 
-// POST
+// POST — 단축 메서드
 const { mutate: createPost } = useMutation(
-  mutation.options({
-    method: 'post',
+  mutationOptions.post({
     path: '/posts',
     onSuccess: (data) => {
       router.push(`/posts/${data.data.id}`);
@@ -451,58 +462,63 @@ const { mutate: createPost } = useMutation(
 
 createPost({ json: { title: 'Hello', content: 'World' } });
 
-// PATCH with path params
+// PATCH — path 파라미터가 있는 단축 메서드
 const { mutate: updatePost } = useMutation(
-  mutation.options({
-    method: 'patch',
-    path: '/posts/{postId}',
-  }),
+  mutationOptions.patch({ path: '/posts/{postId}' }),
 );
 
 updatePost({ params: { postId: 1 }, json: { title: 'Updated' } });
+
+// method를 명시 (method가 동적인 경우 유용)
+const { mutate } = useMutation(
+  mutationOptions({ method, path: '/posts/{postId}' }),
+);
 ```
 
-#### 캐시 무효화 — `query.keyOf`
+#### 캐시 무효화
+
+`createQueryClient`의 `getQueryKey`로 path에 대한 키를 만들어 사용합니다.
 
 ```tsx
+import { useQueryClient } from '@tanstack/react-query';
+import { getQueryKey } from './query-client';
+
 const queryClient = useQueryClient();
 
 // 특정 리소스 캐시 무효화
 await queryClient.invalidateQueries({
-  queryKey: query.keyOf('/posts/{postId}', {
-    params: { postId },
-  }),
+  queryKey: getQueryKey('/posts/{postId}', { params: { postId } }),
 });
 
 // searchParams로 캐시 무효화
 await queryClient.invalidateQueries({
-  queryKey: query.keyOf('/posts', {
-    searchParams: { categoryId },
-  }),
+  queryKey: getQueryKey('/posts', { searchParams: { categoryId } }),
 });
 
 // path 전체 캐시 무효화
 await queryClient.invalidateQueries({
-  queryKey: query.keyOf('/posts'),
+  queryKey: getQueryKey('/posts'),
 });
 ```
+
+대부분의 경우 `createQueryClient`의 `invalidateQueries`를 직접 사용하는 것이 더 간단합니다 — 위 [Query Client](#query-client--createqueryclient-1) 섹션 참고.
 
 ### API
 
 | 이름 | 설명 |
 |---|---|
-| `createQuery(client)` | Query 옵션 팩토리 생성 |
-| `createMutation(client)` | Mutation 옵션 팩토리 생성 |
+| `createQueryOptions(client)` | Query 옵션 팩토리 (callable + `.suspense` + `.infinite`) |
+| `createMutationOptions(client)` | Mutation 옵션 팩토리 (callable + `.post` / `.put` / `.patch` / `.delete`) |
 | `createQueryClient<Paths>(config?)` | `Paths`에 바인딩된 `{ getQueryClient, getQueryKey, setQueryData, invalidateQueries }` 생성 |
 | `getQueryClient()` | SSR-safe `QueryClient` 접근자 (클라이언트는 싱글톤, 서버는 매번 새로) |
 | `getQueryKey(path, { params?, searchParams? })` | 경로에 대한 타입 세이프 캐시 키 |
 | `setQueryData({ path, params?, searchParams?, data })` | 타입 세이프 캐시 갱신 |
 | `invalidateQueries({ path, params?, searchParams?, ...filters })` | 타입 세이프 캐시 무효화 (TanStack 필터/옵션 함께 전달) |
-| `query.options({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useQuery` 옵션 |
-| `query.suspenseOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |
-| `query.infiniteOptions({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | `useInfiniteQuery` 옵션 |
-| `query.keyOf(path, { params?, searchParams? })` | 캐시 키 생성 |
-| `mutation.options({ method, path, ...mutationOptions })` | `useMutation` 옵션 |
+| `queryOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useQuery` 옵션 |
+| `queryOptions.suspense({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |
+| `queryOptions.infinite({ path, params?, searchParams?, pageParamKey?, kyOptions?, initialPageParam, ...queryOptions })` | `useInfiniteQuery` 옵션 |
+| `mutationOptions({ method, path, ...mutationOptions })` | `useMutation` 옵션 (method 명시) |
+| `mutationOptions.<post\|put\|patch\|delete>({ path, ...mutationOptions })` | `useMutation` 옵션 (method 단축) |
 
 ### 라이선스
 

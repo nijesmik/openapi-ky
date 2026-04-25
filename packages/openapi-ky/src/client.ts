@@ -72,10 +72,21 @@ export class Client<Paths extends object> {
 
     try {
       const response = await this.api[method]<ResponseBody<Paths, Path, Method>>(url, kyOptions);
-      if (response.status === 204) {
-        return undefined as ResponseBody<Paths, Path, Method>;
+
+      // `response` is `undefined` at runtime when `ky.stop` is returned in a `beforeRetry` hook, despite ky's types.
+      if (!response) {
+        return response;
       }
-      return await response.json();
+
+      const parseJson = response.json.bind(response);
+      response.json = async <J = ResponseBody<Paths, Path, Method>>(): Promise<J> => {
+        const text = await response.clone().text();
+        if (!text) {
+          return undefined as J;
+        }
+        return parseJson<J>();
+      };
+      return response;
     } catch (error) {
       this.handleError(error);
       throw error;

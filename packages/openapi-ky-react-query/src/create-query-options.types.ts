@@ -16,7 +16,7 @@ type RequestInput<
   path: Path;
   params?: PathParams;
   searchParams?: SearchParams;
-  kyOptions?: Omit<KyOptions, "json" | "searchParams">;
+  kyOptions?: Omit<KyOptions, "json" | "method" | "searchParams">;
 };
 
 export type QueryOptionsParams<

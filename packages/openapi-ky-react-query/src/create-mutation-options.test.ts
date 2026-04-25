@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { createMutationOptions } from "./create-mutation-options";
-import { createFakeClient, getMock } from "./__fixtures__/fake-client";
+import {
+  createFakeCallableClient,
+  getCallableMock,
+} from "./__fixtures__/fake-client";
 
 type TestPaths = {
   "/posts": {
@@ -28,11 +31,11 @@ type TestPaths = {
   };
 };
 
-const createFakeApi = () => createFakeClient<TestPaths, "request">("request", { id: 1 });
+const createFakeApi = () => createFakeCallableClient<TestPaths>({ id: 1 });
 
 describe("createMutationOptions", () => {
   describe("callable", () => {
-    it("method를 명시한 호출이 mutationFn에서 api.request로 dispatch된다", async () => {
+    it("method를 명시한 호출이 mutationFn에서 client callable로 dispatch된다", async () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
 
@@ -40,7 +43,10 @@ describe("createMutationOptions", () => {
       const variables = { json: { title: "Hello" } };
       await opts.mutationFn?.(variables, {} as never);
 
-      expect(getMock(api, "request")).toHaveBeenCalledWith("post", "/posts", variables);
+      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
+        ...variables,
+        method: "post",
+      });
     });
 
     it("[회귀 테스트] mutationFn은 .json()으로 파싱된 본문을 반환한다", async () => {
@@ -61,17 +67,23 @@ describe("createMutationOptions", () => {
       ["put", "/posts/{postId}"],
       ["patch", "/posts/{postId}"],
       ["delete", "/posts/{postId}"],
-    ] as const)("%s 단축 메서드는 method='%s'로 api.request를 호출한다", async (method, path) => {
-      const api = createFakeApi();
-      const mutationOptions = createMutationOptions(api);
+    ] as const)(
+      "%s 단축 메서드는 method='%s'로 client callable을 호출한다",
+      async (method, path) => {
+        const api = createFakeApi();
+        const mutationOptions = createMutationOptions(api);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const opts = (mutationOptions[method] as any)({ path });
-      const variables = { json: { title: "x" } };
-      await opts.mutationFn?.(variables, {} as never);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const opts = (mutationOptions[method] as any)({ path });
+        const variables = { json: { title: "x" } };
+        await opts.mutationFn?.(variables, {} as never);
 
-      expect(getMock(api, "request")).toHaveBeenCalledWith(method, path, variables);
-    });
+        expect(getCallableMock(api)).toHaveBeenCalledWith(path, {
+          ...variables,
+          method,
+        });
+      },
+    );
 
     it("[회귀 테스트] 각 단축 메서드는 서로 다른 method를 캡처한다", async () => {
       const api = createFakeApi();
@@ -94,7 +106,10 @@ describe("createMutationOptions", () => {
         {} as never,
       );
 
-      const methods = getMock(api, "request").mock.calls.map((call) => call[0]);
+      const methods = getCallableMock(api).mock.calls.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (call) => (call[1] as any).method,
+      );
       expect(methods).toEqual(["post", "put", "patch", "delete"]);
     });
   });

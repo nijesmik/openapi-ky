@@ -25,12 +25,11 @@ describe("buildUrl", () => {
     );
   });
 
-  it("문자열 파라미터를 치환한다", () => {
-    expect(buildUrl("/users/{name}", { name: "john" })).toBe("users/john");
-  });
-
-  it("boolean 파라미터를 문자열로 변환한다", () => {
-    expect(buildUrl("/flags/{active}", { active: true })).toBe("flags/true");
+  it.each([
+    ["string", "/users/{name}", { name: "john" }, "users/john"],
+    ["boolean", "/flags/{active}", { active: true }, "flags/true"],
+  ])("%s 타입 파라미터를 문자열로 변환해 치환한다", (_, path, params, expected) => {
+    expect(buildUrl(path, params)).toBe(expected);
   });
 
   it("누락된 파라미터가 있으면 에러를 던진다", () => {

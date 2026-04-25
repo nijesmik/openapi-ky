@@ -44,13 +44,15 @@ const createTestClient = (fetchImpl: typeof fetch) =>
 
 describe("Client", () => {
   describe("response.json override", () => {
-    it("1. 본문이 있으면 원본 parseJson에 위임해 파싱된 값을 반환한다", async () => {
+    it("1. [회귀 테스트] 본문이 있을 때 override가 response.clone()을 거쳐 bind된 parseJson에 위임한다", async () => {
       const fetchImpl = vi.fn(async () => jsonResponse([{ id: 1, title: "hi" }]));
       const client = createTestClient(fetchImpl);
 
       const response = await client.get("/posts");
+      const cloneSpy = vi.spyOn(response!, "clone");
       const data = await response!.json();
 
+      expect(cloneSpy).toHaveBeenCalled();
       expect(data).toEqual([{ id: 1, title: "hi" }]);
     });
 
@@ -71,8 +73,7 @@ describe("Client", () => {
       [
         "post",
         "POST",
-        (c: ReturnType<typeof createTestClient>) =>
-          c.post("/posts", { json: { title: "new" } }),
+        (c: ReturnType<typeof createTestClient>) => c.post("/posts", { json: { title: "new" } }),
       ],
       [
         "put",
@@ -95,9 +96,7 @@ describe("Client", () => {
     ] as const)(
       "3. [회귀 테스트] %s 메서드는 %s 요청으로 dispatch된다",
       async (_verb, httpMethod, call) => {
-        const fetchImpl = vi.fn<typeof fetch>(
-          async () => new Response(null, { status: 204 }),
-        );
+        const fetchImpl = vi.fn<typeof fetch>(async () => new Response(null, { status: 204 }));
         const client = createTestClient(fetchImpl);
 
         await call(client);

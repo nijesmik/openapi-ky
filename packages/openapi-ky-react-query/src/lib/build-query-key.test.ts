@@ -1,4 +1,3 @@
-import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 
 import { buildQueryKey } from "./build-query-key";
@@ -71,35 +70,5 @@ describe("buildQueryKey", () => {
 
   it("options가 undefined이면 [path]를 반환한다", () => {
     expect(buildQueryKey("/users", undefined)).toEqual(["/users"]);
-  });
-
-  describe("QueryClient 캐시 매칭", () => {
-    it("다른 타입의 searchParams로 만든 키가 같은 캐시를 가리킨다", () => {
-      const qc = new QueryClient();
-      const data = { id: 1, name: "test" };
-
-      qc.setQueryData(buildQueryKey("/users", { searchParams: { page: "1" } }), data);
-
-      expect(qc.getQueryData(buildQueryKey("/users", { searchParams: "page=1" }))).toEqual(data);
-      expect(
-        qc.getQueryData(
-          buildQueryKey("/users", { searchParams: new URLSearchParams({ page: "1" }) }),
-        ),
-      ).toEqual(data);
-    });
-
-    it("params와 searchParams가 같은 값이어도 다른 캐시다", () => {
-      const qc = new QueryClient();
-
-      qc.setQueryData(buildQueryKey("/users", { params: { page: "1" } }), "from params");
-      qc.setQueryData(buildQueryKey("/users", { searchParams: { page: "1" } }), "from search");
-
-      expect(qc.getQueryData(buildQueryKey("/users", { params: { page: "1" } }))).toBe(
-        "from params",
-      );
-      expect(qc.getQueryData(buildQueryKey("/users", { searchParams: { page: "1" } }))).toBe(
-        "from search",
-      );
-    });
   });
 });

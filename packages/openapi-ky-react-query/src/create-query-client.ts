@@ -31,16 +31,16 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     path,
     params,
     searchParams,
-    data,
+    updater,
   }: {
     path: Path;
     params?: Options["params"];
     searchParams?: Options["searchParams"];
-    data: Updater<ResponseBody<Paths, Path> | undefined, ResponseBody<Paths, Path> | undefined>;
+    updater: Updater<ResponseBody<Paths, Path> | undefined, ResponseBody<Paths, Path> | undefined>;
   }) {
     return getQueryClient().setQueryData<ResponseBody<Paths, Path>>(
       getQueryKey(path, { params, searchParams }),
-      data,
+      updater,
     );
   }
 

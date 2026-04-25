@@ -6,7 +6,7 @@ import type { buildQueryKey } from "./lib/build-query-key";
 
 export type QueryKey = ReturnType<typeof buildQueryKey>;
 
-export type RequestParams<
+type RequestInput<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
   Params = Options["params"],
@@ -23,7 +23,7 @@ export type QueryOptionsParams<
   Path extends PathsFor<Paths, "get">,
   Data,
   Params = Options["params"],
-> = RequestParams<Paths, Path, Params> & {
+> = RequestInput<Paths, Path, Params> & {
   select?: (data: ResponseBody<Paths, Path>) => Data;
 };
 
@@ -32,7 +32,7 @@ export type InfiniteQueryOptionsParams<
   Path extends PathsFor<Paths, "get">,
   PageParam,
   Data,
-> = RequestParams<
+> = RequestInput<
   Paths,
   Path,
   Options["params"],

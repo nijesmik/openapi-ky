@@ -20,7 +20,11 @@ export function createFakeClient<Paths extends object, M extends string>(
   method: M,
   returnValue: unknown,
 ): Client<Paths> {
-  const mock = vi.fn(async () => returnValue);
+  const mock = vi.fn(() =>
+    Object.assign(Promise.resolve(returnValue), {
+      json: () => Promise.resolve(returnValue),
+    }),
+  );
   return { [method]: mock } as unknown as Client<Paths>;
 }
 

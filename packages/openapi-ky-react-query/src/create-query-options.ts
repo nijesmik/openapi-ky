@@ -36,7 +36,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
 
       return buildQueryOptions({
         queryKey: buildQueryKey(path, requestOptions),
-        queryFn: () => api.get(path, requestOptions),
+        queryFn: () => api.get(path, requestOptions).json(),
         select,
         ...queryOptions,
       });
@@ -64,7 +64,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
 
     return buildQueryOptions({
       queryKey: buildQueryKey(path, requestOptions),
-      queryFn: () => api.get(path, requestOptions),
+      queryFn: () => api.get(path, requestOptions).json(),
       select,
       ...queryOptions,
     });
@@ -95,14 +95,16 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     return buildInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { params, searchParams }),
       queryFn: ({ pageParam }) =>
-        api.get(path, {
-          params,
-          ...kyOptions,
-          searchParams: {
-            ...searchParams,
-            [pageParamKey]: pageParam as PageParam,
-          },
-        }),
+        api
+          .get(path, {
+            params,
+            ...kyOptions,
+            searchParams: {
+              ...searchParams,
+              [pageParamKey]: pageParam as PageParam,
+            },
+          })
+          .json(),
       initialPageParam,
       select,
       ...queryOptions,

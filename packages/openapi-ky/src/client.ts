@@ -1,7 +1,7 @@
 import type { Options, PathsFor, RequestBody, ResponseBody } from "./types";
 import type { HttpMethod } from "openapi-typescript-helpers";
 
-import ky, { type KyInstance, type Options as KyOptions } from "ky";
+import ky, { type KyInstance, type Options as KyOptions, type ResponsePromise } from "ky";
 
 import { buildUrl } from "./lib/build-url";
 
@@ -47,30 +47,37 @@ export class Client<Paths extends object> {
     return this.request("delete", path, options);
   }
 
-  async request<
+  request<
     Method extends Extract<HttpMethod, "delete" | "get" | "patch" | "post" | "put">,
     Path extends PathsFor<Paths, Method>,
     Body extends RequestBody<Paths, Path, Method>,
-  >(method: Method, path: Path, options?: Options<Body>) {
+    T = ResponseBody<Paths, Path, Method>,
+  >(method: Method, path: Path, options?: Options<Body>): ResponsePromise<T> {
     const { params, ...kyOptions } = options ?? {};
     const url = buildUrl(path, params);
+    const promise = this.api[method]<T>(url, kyOptions);
 
-    const response = await this.api[method]<ResponseBody<Paths, Path, Method>>(url, kyOptions);
+    void promise
+      .then((response) => {
+        // `response` is `undefined` at runtime when `ky.stop` is returned in a `beforeRetry` hook, despite ky's types.
+        if (!response) {
+          return;
+        }
+        const parseJson = response.json.bind(response);
+        response.json = async <J = T>(): Promise<J> => {
+          const text = await response.clone().text();
+          if (!text) {
+            return "" as J;
+          }
+          return parseJson<J>();
+        };
+      })
+      .catch(() => {
+        // `.then()` creates a derived promise that rejects independently when `promise` rejects.
+        // The caller awaits/catches `promise` itself, so swallow this branch to avoid `unhandledRejection`.
+      });
 
-    // `response` is `undefined` at runtime when `ky.stop` is returned in a `beforeRetry` hook, despite ky's types.
-    if (!response) {
-      return response;
-    }
-
-    const parseJson = response.json.bind(response);
-    response.json = async <J = ResponseBody<Paths, Path, Method>>(): Promise<J> => {
-      const text = await response.clone().text();
-      if (!text) {
-        return undefined as J;
-      }
-      return parseJson<J>();
-    };
-    return response;
+    return promise;
   }
 }
 

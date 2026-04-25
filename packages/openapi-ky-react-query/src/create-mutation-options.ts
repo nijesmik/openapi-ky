@@ -18,7 +18,7 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
     ...mutationOpts
   }: MutationOptionsParams<Paths, Path, Method, Variables>) {
     return buildMutationOptions({
-      mutationFn: (variables?: Variables) => api.request(method, path, variables),
+      mutationFn: (variables?: Variables) => api.request(method, path, variables).json(),
       ...mutationOpts,
     });
   }

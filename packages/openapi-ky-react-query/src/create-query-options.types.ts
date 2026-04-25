@@ -1,4 +1,5 @@
-import type { Options, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Params, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Options as KyOptions } from "ky";
 
 import type { InfiniteData } from "@tanstack/react-query";
 
@@ -9,21 +10,21 @@ export type QueryKey = ReturnType<typeof buildQueryKey>;
 type RequestInput<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
-  Params = Options["params"],
-  SearchParams = Options["searchParams"],
+  PathParams = Params,
+  SearchParams = KyOptions["searchParams"],
 > = {
   path: Path;
-  params?: Params;
+  params?: PathParams;
   searchParams?: SearchParams;
-  kyOptions?: Omit<Options, "params" | "searchParams">;
+  kyOptions?: Omit<KyOptions, "json" | "searchParams">;
 };
 
 export type QueryOptionsParams<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
   Data,
-  Params = Options["params"],
-> = RequestInput<Paths, Path, Params> & {
+  PathParams = Params,
+> = RequestInput<Paths, Path, PathParams> & {
   select?: (data: ResponseBody<Paths, Path>) => Data;
 };
 
@@ -35,7 +36,7 @@ export type InfiniteQueryOptionsParams<
 > = RequestInput<
   Paths,
   Path,
-  Options["params"],
+  Params,
   Record<string, string | number | boolean | undefined>
 > & {
   pageParamKey?: string;

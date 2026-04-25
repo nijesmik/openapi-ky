@@ -27,7 +27,10 @@ export class Client<Paths extends object> {
     this.beforeAnyErrorHooks = beforeAnyError ?? [];
   }
 
-  get<Path extends PathsFor<Paths, "get">>(path: Path, options?: Options) {
+  get<Path extends PathsFor<Paths, "get">>(
+    path: Path,
+    options?: Options<RequestBody<Paths, Path, "get">>,
+  ) {
     return this.request("get", path, options);
   }
 
@@ -52,7 +55,10 @@ export class Client<Paths extends object> {
     return this.request("patch", path, options);
   }
 
-  delete<Path extends PathsFor<Paths, "delete">>(path: Path, options?: Options) {
+  delete<Path extends PathsFor<Paths, "delete">>(
+    path: Path,
+    options?: Options<RequestBody<Paths, Path, "delete">>,
+  ) {
     return this.request("delete", path, options);
   }
 

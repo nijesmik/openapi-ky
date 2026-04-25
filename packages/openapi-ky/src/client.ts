@@ -13,14 +13,17 @@ export interface Client<
   DefaultMethod extends HttpMethod = "get",
 > {
   /**
-   * Issues an HTTP request and returns ky's `ResponsePromise<T>`. Method 우선순위는
-   * 호출 시 `options.method` → `createClient`의 `defaultOptions.method` → ky 내장 `"get"`.
+   * Issues an HTTP request and returns ky's `ResponsePromise<T>`. The result can
+   * be consumed by chaining a body parser (`.json()`, `.text()`, ...) or by
+   * `await`ing the response and parsing it manually.
    *
-   * 결과는 body parser 체이닝(`.json()`, `.text()`, ...) 또는 `await` + 수동 파싱으로 소비.
+   * Method resolution priority: `options.method` (call-site) → `defaultOptions.method`
+   * (instance, set via `createClient`) → ky's built-in `"get"` fallback.
    *
-   * `beforeRetry` 훅이 `ky.stop`을 반환하면 resolved value는 런타임에 `undefined`이고,
-   * chained body 메서드는 `TypeError`로 던진다 — ky의 upstream 한계. `ky.stop`에 의존한다면
-   * `await` 패턴 + `null`/`undefined` 가드를 사용.
+   * If a `beforeRetry` hook returns `ky.stop`, the resolved value is `undefined`
+   * at runtime, and chained body methods will throw `TypeError`. This is an
+   * upstream ky limitation — use the `await` pattern with a `null`/`undefined`
+   * guard if you rely on `ky.stop`.
    */
   <Path extends PathsFor<Paths, DefaultMethod>>(
     path: Path,
@@ -74,11 +77,11 @@ export function createClient<
 
     void promise
       .then((response) => {
+        // `response` is `undefined` at runtime when `ky.stop` is returned in a `beforeRetry` hook, despite ky's types.
         if (!response) {
           return;
         }
-        // 빈 본문일 때 ky의 chained `.json()`은 `""`를 반환하지만 native `Response.json()`은 throw한다.
-        // 일관성을 위해 native 쪽도 빈 본문에서 `""`를 반환하도록 패치.
+        // Patch native `Response.json()` to match ky's chained `.json()` behavior on empty bodies (returns `""` instead of throwing).
         const parseJson = response.json.bind(response);
         response.json = async <J>(): Promise<J> => {
           const text = await response.clone().text();
@@ -89,9 +92,8 @@ export function createClient<
         };
       })
       .catch(() => {
-        // `.then()`이 만든 derived promise는 원본 reject 시 독립적으로 reject된다.
-        // 호출자는 원본 promise를 await/catch하므로 derived rejection은 흡수해
-        // unhandledRejection 발동을 막는다.
+        // `.then()` creates a derived promise that rejects independently when `promise` rejects.
+        // The caller awaits/catches `promise` itself, so swallow this branch to avoid `unhandledRejection`.
       });
 
     return promise;

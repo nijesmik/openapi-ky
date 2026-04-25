@@ -17,6 +17,9 @@ importers:
       '@nijesmik/prettier-config':
         specifier: ^0.1.2
         version: 0.1.2(prettier@3.8.1)
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
       eslint:
         specifier: ^9.39.1
         version: 9.39.3(jiti@2.6.1)
@@ -2537,7 +2540,6 @@ snapshots:
   '@types/node@25.6.0':
     dependencies:
       undici-types: 7.19.2
-    optional: true
 
   '@typescript-eslint/eslint-plugin@8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
@@ -4189,8 +4191,7 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
-  undici-types@7.19.2:
-    optional: true
+  undici-types@7.19.2: {}
 
   universalify@0.1.2: {}
 

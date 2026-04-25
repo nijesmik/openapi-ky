@@ -9,37 +9,50 @@ import { vi, type Mock } from "vitest";
  */
 const UNPARSED_RESPONSE = "__RESPONSE_NOT_PARSED__";
 
+const buildResponseMock = (returnValue: unknown) =>
+  Object.assign(Promise.resolve(UNPARSED_RESPONSE), {
+    json: () => Promise.resolve(returnValue),
+  });
+
 /**
- * Builds a partial `Client<Paths>` that only mocks the single HTTP method our
- * wrappers actually call. A real `Client` instance would require ky and other
- * external setup, which is unnecessary for unit tests of the option factories.
- *
- * The return type is plain `Client<Paths>` rather than
- * `Client<Paths> & { [M]: Mock }` on purpose: an intersection return type
- * breaks `Paths` inference inside `createMutationOptions` /
- * `createQueryOptions`, causing every downstream generic to collapse to
- * `never`. Mock access goes through the separate {@link getMock} helper.
+ * Fakes a single shortcut method on `Client<Paths>` (e.g. `"get"`, `"post"`).
  *
  * The fake mimics ky's `ResponsePromise` asymmetry: `await mock()` resolves to
- * a sentinel string, and `.json()` resolves to `returnValue`. This way a
- * regression that drops `.json()` from a wrapper produces an observable
- * mismatch instead of accidentally passing.
+ * a sentinel string, and `.json()` resolves to `returnValue`. A regression that
+ * drops `.json()` from a wrapper produces an observable mismatch instead of
+ * accidentally passing.
  *
- * @param method - Name of the `Client` method to mock (e.g. `"get"`, `"request"`).
- * @param returnValue - Value the mock's `.json()` resolves to on every call.
+ * Return type is plain `Client<Paths>` (not the intersection
+ * `Client<Paths> & { [M]: Mock }`) on purpose: an intersection breaks
+ * `Paths` inference inside `createMutationOptions` / `createQueryOptions`,
+ * collapsing every downstream generic to `never`. Mock access goes through
+ * the separate {@link getMock} helper.
  */
 export function createFakeClient<Paths extends object, M extends string>(
   method: M,
   returnValue: unknown,
 ): Client<Paths> {
-  const mock = vi.fn(() =>
-    Object.assign(Promise.resolve(UNPARSED_RESPONSE), {
-      json: () => Promise.resolve(returnValue),
-    }),
-  );
+  const mock = vi.fn(() => buildResponseMock(returnValue));
   return { [method]: mock } as unknown as Client<Paths>;
+}
+
+/**
+ * Fakes the callable body of `Client<Paths>` (`api(path, options)`).
+ *
+ * Use this for tests of wrappers that call `api(...)` directly, such as
+ * `createMutationOptions` after the callable migration.
+ */
+export function createFakeCallableClient<Paths extends object>(
+  returnValue: unknown,
+): Client<Paths> {
+  const mock = vi.fn(() => buildResponseMock(returnValue));
+  return mock as unknown as Client<Paths>;
 }
 
 export function getMock<M extends string>(api: object, method: M): Mock {
   return (api as Record<M, Mock>)[method];
+}
+
+export function getCallableMock(api: object): Mock {
+  return api as unknown as Mock;
 }

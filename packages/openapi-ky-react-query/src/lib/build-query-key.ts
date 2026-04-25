@@ -1,10 +1,11 @@
-import type { Options } from "@nijesmik/openapi-ky";
+import type { Params } from "@nijesmik/openapi-ky";
+import type { Options as KyOptions } from "ky";
 
-type QueryKey = (string | Options["params"])[];
+type QueryKey = (string | Params)[];
 
 export function buildQueryKey(
   path: string,
-  options?: Pick<Options, "params" | "searchParams">,
+  options?: { params?: Params; searchParams?: KyOptions["searchParams"] },
 ): Readonly<QueryKey> {
   const { params, searchParams } = options ?? {};
 

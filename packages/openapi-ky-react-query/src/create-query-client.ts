@@ -1,4 +1,5 @@
-import type { Options, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Params, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Options as KyOptions } from "ky";
 
 import {
   isServer,
@@ -22,7 +23,7 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
 
   function getQueryKey<Path extends PathsFor<Paths, "get">>(
     path: Path,
-    options?: Pick<Options, "params" | "searchParams">,
+    options?: { params?: Params; searchParams?: KyOptions["searchParams"] },
   ) {
     return buildQueryKey(path, options);
   }
@@ -34,8 +35,8 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     updater,
   }: {
     path: Path;
-    params?: Options["params"];
-    searchParams?: Options["searchParams"];
+    params?: Params;
+    searchParams?: KyOptions["searchParams"];
     updater: Updater<ResponseBody<Paths, Path> | undefined, ResponseBody<Paths, Path> | undefined>;
   }) {
     return getQueryClient().setQueryData<ResponseBody<Paths, Path>>(
@@ -53,8 +54,8 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     ...filters
   }: {
     path: Path;
-    params?: Options["params"];
-    searchParams?: Options["searchParams"];
+    params?: Params;
+    searchParams?: KyOptions["searchParams"];
   } & Omit<InvalidateQueryFilters, "queryKey"> &
     InvalidateOptions) {
     return getQueryClient().invalidateQueries(

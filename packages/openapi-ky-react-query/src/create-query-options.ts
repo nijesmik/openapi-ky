@@ -1,4 +1,4 @@
-import type { Client, Options, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Client, Params, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as buildInfiniteQueryOptions,
@@ -29,7 +29,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     kyOptions,
     select,
     ...queryOptions
-  }: QueryOptionsParams<Paths, Path, Data, Options["params"] | null> &
+  }: QueryOptionsParams<Paths, Path, Data, Params | null> &
     Omit<QueryOptions, "queryFn" | "queryKey" | "select">) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOptions };

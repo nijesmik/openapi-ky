@@ -17,6 +17,8 @@ Only verify the logic we add or override on top of them.
 
 **Heuristic**: identify at least one specific mutation of our code that would cause this test to fail. If you can't, drop it. Exception: if our wrapper *is* the sibling unit (no other test covers it), test it here.
 
+Apply the same heuristic when *adding* tests for untested code paths. If no meaningful mutation can be caught beyond what sibling unit tests already cover, leave the code untested rather than ship a weak or redundant guard.
+
 ## 2. Mark regression tests with `[회귀 테스트]`
 
 Prefix tests that exist to lock in a specific bug fix (not ordinary feature behavior).

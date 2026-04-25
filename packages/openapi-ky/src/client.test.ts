@@ -117,6 +117,27 @@ describe("Client", () => {
     });
   });
 
+  describe("인스턴스 method default", () => {
+    it("6. [회귀 테스트] 단축 메서드는 defaultOptions.method를 override한다", async () => {
+      const fetchImpl = vi.fn<typeof fetch>(async () =>
+        new Response("[]", {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      );
+      const client = createClient<TestPaths>({
+        prefixUrl: "https://api.test/",
+        fetch: fetchImpl,
+        retry: 0,
+        method: "post",
+      });
+
+      await client.get("/posts");
+
+      expect((fetchImpl.mock.calls[0]![0] as Request).method).toBe("GET");
+    });
+  });
+
   describe("실패 처리", () => {
     it("4. [회귀 테스트] 호출자가 catch한 요청 실패가 unhandledRejection을 발동시키지 않는다", async () => {
       const fetchImpl = vi.fn(async () => {

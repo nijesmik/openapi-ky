@@ -47,6 +47,16 @@ export class Client<Paths extends object> {
     return this.request("delete", path, options);
   }
 
+  /**
+   * Issues an HTTP request and returns ky's `ResponsePromise<T>`. The result can
+   * be consumed by chaining a body parser (`.json()`, `.text()`, ...) or by
+   * `await`ing the response and parsing it manually.
+   *
+   * If a `beforeRetry` hook returns `ky.stop`, the resolved value is `undefined`
+   * at runtime, and chained body methods will throw `TypeError`. This is an
+   * upstream ky limitation — use the `await` pattern with a `null`/`undefined`
+   * guard if you rely on `ky.stop`.
+   */
   request<
     Method extends Extract<HttpMethod, "delete" | "get" | "patch" | "post" | "put">,
     Path extends PathsFor<Paths, Method>,

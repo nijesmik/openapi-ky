@@ -61,6 +61,34 @@ await client.delete('/posts/{postId}', {
 
 All [ky options](https://github.com/sindresorhus/ky#options) such as `searchParams`, `headers`, etc. can also be passed in.
 
+### Handling Responses
+
+`request` (and the shortcut methods) returns ky's [`ResponsePromise`](https://github.com/sindresorhus/ky#api), so you can either chain a body parser directly or `await` the `KyResponse` and parse it yourself.
+
+```ts
+// Chain body parsers directly
+const users = await client.get('/users').json();
+
+// Or await the response and parse it
+const response = await client.get('/users');
+const users = await response.json();
+```
+
+Other ky body methods (`.text()`, `.blob()`, `.formData()`, `.arrayBuffer()`, `.bytes()`) are available on the chained path.
+
+> **Note on `ky.stop`**
+>
+> If a `beforeRetry` hook returns [`ky.stop`](https://github.com/sindresorhus/ky#stop), the resolved response is `undefined`. Chaining `.json()` (or any other body method) on that promise will throw `TypeError: Cannot read properties of undefined` — this is an [upstream ky limitation](https://github.com/sindresorhus/ky#stop). Use the `await` pattern and guard for `undefined` if you rely on `ky.stop`:
+>
+> ```ts
+> const response = await client.get('/users');
+> if (!response) {
+>   // beforeRetry returned ky.stop
+>   return;
+> }
+> const users = await response.json();
+> ```
+
 ### Hooks
 
 All [ky hooks](https://github.com/sindresorhus/ky#hooks) are supported. For example, use `beforeError` to intercept and modify `HTTPError`:
@@ -189,6 +217,34 @@ await client.delete('/posts/{postId}', {
 ```
 
 `searchParams`, `headers` 등 모든 [ky 옵션](https://github.com/sindresorhus/ky#options)을 함께 전달할 수 있습니다.
+
+#### 응답 처리
+
+`request` 및 단축 메서드는 ky의 [`ResponsePromise`](https://github.com/sindresorhus/ky#api)를 반환합니다. 본문 파서를 그대로 체이닝하거나, `KyResponse`를 `await`한 뒤 직접 파싱할 수 있습니다.
+
+```ts
+// 본문 파서를 직접 체이닝
+const users = await client.get('/users').json();
+
+// 또는 응답을 await한 뒤 파싱
+const response = await client.get('/users');
+const users = await response.json();
+```
+
+체이닝 경로에서는 `.text()`, `.blob()`, `.formData()`, `.arrayBuffer()`, `.bytes()` 등 ky의 다른 본문 메서드도 사용할 수 있습니다.
+
+> **`ky.stop` 주의사항**
+>
+> `beforeRetry` 훅이 [`ky.stop`](https://github.com/sindresorhus/ky#stop)을 반환하면 응답이 `undefined`로 resolve됩니다. 이 promise에 `.json()`(또는 다른 본문 메서드)을 체이닝하면 `TypeError: Cannot read properties of undefined`가 발생하며, 이는 [ky 자체의 한계](https://github.com/sindresorhus/ky#stop)입니다. `ky.stop`을 사용한다면 `await` 패턴으로 받은 뒤 `undefined`를 직접 가드하세요:
+>
+> ```ts
+> const response = await client.get('/users');
+> if (!response) {
+>   // beforeRetry가 ky.stop을 반환한 경우
+>   return;
+> }
+> const users = await response.json();
+> ```
 
 ### Hooks
 

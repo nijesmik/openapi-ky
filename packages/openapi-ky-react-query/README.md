@@ -240,6 +240,33 @@ await queryClient.invalidateQueries({
 
 For most cases, prefer `invalidateQueries` from `createQueryClient` directly — see [Query Client](#query-client--createqueryclient) above.
 
+## Caveats
+
+### `ky.stop` is not compatible with this package
+
+`queryOptions` and `mutationOptions` internally chain `.json()` to return the parsed body. If a `beforeRetry` hook returns [`ky.stop`](https://github.com/sindresorhus/ky#stop), the response resolves to `undefined`, and the internal `.json()` call throws `TypeError: Cannot read properties of undefined` from inside the wrapper.
+
+This is an [upstream ky limitation](https://github.com/sindresorhus/ky#stop) — see the note in [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#handling-responses).
+
+For most "stop retrying on a specific error" cases, prefer react-query's built-in retry control:
+
+```ts
+import { useQuery } from '@tanstack/react-query';
+import { HTTPError } from 'ky';
+
+useQuery({
+  ...queryOptions({ path: '/users' }),
+  retry: (failureCount, error) => {
+    if (error instanceof HTTPError && error.response.status === 401) {
+      return false; // don't retry on 401
+    }
+    return failureCount < 3;
+  },
+});
+```
+
+If you genuinely need `ky.stop`, call the `client` method directly outside the wrapper and handle the `undefined` case yourself.
+
 ## API
 
 | Name | Description |
@@ -502,6 +529,33 @@ await queryClient.invalidateQueries({
 ```
 
 대부분의 경우 `createQueryClient`의 `invalidateQueries`를 직접 사용하는 것이 더 간단합니다 — 위 [Query Client](#query-client--createqueryclient-1) 섹션 참고.
+
+### 주의사항
+
+#### `ky.stop`은 이 패키지와 호환되지 않습니다
+
+`queryOptions`와 `mutationOptions`는 본문을 파싱해 반환하기 위해 내부적으로 `.json()`을 체이닝합니다. `beforeRetry` 훅이 [`ky.stop`](https://github.com/sindresorhus/ky#stop)을 반환하면 응답이 `undefined`로 resolve되고, 래퍼 내부의 `.json()` 호출에서 `TypeError: Cannot read properties of undefined`가 발생합니다.
+
+이는 [ky 자체의 한계](https://github.com/sindresorhus/ky#stop)이며, [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#한국어)의 응답 처리 섹션도 참고하세요.
+
+특정 에러에서 retry를 멈추고 싶다면 react-query의 내장 retry 제어를 사용하는 것이 더 자연스럽습니다:
+
+```ts
+import { useQuery } from '@tanstack/react-query';
+import { HTTPError } from 'ky';
+
+useQuery({
+  ...queryOptions({ path: '/users' }),
+  retry: (failureCount, error) => {
+    if (error instanceof HTTPError && error.response.status === 401) {
+      return false; // 401에서는 retry 중단
+    }
+    return failureCount < 3;
+  },
+});
+```
+
+`ky.stop`이 꼭 필요한 경우 래퍼 밖에서 `client` 메서드를 직접 호출하고 `undefined` 케이스를 처리하세요.
 
 ### API
 

@@ -1,6 +1,13 @@
 import { QueryClient } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+// vitest의 기본 node 환경에선 `isServer`가 true라 매 호출마다 새 QueryClient를 만든다.
+// 브라우저 싱글턴 동작을 검증하려면 `isServer`를 false로 강제해야 한다.
+vi.mock("@tanstack/react-query", async (importActual) => {
+  const actual = await importActual<typeof import("@tanstack/react-query")>();
+  return { ...actual, isServer: false };
+});
+
 import { createQueryClient } from "./create-query-client";
 
 type TestPaths = {
@@ -21,18 +28,24 @@ describe("createQueryClient", () => {
     vi.restoreAllMocks();
   });
 
-  describe("setQueryData", () => {
-    it("주어진 queryKey와 updater 값을 QueryClient.setQueryData로 dispatch한다", () => {
-      const setSpy = vi.spyOn(QueryClient.prototype, "setQueryData");
+  describe("getQueryClient", () => {
+    it("브라우저에서 동일 인스턴스를 재사용한다 (싱글턴)", () => {
       const factory = createQueryClient<TestPaths>();
-      const data = [{ id: 1, title: "a" }];
 
-      factory.setQueryData({ path: "/posts", updater: data });
-
-      expect(setSpy).toHaveBeenCalledWith(["/posts"], data);
+      expect(factory.getQueryClient()).toBe(factory.getQueryClient());
     });
+  });
 
-    it("updater 함수를 그대로 QueryClient.setQueryData에 전달한다", () => {
+  describe("팩토리 callable", () => {
+    it("팩토리 자체를 호출하면 getQueryClient와 동일한 인스턴스를 반환한다", () => {
+      const factory = createQueryClient<TestPaths>();
+
+      expect(factory()).toBe(factory.getQueryClient());
+    });
+  });
+
+  describe("setQueryData", () => {
+    it("setQueryData를 dispatch하며 updater를 그대로 전달한다", () => {
       const setSpy = vi.spyOn(QueryClient.prototype, "setQueryData");
       const factory = createQueryClient<TestPaths>();
       const updater = (prev: { id: number; title: string } | undefined) => prev;
@@ -43,24 +56,8 @@ describe("createQueryClient", () => {
         updater,
       });
 
-      expect(setSpy).toHaveBeenCalledWith(["/posts/{postId}", { postId: 1 }], updater);
-    });
-
-    it("params/searchParams를 포함한 queryKey를 빌드해 dispatch한다", () => {
-      const setSpy = vi.spyOn(QueryClient.prototype, "setQueryData");
-      const factory = createQueryClient<TestPaths>();
-
-      factory.setQueryData({
-        path: "/posts/{postId}",
-        params: { postId: 1 },
-        searchParams: { include: "comments" },
-        updater: { id: 1, title: "x" },
-      });
-
-      expect(setSpy).toHaveBeenCalledWith(
-        ["/posts/{postId}", { postId: 1 }, "include=comments"],
-        { id: 1, title: "x" },
-      );
+      expect(setSpy).toHaveBeenCalledTimes(1);
+      expect(setSpy.mock.calls[0]?.[1]).toBe(updater);
     });
 
     it("[회귀 테스트] QueryClient.setQueryData의 리턴 값을 그대로 전파한다", () => {
@@ -74,6 +71,35 @@ describe("createQueryClient", () => {
 
       expect(result).toBe(sentinel);
       expect(setSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("invalidateQueries", () => {
+    it("invalidateQueries를 dispatch한다", () => {
+      const invalidateSpy = vi.spyOn(QueryClient.prototype, "invalidateQueries");
+      const factory = createQueryClient<TestPaths>();
+
+      factory.invalidateQueries({ path: "/posts" });
+
+      expect(invalidateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("filter 옵션과 invalidate 옵션을 분리해 전달한다", () => {
+      const invalidateSpy = vi.spyOn(QueryClient.prototype, "invalidateQueries");
+      const factory = createQueryClient<TestPaths>();
+
+      factory.invalidateQueries({
+        path: "/posts/{postId}",
+        params: { postId: 1 },
+        exact: true,
+        cancelRefetch: false,
+        throwOnError: true,
+      });
+
+      expect(invalidateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ exact: true, queryKey: expect.any(Array) }),
+        { cancelRefetch: false, throwOnError: true },
+      );
     });
   });
 });

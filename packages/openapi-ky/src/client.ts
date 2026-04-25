@@ -1,30 +1,15 @@
-import type {
-  BeforeAnyErrorHook,
-  ClientOptions,
-  Options,
-  PathsFor,
-  RequestBody,
-  ResponseBody,
-} from "./types";
+import type { Options, PathsFor, RequestBody, ResponseBody } from "./types";
 import type { HttpMethod } from "openapi-typescript-helpers";
 
-import ky, { type KyInstance } from "ky";
+import ky, { type KyInstance, type Options as KyOptions } from "ky";
 
 import { buildUrl } from "./lib/build-url";
 
 export class Client<Paths extends object> {
   protected api: KyInstance;
-  private readonly beforeAnyErrorHooks: BeforeAnyErrorHook[];
 
-  constructor(options: ClientOptions) {
-    const { beforeAnyError, beforeHTTPError, ...kyHooks } = options.hooks ?? {};
-
-    this.api = ky.create({
-      ...options,
-      hooks: { ...kyHooks, beforeError: beforeHTTPError },
-    });
-
-    this.beforeAnyErrorHooks = beforeAnyError ?? [];
+  constructor(options: KyOptions) {
+    this.api = ky.create(options);
   }
 
   get<Path extends PathsFor<Paths, "get">>(
@@ -70,36 +55,25 @@ export class Client<Paths extends object> {
     const { params, ...kyOptions } = options ?? {};
     const url = buildUrl(path, params);
 
-    try {
-      const response = await this.api[method]<ResponseBody<Paths, Path, Method>>(url, kyOptions);
+    const response = await this.api[method]<ResponseBody<Paths, Path, Method>>(url, kyOptions);
 
-      // `response` is `undefined` at runtime when `ky.stop` is returned in a `beforeRetry` hook, despite ky's types.
-      if (!response) {
-        return response;
-      }
-
-      const parseJson = response.json.bind(response);
-      response.json = async <J = ResponseBody<Paths, Path, Method>>(): Promise<J> => {
-        const text = await response.clone().text();
-        if (!text) {
-          return undefined as J;
-        }
-        return parseJson<J>();
-      };
+    // `response` is `undefined` at runtime when `ky.stop` is returned in a `beforeRetry` hook, despite ky's types.
+    if (!response) {
       return response;
-    } catch (error) {
-      this.handleError(error);
-      throw error;
     }
-  }
 
-  private handleError(error: unknown) {
-    for (const hook of this.beforeAnyErrorHooks) {
-      hook(error);
-    }
+    const parseJson = response.json.bind(response);
+    response.json = async <J = ResponseBody<Paths, Path, Method>>(): Promise<J> => {
+      const text = await response.clone().text();
+      if (!text) {
+        return undefined as J;
+      }
+      return parseJson<J>();
+    };
+    return response;
   }
 }
 
-export function createClient<Paths extends object>(options: ClientOptions) {
+export function createClient<Paths extends object>(options: KyOptions) {
   return new Client<Paths>(options);
 }

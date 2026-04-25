@@ -63,38 +63,17 @@ All [ky options](https://github.com/sindresorhus/ky#options) such as `searchPara
 
 ### Hooks
 
-Hooks allow you to intercept and modify requests, responses, and errors. All [ky hooks](https://github.com/sindresorhus/ky#hooks) are supported, with the following additions:
-
-#### `beforeHTTPError`
-
-Maps to ky's `beforeError`. Called before an `HTTPError` is thrown, allowing you to modify the error. The hook must return the error object.
+All [ky hooks](https://github.com/sindresorhus/ky#hooks) are supported. For example, use `beforeError` to intercept and modify `HTTPError`:
 
 ```ts
 const client = createClient<paths>({
   prefixUrl: 'https://api.example.com',
   hooks: {
-    beforeHTTPError: [
+    beforeError: [
       async (error) => {
         const body = await error.response.json();
         error.message = `${body.message} (${error.response.status})`;
         return error;
-      },
-    ],
-  },
-});
-```
-
-#### `beforeAnyError`
-
-Called for all errors (`HTTPError`, `TimeoutError`, network errors, etc.) before they are thrown. Unlike `beforeHTTPError`, this hook does not return or modify the error.
-
-```ts
-const client = createClient<paths>({
-  prefixUrl: 'https://api.example.com',
-  hooks: {
-    beforeAnyError: [
-      (error) => {
-        console.error('Request failed:', error);
       },
     ],
   },
@@ -213,38 +192,17 @@ await client.delete('/posts/{postId}', {
 
 ### Hooks
 
-hooks를 사용하여 요청, 응답, 에러를 가로채고 수정할 수 있습니다. 모든 [ky hooks](https://github.com/sindresorhus/ky#hooks)를 지원하며, 다음 훅이 추가로 제공됩니다:
-
-#### `beforeHTTPError`
-
-ky의 `beforeError`에 매핑됩니다. `HTTPError`가 throw되기 전에 호출되어 에러를 수정할 수 있습니다. 훅에서 에러 객체를 반환해야 합니다.
+모든 [ky hooks](https://github.com/sindresorhus/ky#hooks)를 그대로 사용할 수 있습니다. 예를 들어 `beforeError`로 `HTTPError`를 가로채 수정할 수 있습니다:
 
 ```ts
 const client = createClient<paths>({
   prefixUrl: 'https://api.example.com',
   hooks: {
-    beforeHTTPError: [
+    beforeError: [
       async (error) => {
         const body = await error.response.json();
         error.message = `${body.message} (${error.response.status})`;
         return error;
-      },
-    ],
-  },
-});
-```
-
-#### `beforeAnyError`
-
-모든 에러(`HTTPError`, `TimeoutError`, 네트워크 에러 등)에 대해 throw되기 전에 호출됩니다. `beforeHTTPError`와 달리 에러를 반환하거나 수정하지 않습니다.
-
-```ts
-const client = createClient<paths>({
-  prefixUrl: 'https://api.example.com',
-  hooks: {
-    beforeAnyError: [
-      (error) => {
-        console.error('Request failed:', error);
       },
     ],
   },

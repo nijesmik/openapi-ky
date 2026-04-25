@@ -6,7 +6,7 @@ import type {
   ResponseObjectMap,
   SuccessResponse,
 } from "openapi-typescript-helpers";
-import type { BeforeErrorHook as KyBeforeErrorHook, Options as KyOptions } from "ky";
+import type { Options as KyOptions } from "ky";
 
 export type Params = Record<string, boolean | number | string>;
 
@@ -34,15 +34,3 @@ export type PathsFor<Paths extends object, Method extends HttpMethod> = PathsWit
   Method
 > &
   string;
-
-export type BeforeHTTPErrorHook = KyBeforeErrorHook;
-export type BeforeAnyErrorHook = (error: unknown) => void;
-
-export type Hooks = Omit<KyOptions["hooks"], "beforeError"> & {
-  beforeHTTPError?: BeforeHTTPErrorHook[];
-  beforeAnyError?: BeforeAnyErrorHook[];
-};
-
-export type ClientOptions = Omit<KyOptions, "hooks"> & {
-  hooks?: Hooks;
-};

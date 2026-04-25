@@ -61,7 +61,7 @@ export class Client<Paths extends object> {
     Method extends Extract<HttpMethod, "delete" | "get" | "patch" | "post" | "put">,
     Path extends PathsFor<Paths, Method>,
     Body extends RequestBody<Paths, Path, Method>,
-    T = ResponseBody<Paths, Path, Method>,
+    T extends ResponseBody<Paths, Path, Method>,
   >(method: Method, path: Path, options?: Options<Body>): ResponsePromise<T> {
     const { params, ...kyOptions } = options ?? {};
     const url = buildUrl(path, params);

@@ -1,4 +1,5 @@
 import type { Client, Options, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { ResponsePromise } from "ky";
 
 import { mutationOptions as buildMutationOptions } from "@tanstack/react-query";
 
@@ -17,10 +18,16 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
     path,
     ...mutationOpts
   }: MutationOptionsParams<Paths, Path, Method, Variables>) {
+    // generic context에서 `Method extends MutationMethod`/`Path extends PathsFor<Paths, Method>`가
+    // Client callable의 명시-method 오버로드 제약(`Method extends keyof Paths[Path] & HttpMethod`)과
+    // 동치이지만 TS가 그것을 증명할 수 없음. 단일 함수 시그니처로 alias해 boundary cast.
+    const call = api as unknown as (
+      path: Path,
+      options: Options<Paths, Path, Method> & { method: Method },
+    ) => ResponsePromise<ResponseBody<Paths, Path, Method>>;
     return buildMutationOptions({
       mutationFn: (variables?: Variables) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (api as any)(path, { ...variables, method }).json() as Promise<ResponseBody<Paths, Path, Method>>,
+        call(path, { ...variables, method } as Options<Paths, Path, Method> & { method: Method }).json(),
       ...mutationOpts,
     });
   }

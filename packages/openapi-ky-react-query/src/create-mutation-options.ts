@@ -1,27 +1,51 @@
 import type { Client, Options, PathsFor, RequestBody, ResponseBody } from "@nijesmik/openapi-ky";
 
-import { mutationOptions, type UseMutationOptions } from "@tanstack/react-query";
+import {
+  mutationOptions as buildMutationOptions,
+  type UseMutationOptions,
+} from "@tanstack/react-query";
 
 type MutationMethod = "delete" | "patch" | "post" | "put";
 
-export function createMutation<Paths extends object>(api: Client<Paths>) {
-  function options<
-    Method extends MutationMethod,
+type MutationOptionsParams<
+  Paths extends object,
+  Path extends PathsFor<Paths, Method>,
+  Method extends MutationMethod,
+  Variables extends Options<RequestBody<Paths, Path, Method>>,
+> = Omit<UseMutationOptions<ResponseBody<Paths, Path, Method>, Error, Variables>, "mutationFn"> & {
+  method: Method;
+  path: Path;
+};
+
+export function createMutationOptions<Paths extends object>(api: Client<Paths>) {
+  function mutationOptions<
     Path extends PathsFor<Paths, Method>,
+    Method extends MutationMethod,
     Variables extends Options<RequestBody<Paths, Path, Method>>,
   >({
     method,
     path,
     ...mutationOpts
-  }: Omit<UseMutationOptions<ResponseBody<Paths, Path, Method>, Error, Variables>, "mutationFn"> & {
-    method: Method;
-    path: Path;
-  }) {
-    return mutationOptions({
+  }: MutationOptionsParams<Paths, Path, Method, Variables>) {
+    return buildMutationOptions({
       mutationFn: (variables?: Variables) => api.request(method, path, variables),
       ...mutationOpts,
     });
   }
 
-  return { options };
+  function mutationOptionsWithMethod<Method extends MutationMethod>(method: Method) {
+    return <
+      Path extends PathsFor<Paths, Method>,
+      Variables extends Options<RequestBody<Paths, Path, Method>>,
+    >(
+      args: Omit<MutationOptionsParams<Paths, Path, Method, Variables>, "method">,
+    ) => mutationOptions({ ...args, method });
+  }
+
+  return Object.assign(mutationOptions, {
+    post: mutationOptionsWithMethod("post"),
+    put: mutationOptionsWithMethod("put"),
+    patch: mutationOptionsWithMethod("patch"),
+    delete: mutationOptionsWithMethod("delete"),
+  });
 }

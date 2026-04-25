@@ -1,8 +1,8 @@
 import type { Client, Options, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
-  infiniteQueryOptions as createInfiniteQueryOptions,
-  queryOptions as createQueryOptions,
+  infiniteQueryOptions as buildInfiniteQueryOptions,
+  queryOptions as buildQueryOptions,
   skipToken,
   type InfiniteData,
   type UseInfiniteQueryOptions,
@@ -14,15 +14,8 @@ import { buildQueryKey } from "./lib/build-query-key";
 
 type QueryKey = ReturnType<typeof buildQueryKey>;
 
-export function createQuery<Paths extends object>(api: Client<Paths>) {
-  function keyOf<Path extends PathsFor<Paths, "get">>(
-    path: Path,
-    options?: Pick<Options, "params" | "searchParams">,
-  ) {
-    return buildQueryKey(path, options);
-  }
-
-  function options<
+export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
+  function queryOptions<
     Path extends PathsFor<Paths, "get">,
     Data,
     QueryOptions extends UseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
@@ -43,7 +36,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOptions };
 
-      return createQueryOptions({
+      return buildQueryOptions({
         queryKey: buildQueryKey(path, requestOptions),
         queryFn: () => api.get(path, requestOptions),
         select,
@@ -51,13 +44,13 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
       });
     }
 
-    return createQueryOptions<ResponseBody<Paths, Path>, Error, Data>({
+    return buildQueryOptions<ResponseBody<Paths, Path>, Error, Data>({
       queryKey: buildQueryKey(path),
       queryFn: skipToken,
     });
   }
 
-  function suspenseOptions<Path extends PathsFor<Paths, "get">, Data>({
+  function suspenseQueryOptions<Path extends PathsFor<Paths, "get">, Data>({
     path,
     params,
     searchParams,
@@ -76,7 +69,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
   >) {
     const requestOptions = { params, searchParams, ...kyOptions };
 
-    return createQueryOptions({
+    return buildQueryOptions({
       queryKey: buildQueryKey(path, requestOptions),
       queryFn: () => api.get(path, requestOptions),
       select,
@@ -84,7 +77,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     });
   }
 
-  function infiniteOptions<
+  function infiniteQueryOptions<
     Path extends PathsFor<Paths, "get">,
     PageParam extends string | number | undefined = string | undefined,
     Data = InfiniteData<ResponseBody<Paths, Path>, PageParam>,
@@ -113,7 +106,7 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     initialPageParam: PageParam;
     select?: (data: InfiniteData<ResponseBody<Paths, Path>, PageParam>) => Data;
   } & Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">) {
-    return createInfiniteQueryOptions({
+    return buildInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { params, searchParams }),
       queryFn: ({ pageParam }) =>
         api.get(path, {
@@ -130,5 +123,8 @@ export function createQuery<Paths extends object>(api: Client<Paths>) {
     });
   }
 
-  return { options, suspenseOptions, infiniteOptions, keyOf };
+  return Object.assign(queryOptions, {
+    suspense: suspenseQueryOptions,
+    infinite: infiniteQueryOptions,
+  });
 }

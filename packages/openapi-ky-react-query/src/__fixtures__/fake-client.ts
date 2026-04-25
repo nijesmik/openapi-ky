@@ -40,7 +40,8 @@ export function createFakeClient<Paths extends object, M extends string>(
  * Fakes the callable body of `Client<Paths>` (`api(path, options)`).
  *
  * Use this for tests of wrappers that call `api(...)` directly, such as
- * `createMutationOptions` after the callable migration.
+ * `createMutationOptions` after the callable migration. Mock access goes
+ * through the {@link getCallableMock} helper.
  */
 export function createFakeCallableClient<Paths extends object>(
   returnValue: unknown,

@@ -73,6 +73,7 @@ export class Client<Paths extends object> {
         if (!response) {
           return;
         }
+        // Patch native `Response.json()` to match ky's chained `.json()` behavior on empty bodies (returns `""` instead of throwing).
         const parseJson = response.json.bind(response);
         response.json = async <J = T>(): Promise<J> => {
           const text = await response.clone().text();

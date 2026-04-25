@@ -79,6 +79,20 @@ describe("createQueryOptions", () => {
         searchParams: undefined,
       });
     });
+
+    it("[회귀 테스트] queryFn은 .json()으로 파싱된 본문을 반환한다", async () => {
+      const api = createFakeApi();
+      const queryOptions = createQueryOptions(api);
+
+      const opts = queryOptions({
+        path: "/posts/{postId}",
+        params: { postId: 1 },
+      });
+
+      const queryFn = opts.queryFn;
+      if (typeof queryFn !== "function") throw new Error("expected function queryFn");
+      await expect(queryFn({} as never)).resolves.toEqual({ id: 1, title: "test" });
+    });
   });
 
   describe("infinite query — pageParam spread", () => {

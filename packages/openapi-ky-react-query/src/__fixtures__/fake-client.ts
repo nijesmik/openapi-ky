@@ -13,6 +13,13 @@ import { vi, type Mock } from "vitest";
  * `createQueryOptions`, causing every downstream generic to collapse to
  * `never`. Mock access goes through the separate {@link getMock} helper.
  *
+ * Note: this fake collapses `ResponsePromise`'s asymmetry — both `await mock()`
+ * and `await mock().json()` resolve to `returnValue`. The real client's
+ * `await client.get(...)` resolves to `KyResponse`, not the parsed body.
+ * The wrappers here always chain `.json()` so the simplification is safe, but
+ * any future wrapper that uses `(await api.get(...)).json()` cannot be tested
+ * with this fake.
+ *
  * @param method - Name of the `Client` method to mock (e.g. `"get"`, `"request"`).
  * @param returnValue - Value the mock resolves to on every call.
  */

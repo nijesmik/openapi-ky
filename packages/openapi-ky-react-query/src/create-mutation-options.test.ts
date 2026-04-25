@@ -43,6 +43,16 @@ describe("createMutationOptions", () => {
       expect(getMock(api, "request")).toHaveBeenCalledWith("post", "/posts", variables);
     });
 
+    it("[회귀 테스트] mutationFn은 .json()으로 파싱된 본문을 반환한다", async () => {
+      const api = createFakeApi();
+      const mutationOptions = createMutationOptions(api);
+
+      const opts = mutationOptions({ method: "post", path: "/posts" });
+
+      await expect(
+        opts.mutationFn?.({ json: { title: "Hello" } }, {} as never),
+      ).resolves.toEqual({ id: 1 });
+    });
   });
 
   describe("HTTP method 단축 메서드", () => {
@@ -63,7 +73,7 @@ describe("createMutationOptions", () => {
       expect(getMock(api, "request")).toHaveBeenCalledWith(method, path, variables);
     });
 
-    it("각 단축 메서드는 서로 다른 method를 캡처한다 (클로저 캡처 회귀 가드)", async () => {
+    it("[회귀 테스트] 각 단축 메서드는 서로 다른 method를 캡처한다", async () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
 

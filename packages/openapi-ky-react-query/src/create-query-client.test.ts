@@ -63,7 +63,7 @@ describe("createQueryClient", () => {
       );
     });
 
-    it("QueryClient.setQueryData의 리턴 값을 그대로 전파한다 (체인 단절 회귀 가드)", () => {
+    it("[회귀 테스트] QueryClient.setQueryData의 리턴 값을 그대로 전파한다", () => {
       const sentinel = Symbol("setQueryData result");
       const setSpy = vi
         .spyOn(QueryClient.prototype, "setQueryData")

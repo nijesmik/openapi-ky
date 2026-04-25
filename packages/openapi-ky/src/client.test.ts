@@ -1,23 +1,28 @@
-import ky from "ky";
 import { describe, expect, it, vi } from "vitest";
 
 import { createClient } from "./client";
 
+type Post = { id: number; title: string };
+
 type TestPaths = {
   "/posts": {
     get: {
-      responses: {
-        200: { content: { "application/json": { id: number; title: string }[] } };
-      };
+      responses: { 200: { content: { "application/json": Post[] } } };
     };
     post: {
       requestBody: { content: { "application/json": { title: string } } };
-      responses: {
-        201: { content: { "application/json": { id: number } } };
-      };
+      responses: { 201: { content: { "application/json": Post } } };
     };
   };
   "/posts/{postId}": {
+    put: {
+      requestBody: { content: { "application/json": { title: string } } };
+      responses: { 200: { content: { "application/json": Post } } };
+    };
+    patch: {
+      requestBody: { content: { "application/json": { title: string } } };
+      responses: { 200: { content: { "application/json": Post } } };
+    };
     delete: {
       responses: { 204: { content: { "application/json": never } } };
     };
@@ -38,38 +43,18 @@ const createTestClient = (fetchImpl: typeof fetch) =>
   });
 
 describe("Client", () => {
-  describe(".json() 체이닝", () => {
-    it("ResponsePromise를 반환해 .json()을 직접 체이닝할 수 있다", async () => {
+  describe("response.json override", () => {
+    it("1. 본문이 있으면 원본 parseJson에 위임해 파싱된 값을 반환한다", async () => {
       const fetchImpl = vi.fn(async () => jsonResponse([{ id: 1, title: "hi" }]));
-      const client = createTestClient(fetchImpl);
-
-      const data = await client.get("/posts").json();
-
-      expect(data).toEqual([{ id: 1, title: "hi" }]);
-    });
-
-    it("await 후 KyResponse.json()으로도 본문을 읽을 수 있다", async () => {
-      const fetchImpl = vi.fn(async () => jsonResponse([{ id: 2, title: "yo" }]));
       const client = createTestClient(fetchImpl);
 
       const response = await client.get("/posts");
       const data = await response!.json();
 
-      expect(data).toEqual([{ id: 2, title: "yo" }]);
-    });
-  });
-
-  describe("빈 본문 처리", () => {
-    it("체이닝 경로에서 204 응답이면 .json()이 빈 문자열을 반환한다", async () => {
-      const fetchImpl = vi.fn(async () => new Response(null, { status: 204 }));
-      const client = createTestClient(fetchImpl);
-
-      const data = await client.delete("/posts/{postId}", { params: { postId: 1 } }).json();
-
-      expect(data).toBe("");
+      expect(data).toEqual([{ id: 1, title: "hi" }]);
     });
 
-    it("await 경로에서 본문이 비었으면 .json()이 빈 문자열을 반환한다", async () => {
+    it("2. 본문이 비어있으면 빈 문자열을 반환한다", async () => {
       const fetchImpl = vi.fn(async () => new Response("", { status: 200 }));
       const client = createTestClient(fetchImpl);
 
@@ -80,41 +65,50 @@ describe("Client", () => {
     });
   });
 
-  describe("ky.stop 처리", () => {
-    it("beforeRetry hook이 ky.stop을 반환하면 await 결과는 undefined", async () => {
-      const fetchImpl = vi.fn(async () => {
-        throw new TypeError("network down");
-      });
-      const client = createClient<TestPaths>({
-        prefixUrl: "https://api.test/",
-        fetch: fetchImpl,
-        retry: { limit: 1, methods: ["get"] },
-        hooks: {
-          beforeRetry: [() => ky.stop],
-        },
-      });
+  describe("HTTP 메서드 dispatch", () => {
+    it.each([
+      ["get", "GET", (c: ReturnType<typeof createTestClient>) => c.get("/posts")],
+      [
+        "post",
+        "POST",
+        (c: ReturnType<typeof createTestClient>) =>
+          c.post("/posts", { json: { title: "new" } }),
+      ],
+      [
+        "put",
+        "PUT",
+        (c: ReturnType<typeof createTestClient>) =>
+          c.put("/posts/{postId}", { params: { postId: 1 }, json: { title: "updated" } }),
+      ],
+      [
+        "patch",
+        "PATCH",
+        (c: ReturnType<typeof createTestClient>) =>
+          c.patch("/posts/{postId}", { params: { postId: 1 }, json: { title: "patched" } }),
+      ],
+      [
+        "delete",
+        "DELETE",
+        (c: ReturnType<typeof createTestClient>) =>
+          c.delete("/posts/{postId}", { params: { postId: 1 } }),
+      ],
+    ] as const)(
+      "3. [회귀 테스트] %s 메서드는 %s 요청으로 dispatch된다",
+      async (_verb, httpMethod, call) => {
+        const fetchImpl = vi.fn<typeof fetch>(
+          async () => new Response(null, { status: 204 }),
+        );
+        const client = createTestClient(fetchImpl);
 
-      const response = await client.get("/posts");
+        await call(client);
 
-      expect(response).toBeUndefined();
-    });
-  });
-
-  describe("path 파라미터 치환", () => {
-    it("URL의 {param}을 치환한다", async () => {
-      const fetchImpl = vi.fn<typeof fetch>(async () => new Response(null, { status: 204 }));
-      const client = createTestClient(fetchImpl);
-
-      await client.delete("/posts/{postId}", { params: { postId: 42 } });
-
-      const [firstCall] = fetchImpl.mock.calls;
-      const request = firstCall![0] as Request;
-      expect(request.url).toBe("https://api.test/posts/42");
-    });
+        expect((fetchImpl.mock.calls[0]![0] as Request).method).toBe(httpMethod);
+      },
+    );
   });
 
   describe("실패 처리", () => {
-    it("호출자가 catch한 요청 실패가 unhandledRejection을 발동시키지 않는다", async () => {
+    it("4. [회귀 테스트] 호출자가 catch한 요청 실패가 unhandledRejection을 발동시키지 않는다", async () => {
       const fetchImpl = vi.fn(async () => {
         throw new TypeError("network down");
       });

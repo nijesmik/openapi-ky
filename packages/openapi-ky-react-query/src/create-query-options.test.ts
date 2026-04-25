@@ -2,7 +2,7 @@ import { skipToken } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 
 import { createQueryOptions } from "./create-query-options";
-import { createFakeClient, getMock } from "./lib/__tests__/fake-client";
+import { createFakeClient, getMock } from "./__fixtures__/fake-client";
 
 type TestPaths = {
   "/posts": {

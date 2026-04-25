@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMutationOptions } from "./create-mutation-options";
-import { createFakeClient, getMock } from "./lib/__tests__/fake-client";
+import { createFakeClient, getMock } from "./__fixtures__/fake-client";
 
 type TestPaths = {
   "/posts": {

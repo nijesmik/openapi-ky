@@ -71,4 +71,46 @@ describe("buildQueryKey", () => {
   it("options가 undefined이면 [path]를 반환한다", () => {
     expect(buildQueryKey("/users", undefined)).toEqual(["/users"]);
   });
+
+  it("method가 'get'이면 queryKey에 포함하지 않는다", () => {
+    expect(buildQueryKey("/users", { method: "get" })).toEqual(["/users"]);
+  });
+
+  it("method 'get'은 params와 함께 있을 때도 queryKey에 포함되지 않는다", () => {
+    expect(
+      buildQueryKey("/users/{id}", { method: "get", params: { id: 1 } }),
+    ).toEqual(["/users/{id}", { id: 1 }]);
+  });
+
+  it("비-GET method는 path 다음 두 번째 요소로 포함한다", () => {
+    expect(buildQueryKey("/search", { method: "post" })).toEqual([
+      "/search",
+      "post",
+    ]);
+  });
+
+  it("method + params는 [path, method, params] 순서로 포함한다", () => {
+    expect(
+      buildQueryKey("/users/{id}", { method: "post", params: { id: 1 } }),
+    ).toEqual(["/users/{id}", "post", { id: 1 }]);
+  });
+
+  it("method + searchParams는 [path, method, searchParams] 순서로 포함한다", () => {
+    expect(
+      buildQueryKey("/search", {
+        method: "post",
+        searchParams: { sort: "name" },
+      }),
+    ).toEqual(["/search", "post", "sort=name"]);
+  });
+
+  it("method + params + searchParams는 [path, method, params, searchParams] 순서로 포함한다", () => {
+    expect(
+      buildQueryKey("/users/{id}", {
+        method: "post",
+        params: { id: 1 },
+        searchParams: { include: "posts" },
+      }),
+    ).toEqual(["/users/{id}", "post", { id: 1 }, "include=posts"]);
+  });
 });

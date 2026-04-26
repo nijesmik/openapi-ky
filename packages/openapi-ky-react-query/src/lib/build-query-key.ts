@@ -1,13 +1,16 @@
-import type { Params } from "@nijesmik/openapi-ky";
-import type { Options as KyOptions } from "ky";
+import type { HttpMethod, Params, SearchParams } from "@nijesmik/openapi-ky";
 
 type QueryKey = (string | Params)[];
 
 export function buildQueryKey(
   path: string,
-  options?: { params?: Params; searchParams?: KyOptions["searchParams"] },
+  options?: {
+    method?: HttpMethod;
+    params?: Params;
+    searchParams?: SearchParams;
+  },
 ): Readonly<QueryKey> {
-  const { params, searchParams } = options ?? {};
+  const { method, params, searchParams } = options ?? {};
 
   const normalizedSearchParams = searchParams && new URLSearchParams(searchParams as string);
   if (normalizedSearchParams) {
@@ -15,6 +18,10 @@ export function buildQueryKey(
   }
 
   const key: QueryKey = [path];
+
+  if (method && method !== "get") {
+    key.push(method);
+  }
 
   const hasParams = params && Object.keys(params).length > 0;
   if (hasParams) {

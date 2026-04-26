@@ -6,20 +6,14 @@ import type {
   ResponseObjectMap,
   SuccessResponse,
 } from "openapi-typescript-helpers";
-import type { Options as KyOptions } from "ky";
 
 export type Params = Record<string, boolean | number | string>;
 
-export type Options<
+export type PathsFor<Paths extends object, Method extends HttpMethod> = PathsWithMethod<
   Paths,
-  Path extends keyof Paths,
-  Method extends HttpMethod = "get",
-> = Omit<KyOptions, "json" | "method"> & {
-  method?: Method;
-  params?: Params;
-} & ([RequestBody<Paths, Path, Method>] extends [never | undefined]
-    ? unknown
-    : { json: RequestBody<Paths, Path, Method> });
+  Method
+> &
+  string;
 
 export type RequestBody<
   Paths,
@@ -34,9 +28,3 @@ export type ResponseBody<
 > = SuccessResponse<
   Extract<ResponseObjectMap<FilterKeys<Paths[Path], Method>>, Record<number | string, unknown>>
 >;
-
-export type PathsFor<Paths extends object, Method extends HttpMethod> = PathsWithMethod<
-  Paths,
-  Method
-> &
-  string;

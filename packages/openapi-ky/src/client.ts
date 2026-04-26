@@ -5,7 +5,9 @@ import type {
 } from "ky";
 import ky from "ky";
 
-import type { Options, Params, PathsFor, ResponseBody } from "./types";
+import type { Params, PathsFor, ResponseBody } from "./types/common";
+import type { Options } from "./types/options";
+import type { Fetcher } from "./types/shortcut";
 import { buildUrl } from "./lib/build-url";
 
 export interface Client<
@@ -37,26 +39,11 @@ export interface Client<
     options: Options<Paths, Path, Method> & { method: Method },
   ): ResponsePromise<ResponseBody<Paths, Path, Method>>;
 
-  get<Path extends PathsFor<Paths, "get">>(
-    path: Path,
-    options?: Options<Paths, Path, "get">,
-  ): ResponsePromise<ResponseBody<Paths, Path, "get">>;
-  post<Path extends PathsFor<Paths, "post">>(
-    path: Path,
-    options?: Options<Paths, Path, "post">,
-  ): ResponsePromise<ResponseBody<Paths, Path, "post">>;
-  put<Path extends PathsFor<Paths, "put">>(
-    path: Path,
-    options?: Options<Paths, Path, "put">,
-  ): ResponsePromise<ResponseBody<Paths, Path, "put">>;
-  patch<Path extends PathsFor<Paths, "patch">>(
-    path: Path,
-    options?: Options<Paths, Path, "patch">,
-  ): ResponsePromise<ResponseBody<Paths, Path, "patch">>;
-  delete<Path extends PathsFor<Paths, "delete">>(
-    path: Path,
-    options?: Options<Paths, Path, "delete">,
-  ): ResponsePromise<ResponseBody<Paths, Path, "delete">>;
+  get: Fetcher<Paths, "get">;
+  post: Fetcher<Paths, "post">;
+  put: Fetcher<Paths, "put">;
+  patch: Fetcher<Paths, "patch">;
+  delete: Fetcher<Paths, "delete">;
 }
 
 export function createClient<

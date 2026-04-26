@@ -29,7 +29,7 @@ type RequestInput<
   method?: Method;
   params?: Params;
   searchParams?: S;
-  kyOptions?: Omit<KyOptions, "json" | "method" | "searchParams">;
+  kyOptions?: KyOptions;
 } & JsonField<Paths, Path, Method>;
 
 export type QueryOptionsParams<

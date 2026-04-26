@@ -1,12 +1,12 @@
 import type {
   HttpMethod,
+  KyOptions,
   Params,
   PathsFor,
   RequestBody,
   ResponseBody,
   SearchParams,
 } from "@nijesmik/openapi-ky";
-import type { Options as KyOptions } from "ky";
 
 import type { UseMutationOptions } from "@tanstack/react-query";
 
@@ -20,5 +20,5 @@ export type MutationOptionsParams<
   path: Path;
   params?: Params;
   searchParams?: SearchParams;
-  kyOptions?: Omit<KyOptions, "json" | "method" | "searchParams">;
+  kyOptions?: KyOptions;
 };

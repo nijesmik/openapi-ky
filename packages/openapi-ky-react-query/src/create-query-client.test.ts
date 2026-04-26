@@ -102,4 +102,52 @@ describe("createQueryClient", () => {
       );
     });
   });
+
+  describe("method 분리 매칭", () => {
+    it("invalidateQueries({ method: 'post', path })는 같은 path의 GET query를 매칭하지 않는다", async () => {
+      type Paths = {
+        "/items": {
+          get: { responses: { 200: { content: { "application/json": never[] } } } };
+          post: {
+            requestBody: { content: { "application/json": { x: string } } };
+            responses: { 200: { content: { "application/json": never[] } } };
+          };
+        };
+      };
+
+      const queryClient = createQueryClient<Paths>();
+      const client = queryClient.getQueryClient();
+
+      // GET cache, POST cache 둘 다 미리 채움.
+      client.setQueryData(["/items"], ["GET-DATA"]);
+      client.setQueryData(["/items", "post"], ["POST-DATA"]);
+
+      await queryClient.invalidateQueries({ method: "post", path: "/items" });
+
+      // POST 캐시는 invalidated, GET은 그대로
+      const getQuery = client.getQueryState(["/items"]);
+      const postQuery = client.getQueryState(["/items", "post"]);
+
+      expect(getQuery?.isInvalidated).toBe(false);
+      expect(postQuery?.isInvalidated).toBe(true);
+    });
+
+    it("invalidateQueries({ path })만 주면 method 미지정으로 GET cache key 매칭", async () => {
+      type Paths = {
+        "/items": {
+          get: { responses: { 200: { content: { "application/json": never[] } } } };
+        };
+      };
+
+      const queryClient = createQueryClient<Paths>();
+      const client = queryClient.getQueryClient();
+
+      client.setQueryData(["/items"], ["GET-DATA"]);
+
+      await queryClient.invalidateQueries({ path: "/items" });
+
+      const getQuery = client.getQueryState(["/items"]);
+      expect(getQuery?.isInvalidated).toBe(true);
+    });
+  });
 });

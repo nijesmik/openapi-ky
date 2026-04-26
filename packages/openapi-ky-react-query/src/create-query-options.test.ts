@@ -2,7 +2,7 @@ import { skipToken } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 
 import { createQueryOptions } from "./create-query-options";
-import { createFakeClient, getMock } from "./__fixtures__/fake-client";
+import { createFakeCallableClient, getCallableMock } from "./__fixtures__/fake-client";
 
 type TestPaths = {
   "/posts": {
@@ -18,7 +18,7 @@ type TestPaths = {
 };
 
 const createFakeApi = () =>
-  createFakeClient<TestPaths, "get">("get", { id: 1, title: "test" });
+  createFakeCallableClient<TestPaths>({ id: 1, title: "test" });
 
 describe("createQueryOptions", () => {
   describe("callable / structure", () => {
@@ -52,7 +52,7 @@ describe("createQueryOptions", () => {
         { postId: 1 },
       ],
     ] as const)(
-      "params가 %s queryFn이 api.get을 호출한다",
+      "params가 %s queryFn이 api를 호출한다",
       async (_label, input, expectedPath, expectedParams) => {
         const api = createFakeApi();
         const queryOptions = createQueryOptions(api);
@@ -64,7 +64,8 @@ describe("createQueryOptions", () => {
         if (typeof queryFn !== "function") throw new Error("expected function queryFn");
         await queryFn({} as never);
 
-        expect(getMock(api, "get")).toHaveBeenCalledWith(expectedPath, {
+        expect(getCallableMock(api)).toHaveBeenCalledWith(expectedPath, {
+          method: undefined,
           params: expectedParams,
           searchParams: undefined,
         });
@@ -100,7 +101,8 @@ describe("createQueryOptions", () => {
 
       await opts.queryFn?.({ pageParam: "abc" } as never);
 
-      expect(getMock(api, "get")).toHaveBeenCalledWith("/posts", {
+      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
+        method: undefined,
         params: undefined,
         searchParams: { size: 10, cursor: "abc" },
       });
@@ -120,7 +122,8 @@ describe("createQueryOptions", () => {
 
       await opts.queryFn?.({ pageParam: 2 } as never);
 
-      expect(getMock(api, "get")).toHaveBeenCalledWith("/posts", {
+      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
+        method: undefined,
         params: undefined,
         searchParams: { size: 10, page: 2 },
       });
@@ -139,7 +142,8 @@ describe("createQueryOptions", () => {
 
       await opts.queryFn?.({ pageParam: "fresh" } as never);
 
-      expect(getMock(api, "get")).toHaveBeenCalledWith("/posts", {
+      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
+        method: undefined,
         params: undefined,
         searchParams: { cursor: "fresh", size: 10 },
       });

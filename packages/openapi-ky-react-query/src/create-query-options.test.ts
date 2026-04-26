@@ -149,4 +149,64 @@ describe("createQueryOptions", () => {
       });
     });
   });
+
+  describe("비-GET method 지원", () => {
+    it("method: 'post'를 명시하면 callable 본체로 dispatch된다", async () => {
+      type PostPaths = {
+        "/search": {
+          post: {
+            requestBody: { content: { "application/json": { criteria: string } } };
+            responses: { 200: { content: { "application/json": { items: number[] } } } };
+          };
+        };
+      };
+      const api = createFakeCallableClient<PostPaths>({ items: [1, 2] });
+      const queryOptions = createQueryOptions(api);
+
+      const opts = queryOptions({
+        method: "post",
+        path: "/search",
+        json: { criteria: "ts" },
+      });
+
+      // queryFn 실행 → callable 본체 호출 형태 검증
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (opts.queryFn as any)?.({} as never);
+
+      const callArgs = getCallableMock(api).mock.calls[0];
+      expect(callArgs?.[0]).toBe("/search");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((callArgs?.[1] as any)?.method).toBe("post");
+    });
+
+    it("method: 'post' query의 queryKey는 [path, 'post']로 생성된다", () => {
+      type PostPaths = {
+        "/search": {
+          post: {
+            requestBody: { content: { "application/json": { criteria: string } } };
+            responses: { 200: { content: { "application/json": { items: number[] } } } };
+          };
+        };
+      };
+      const api = createFakeCallableClient<PostPaths>({ items: [] });
+      const queryOptions = createQueryOptions(api);
+
+      const opts = queryOptions({
+        method: "post",
+        path: "/search",
+        json: { criteria: "x" },
+      });
+
+      expect(opts.queryKey).toEqual(["/search", "post"]);
+    });
+
+    it("method 미지정 시 queryKey는 method 미포함 (기존 GET 동작 보존)", () => {
+      const api = createFakeCallableClient<TestPaths>([]);
+      const queryOptions = createQueryOptions(api);
+
+      const opts = queryOptions({ path: "/posts" });
+
+      expect(opts.queryKey).toEqual(["/posts"]);
+    });
+  });
 });

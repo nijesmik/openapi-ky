@@ -3,14 +3,9 @@ import type { Options as KyOptions } from "ky";
 
 import type { Params, RequestBody } from "./common";
 
-export type Options<
-  Paths,
-  Path extends keyof Paths,
-  Method extends HttpMethod = "get",
-> = Omit<KyOptions, "json" | "method"> & {
-  method?: Method;
-  params?: Params;
-} & JsonField<Paths, Path, Method>;
+export type MethodField<Method extends HttpMethod> = { method?: Method };
+
+export type ParamsField = { params?: Params };
 
 export type JsonField<
   Paths,
@@ -19,3 +14,12 @@ export type JsonField<
 > = [RequestBody<Paths, Path, Method>] extends [never | undefined]
   ? unknown
   : { json: RequestBody<Paths, Path, Method> };
+
+export type Options<
+  Paths,
+  Path extends keyof Paths,
+  Method extends HttpMethod = "get",
+> = Omit<KyOptions, "json" | "method"> &
+  MethodField<Method> &
+  ParamsField &
+  JsonField<Paths, Path, Method>;

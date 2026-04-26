@@ -1,63 +1,19 @@
 import type { HttpMethod } from "openapi-typescript-helpers";
-import type {
-  Options as KyOptions,
-  ResponsePromise,
-} from "ky";
+import type { Options as KyOptions, ResponsePromise } from "ky";
 import ky from "ky";
 
-import type { Params, PathsFor, ResponseBody } from "./types/common";
-import type { Options } from "./types/options";
-import type { Fetcher } from "./types/shortcut";
+import type { Client } from "./types/client";
+import type { ParamsField } from "./types/options";
 import { buildUrl } from "./lib/build-url";
 
-export interface Client<
-  Paths extends object,
-  DefaultMethod extends HttpMethod = "get",
-> {
-  /**
-   * Issues an HTTP request and returns ky's `ResponsePromise<T>`. The result can
-   * be consumed by chaining a body parser (`.json()`, `.text()`, ...) or by
-   * `await`ing the response and parsing it manually.
-   *
-   * Method resolution priority: `options.method` (call-site) → `defaultOptions.method`
-   * (instance, set via `createClient`) → ky's built-in `"get"` fallback.
-   *
-   * If a `beforeRetry` hook returns `ky.stop`, the resolved value is `undefined`
-   * at runtime, and chained body methods will throw `TypeError`. This is an
-   * upstream ky limitation — use the `await` pattern with a `null`/`undefined`
-   * guard if you rely on `ky.stop`.
-   */
-  <Path extends PathsFor<Paths, DefaultMethod>>(
-    path: Path,
-    options?: Options<Paths, Path, DefaultMethod>,
-  ): ResponsePromise<ResponseBody<Paths, Path, DefaultMethod>>;
-  <
-    Method extends HttpMethod,
-    Path extends PathsFor<Paths, Method>,
-  >(
-    path: Path,
-    options: Options<Paths, Path, Method> & { method: Method },
-  ): ResponsePromise<ResponseBody<Paths, Path, Method>>;
+type _Options = KyOptions & ParamsField;
 
-  get: Fetcher<Paths, "get">;
-  post: Fetcher<Paths, "post">;
-  put: Fetcher<Paths, "put">;
-  patch: Fetcher<Paths, "patch">;
-  delete: Fetcher<Paths, "delete">;
-}
-
-export function createClient<
-  Paths extends object,
-  DefaultMethod extends HttpMethod = "get",
->(
+export function createClient<Paths extends object, DefaultMethod extends HttpMethod = "get">(
   defaultOptions: Omit<KyOptions, "method"> & { method?: DefaultMethod },
 ): Client<Paths, DefaultMethod> {
   const api = ky.create(defaultOptions);
 
-  const request = (
-    path: string,
-    options: KyOptions & { params?: Params } = {},
-  ): ResponsePromise => {
+  const request = (path: string, options: _Options = {}): ResponsePromise => {
     const { params, ...kyOptions } = options;
     const url = buildUrl(path, params);
     const promise = api(url, kyOptions);
@@ -87,15 +43,11 @@ export function createClient<
   };
 
   return Object.assign(request, {
-    get: (path: string, options: KyOptions & { params?: Params } = {}) =>
-      request(path, { ...options, method: "get" }),
-    post: (path: string, options: KyOptions & { params?: Params } = {}) =>
-      request(path, { ...options, method: "post" }),
-    put: (path: string, options: KyOptions & { params?: Params } = {}) =>
-      request(path, { ...options, method: "put" }),
-    patch: (path: string, options: KyOptions & { params?: Params } = {}) =>
-      request(path, { ...options, method: "patch" }),
-    delete: (path: string, options: KyOptions & { params?: Params } = {}) =>
+    get: (path: string, options: _Options = {}) => request(path, { ...options, method: "get" }),
+    post: (path: string, options: _Options = {}) => request(path, { ...options, method: "post" }),
+    put: (path: string, options: _Options = {}) => request(path, { ...options, method: "put" }),
+    patch: (path: string, options: _Options = {}) => request(path, { ...options, method: "patch" }),
+    delete: (path: string, options: _Options = {}) =>
       request(path, { ...options, method: "delete" }),
   }) as unknown as Client<Paths, DefaultMethod>;
 }

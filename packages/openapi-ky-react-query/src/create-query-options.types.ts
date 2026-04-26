@@ -1,4 +1,4 @@
-import type { Params, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Params, PathsFor, ResponseBody, SearchParams } from "@nijesmik/openapi-ky";
 import type { Options as KyOptions } from "ky";
 
 import type { InfiniteData } from "@tanstack/react-query";
@@ -11,11 +11,11 @@ type RequestInput<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
   PathParams = Params,
-  SearchParams = KyOptions["searchParams"],
+  S extends SearchParams = SearchParams,
 > = {
   path: Path;
   params?: PathParams;
-  searchParams?: SearchParams;
+  searchParams?: S;
   kyOptions?: Omit<KyOptions, "json" | "method" | "searchParams">;
 };
 

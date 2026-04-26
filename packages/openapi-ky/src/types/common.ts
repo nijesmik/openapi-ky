@@ -6,8 +6,11 @@ import type {
   ResponseObjectMap,
   SuccessResponse,
 } from "openapi-typescript-helpers";
+import type { Options as KyOptions } from "ky";
 
 export type Params = Record<string, boolean | number | string>;
+
+export type SearchParams = NonNullable<KyOptions["searchParams"]>;
 
 export type PathsFor<Paths extends object, Method extends HttpMethod> = PathsWithMethod<
   Paths,

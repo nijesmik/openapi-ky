@@ -1,10 +1,4 @@
-import type {
-  HttpMethod,
-  Params,
-  PathsFor,
-  ResponseBody,
-  SearchParams,
-} from "@nijesmik/openapi-ky";
+import type { HttpMethod, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
   isServer,
@@ -16,6 +10,7 @@ import {
 } from "@tanstack/react-query";
 
 import { buildQueryKey } from "./lib/build-query-key";
+import type { QueryKeyOptions } from "./types/client";
 
 export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
   let browserQueryClient: QueryClient | undefined;
@@ -26,30 +21,21 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     return browserQueryClient;
   }
 
-  function getQueryKey<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
-  >(
+  function getQueryKey<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">(
     path: Path,
-    options?: { method?: Method; params?: Params; searchParams?: SearchParams },
+    options?: QueryKeyOptions<Method>,
   ) {
     return buildQueryKey(path, options);
   }
 
-  function setQueryData<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
-  >({
+  function setQueryData<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">({
     method,
     path,
     params,
     searchParams,
     updater,
-  }: {
-    method?: Method;
+  }: QueryKeyOptions<Method> & {
     path: Path;
-    params?: Params;
-    searchParams?: SearchParams;
     updater: Updater<
       ResponseBody<Paths, Path, Method> | undefined,
       ResponseBody<Paths, Path, Method> | undefined
@@ -73,13 +59,11 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     cancelRefetch,
     throwOnError,
     ...filters
-  }: {
-    method?: Method;
-    path: Path;
-    params?: Params;
-    searchParams?: SearchParams;
-  } & Omit<InvalidateQueryFilters, "queryKey"> &
-    InvalidateOptions) {
+  }: Omit<InvalidateQueryFilters, "queryKey"> &
+    QueryKeyOptions<Method> &
+    InvalidateOptions & {
+      path: Path;
+    }) {
     return getQueryClient().invalidateQueries(
       {
         queryKey: getQueryKey(path, { method, params, searchParams }),

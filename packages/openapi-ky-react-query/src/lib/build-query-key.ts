@@ -1,14 +1,12 @@
-import type { HttpMethod, Params, SearchParams } from "@nijesmik/openapi-ky";
+import type { Params } from "@nijesmik/openapi-ky";
+
+import type { QueryKeyOptions } from "@/types/client";
 
 type QueryKey = (string | Params)[];
 
 export function buildQueryKey(
   path: string,
-  options?: {
-    method?: HttpMethod;
-    params?: Params;
-    searchParams?: SearchParams;
-  },
+  options?: QueryKeyOptions,
 ): Readonly<QueryKey> {
   const { method, params, searchParams } = options ?? {};
 

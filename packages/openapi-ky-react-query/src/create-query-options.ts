@@ -26,15 +26,24 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Path extends PathsFor<Paths, Method>,
     Method extends HttpMethod = "get",
     Data = ResponseBody<Paths, Path, Method>,
-  >({
-    path,
-    method,
-    params,
-    searchParams,
-    kyOptions,
-    select,
-    ...queryOptions
-  }: QueryOptionsParams<Paths, Path, Method, Data>) {
+  >(
+    options: QueryOptionsParams<Paths, Path, Method, Data>,
+  ) {
+    const {
+      path,
+      method,
+      params,
+      searchParams,
+      kyOptions,
+      select,
+      ...rest
+    } = options;
+    // json은 body method일 때만 존재 (JsonField intersection). rest에서 추출 후 분리.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const json = (rest as any).json;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { json: _json, ...queryOptions } = rest as any;
+
     // generic context의 (Path, Method)가 Client callable의 명시-method 오버로드 제약을 동치로
     // 만족시키지만 TS가 증명 못함. mutation과 동일 boundary cast 패턴 (단일 시그니처 alias).
     // method가 optional인 점만 mutation과 다름 — query는 GET 기본 지원.
@@ -44,11 +53,13 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     ) => ResponsePromise<ResponseBody<Paths, Path, Method>>;
 
     if (params !== null) {
-      const requestOptions = { method, params, searchParams, ...kyOptions } as Options<
-        Paths,
-        Path,
-        Method
-      > & { method?: Method };
+      const requestOptions = {
+        method,
+        params,
+        searchParams,
+        ...kyOptions,
+        json,
+      } as Options<Paths, Path, Method> & { method?: Method };
 
       return buildQueryOptions({
         queryKey: buildQueryKey(path, { method, params, searchParams }),
@@ -68,25 +79,35 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Path extends PathsFor<Paths, Method>,
     Method extends HttpMethod = "get",
     Data = ResponseBody<Paths, Path, Method>,
-  >({
-    path,
-    method,
-    params,
-    searchParams,
-    kyOptions,
-    select,
-    ...queryOptions
-  }: SuspenseQueryOptionsParams<Paths, Path, Method, Data>) {
+  >(
+    options: SuspenseQueryOptionsParams<Paths, Path, Method, Data>,
+  ) {
+    const {
+      path,
+      method,
+      params,
+      searchParams,
+      kyOptions,
+      select,
+      ...rest
+    } = options;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const json = (rest as any).json;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { json: _json, ...queryOptions } = rest as any;
+
     const call = api as unknown as (
       p: Path,
       o: Options<Paths, Path, Method> & { method?: Method },
     ) => ResponsePromise<ResponseBody<Paths, Path, Method>>;
 
-    const requestOptions = { method, params, searchParams, ...kyOptions } as Options<
-      Paths,
-      Path,
-      Method
-    > & { method?: Method };
+    const requestOptions = {
+      method,
+      params,
+      searchParams,
+      ...kyOptions,
+      json,
+    } as Options<Paths, Path, Method> & { method?: Method };
 
     return buildQueryOptions({
       queryKey: buildQueryKey(path, { method, params, searchParams }),
@@ -101,17 +122,25 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Method extends HttpMethod = "get",
     PageParam extends string | number | undefined = string | undefined,
     Data = InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>,
-  >({
-    path,
-    method,
-    params,
-    searchParams,
-    pageParamKey = "cursor",
-    kyOptions,
-    initialPageParam,
-    select,
-    ...queryOptions
-  }: InfiniteQueryOptionsParams<Paths, Path, Method, PageParam, Data>) {
+  >(
+    options: InfiniteQueryOptionsParams<Paths, Path, Method, PageParam, Data>,
+  ) {
+    const {
+      path,
+      method,
+      params,
+      searchParams,
+      pageParamKey = "cursor",
+      kyOptions,
+      initialPageParam,
+      select,
+      ...rest
+    } = options;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const json = (rest as any).json;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { json: _json, ...queryOptions } = rest as any;
+
     const call = api as unknown as (
       p: Path,
       o: Options<Paths, Path, Method> & { method?: Method },
@@ -128,6 +157,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
             ...searchParams,
             [pageParamKey]: pageParam as PageParam,
           },
+          json,
         } as Options<Paths, Path, Method> & { method?: Method }).json(),
       initialPageParam,
       select,

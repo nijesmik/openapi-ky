@@ -177,6 +177,8 @@ describe("createQueryOptions", () => {
       expect(callArgs?.[0]).toBe("/search");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((callArgs?.[1] as any)?.method).toBe("post");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((callArgs?.[1] as any)?.json).toEqual({ criteria: "ts" });
     });
 
     it("method: 'post' query의 queryKey는 [path, 'post']로 생성된다", () => {

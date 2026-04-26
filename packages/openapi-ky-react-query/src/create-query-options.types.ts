@@ -27,15 +27,10 @@ export type QueryOptionsParams<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
   Data,
-  QueryOptions extends UseQueryOptions<
-    ResponseBody<Paths, Path>,
-    Error,
-    Data
-  > = UseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
 > = Omit<RequestInput<Paths, Path>, "params"> & {
   params?: Params | null;
   select?: (data: ResponseBody<Paths, Path>) => Data;
-} & Omit<QueryOptions, "queryFn" | "queryKey" | "select">;
+} & Omit<UseQueryOptions<ResponseBody<Paths, Path>, Error, Data>, "queryFn" | "queryKey" | "select">;
 
 export type SuspenseQueryOptionsParams<
   Paths extends object,
@@ -52,16 +47,12 @@ export type InfiniteQueryOptionsParams<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
   PageParam,
-  Data,
-  InfiniteQueryOptions extends UseInfiniteQueryOptions<
-    ResponseBody<Paths, Path>,
-    Error,
-    Data,
-    QueryKey,
-    PageParam
-  > = UseInfiniteQueryOptions<ResponseBody<Paths, Path>, Error, Data, QueryKey, PageParam>,
+  Data = InfiniteData<ResponseBody<Paths, Path>, PageParam>,
 > = RequestInput<Paths, Path, Record<string, string | number | boolean | undefined>> & {
   pageParamKey?: string;
   initialPageParam: PageParam;
   select?: (data: InfiniteData<ResponseBody<Paths, Path>, PageParam>) => Data;
-} & Omit<InfiniteQueryOptions, "queryFn" | "queryKey" | "initialPageParam" | "select">;
+} & Omit<
+    UseInfiniteQueryOptions<ResponseBody<Paths, Path>, Error, Data, QueryKey, PageParam>,
+    "queryFn" | "queryKey" | "initialPageParam" | "select"
+  >;

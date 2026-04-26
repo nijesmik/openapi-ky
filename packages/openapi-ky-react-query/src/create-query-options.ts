@@ -5,31 +5,24 @@ import {
   queryOptions as buildQueryOptions,
   skipToken,
   type InfiniteData,
-  type UseInfiniteQueryOptions,
-  type UseQueryOptions,
 } from "@tanstack/react-query";
 
 import type {
   InfiniteQueryOptionsParams,
-  QueryKey,
   QueryOptionsParams,
   SuspenseQueryOptionsParams,
 } from "./create-query-options.types";
 import { buildQueryKey } from "./lib/build-query-key";
 
 export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
-  function queryOptions<
-    Path extends PathsFor<Paths, "get">,
-    Data,
-    QueryOptions extends UseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
-  >({
+  function queryOptions<Path extends PathsFor<Paths, "get">, Data>({
     path,
     params,
     searchParams,
     kyOptions,
     select,
     ...queryOptions
-  }: QueryOptionsParams<Paths, Path, Data, QueryOptions>) {
+  }: QueryOptionsParams<Paths, Path, Data>) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOptions };
 
@@ -69,13 +62,6 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Path extends PathsFor<Paths, "get">,
     PageParam extends string | number | undefined = string | undefined,
     Data = InfiniteData<ResponseBody<Paths, Path>, PageParam>,
-    InfiniteQueryOptions extends UseInfiniteQueryOptions<
-      ResponseBody<Paths, Path>,
-      Error,
-      Data,
-      QueryKey,
-      PageParam
-    > = UseInfiniteQueryOptions<ResponseBody<Paths, Path>, Error, Data, QueryKey, PageParam>,
   >({
     path,
     params,
@@ -85,7 +71,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     initialPageParam,
     select,
     ...queryOptions
-  }: InfiniteQueryOptionsParams<Paths, Path, PageParam, Data, InfiniteQueryOptions>) {
+  }: InfiniteQueryOptionsParams<Paths, Path, PageParam, Data>) {
     return buildInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { params, searchParams }),
       queryFn: ({ pageParam }) =>

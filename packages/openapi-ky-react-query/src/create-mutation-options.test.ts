@@ -40,12 +40,12 @@ describe("createMutationOptions", () => {
       const mutationOptions = createMutationOptions(api);
 
       const opts = mutationOptions({ method: "post", path: "/posts" });
-      const variables = { json: { title: "Hello" } };
-      await opts.mutationFn?.(variables, {} as never);
+      const body = { title: "Hello" };
+      await opts.mutationFn?.(body, {} as never);
 
       expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
-        ...variables,
         method: "post",
+        json: body,
       });
     });
 
@@ -56,7 +56,7 @@ describe("createMutationOptions", () => {
       const opts = mutationOptions({ method: "post", path: "/posts" });
 
       await expect(
-        opts.mutationFn?.({ json: { title: "Hello" } }, {} as never),
+        opts.mutationFn?.({ title: "Hello" }, {} as never),
       ).resolves.toEqual({ id: 1 });
     });
   });
@@ -66,7 +66,6 @@ describe("createMutationOptions", () => {
       ["post", "/posts"],
       ["put", "/posts/{postId}"],
       ["patch", "/posts/{postId}"],
-      ["delete", "/posts/{postId}"],
     ] as const)(
       "%s 단축 메서드는 method='%s'로 client callable을 호출한다",
       async (method, path) => {
@@ -75,12 +74,12 @@ describe("createMutationOptions", () => {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const opts = (mutationOptions[method] as any)({ path });
-        const variables = { json: { title: "x" } };
-        await opts.mutationFn?.(variables, {} as never);
+        const body = { title: "x" };
+        await opts.mutationFn?.(body, {} as never);
 
         expect(getCallableMock(api)).toHaveBeenCalledWith(path, {
-          ...variables,
           method,
+          json: body,
         });
       },
     );
@@ -90,19 +89,19 @@ describe("createMutationOptions", () => {
       const mutationOptions = createMutationOptions(api);
 
       await mutationOptions.post({ path: "/posts" }).mutationFn?.(
-        { json: { title: "p" } },
+        { title: "p" },
         {} as never,
       );
       await mutationOptions.put({ path: "/posts/{postId}" }).mutationFn?.(
-        { params: { postId: 1 }, json: { title: "u" } },
+        { title: "u" },
         {} as never,
       );
       await mutationOptions.patch({ path: "/posts/{postId}" }).mutationFn?.(
-        { params: { postId: 1 }, json: { title: "a" } },
+        { title: "a" },
         {} as never,
       );
       await mutationOptions.delete({ path: "/posts/{postId}" }).mutationFn?.(
-        { params: { postId: 1 } },
+        undefined,
         {} as never,
       );
 

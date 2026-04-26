@@ -22,7 +22,10 @@ export type RequestBody<
   Paths,
   Path extends keyof Paths,
   Method extends HttpMethod,
-> = OperationRequestBodyContent<FilterKeys<Paths[Path], Method>>;
+> =
+  OperationRequestBodyContent<FilterKeys<Paths[Path], Method>> extends undefined
+    ? void
+    : OperationRequestBodyContent<FilterKeys<Paths[Path], Method>>;
 
 export type ResponseBody<
   Paths,

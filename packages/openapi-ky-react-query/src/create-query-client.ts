@@ -55,9 +55,9 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
       ResponseBody<Paths, Path, Method> | undefined
     >;
   }) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return getQueryClient().setQueryData<ResponseBody<Paths, Path, Method>>(
       getQueryKey(path, { method, params, searchParams }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       updater as any,
     );
   }

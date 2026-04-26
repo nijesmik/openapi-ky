@@ -29,6 +29,8 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
   >(
     options: QueryOptionsParams<Paths, Path, Method, Data>,
   ) {
+    // json은 JsonField intersection으로 body method에만 존재. 입력 타입을 캐스팅해 conditional을 풀고
+    // 한 번의 destructure로 json을 빼면서 queryOptions(나머지)는 typed 상태 유지 (any 회피).
     const {
       path,
       method,
@@ -36,13 +38,11 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
       searchParams,
       kyOptions,
       select,
-      ...rest
-    } = options;
-    // json은 body method일 때만 존재 (JsonField intersection). rest에서 추출 후 분리.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const json = (rest as any).json;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { json: _json, ...queryOptions } = rest as any;
+      json,
+      ...queryOptions
+    } = options as QueryOptionsParams<Paths, Path, Method, Data> & {
+      json?: ResponseBody<Paths, Path, Method>;
+    };
 
     // generic context의 (Path, Method)가 Client callable의 명시-method 오버로드 제약을 동치로
     // 만족시키지만 TS가 증명 못함. mutation과 동일 boundary cast 패턴 (단일 시그니처 alias).
@@ -89,12 +89,11 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
       searchParams,
       kyOptions,
       select,
-      ...rest
-    } = options;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const json = (rest as any).json;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { json: _json, ...queryOptions } = rest as any;
+      json,
+      ...queryOptions
+    } = options as SuspenseQueryOptionsParams<Paths, Path, Method, Data> & {
+      json?: ResponseBody<Paths, Path, Method>;
+    };
 
     const call = api as unknown as (
       p: Path,
@@ -134,12 +133,11 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
       kyOptions,
       initialPageParam,
       select,
-      ...rest
-    } = options;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const json = (rest as any).json;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { json: _json, ...queryOptions } = rest as any;
+      json,
+      ...queryOptions
+    } = options as InfiniteQueryOptionsParams<Paths, Path, Method, PageParam, Data> & {
+      json?: ResponseBody<Paths, Path, Method>;
+    };
 
     const call = api as unknown as (
       p: Path,

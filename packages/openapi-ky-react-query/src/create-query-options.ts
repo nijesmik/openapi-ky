@@ -1,4 +1,4 @@
-import type { Client, Params, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Client, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as buildInfiniteQueryOptions,
@@ -14,6 +14,7 @@ import type {
   InfiniteQueryOptionsParams,
   QueryKey,
   QueryOptionsParams,
+  SuspenseQueryOptionsParams,
 } from "./create-query-options.types";
 import { buildQueryKey } from "./lib/build-query-key";
 
@@ -29,7 +30,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     kyOptions,
     select,
     ...queryOptions
-  }: QueryOptionsParams<Paths, Path, Data, Params | null> &
+  }: QueryOptionsParams<Paths, Path, Data> &
     Omit<QueryOptions, "queryFn" | "queryKey" | "select">) {
     if (params !== null) {
       const requestOptions = { params, searchParams, ...kyOptions };
@@ -55,7 +56,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     kyOptions,
     select,
     ...queryOptions
-  }: QueryOptionsParams<Paths, Path, Data> &
+  }: SuspenseQueryOptionsParams<Paths, Path, Data> &
     Omit<
       UseSuspenseQueryOptions<ResponseBody<Paths, Path>, Error, Data>,
       "queryFn" | "queryKey" | "select"

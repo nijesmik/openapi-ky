@@ -10,11 +10,10 @@ export type QueryKey = ReturnType<typeof buildQueryKey>;
 type RequestInput<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
-  PathParams = Params,
   S extends SearchParams = SearchParams,
 > = {
   path: Path;
-  params?: PathParams;
+  params?: Params;
   searchParams?: S;
   kyOptions?: Omit<KyOptions, "json" | "method" | "searchParams">;
 };
@@ -23,8 +22,16 @@ export type QueryOptionsParams<
   Paths extends object,
   Path extends PathsFor<Paths, "get">,
   Data,
-  PathParams = Params,
-> = RequestInput<Paths, Path, PathParams> & {
+> = Omit<RequestInput<Paths, Path>, "params"> & {
+  params?: Params | null;
+  select?: (data: ResponseBody<Paths, Path>) => Data;
+};
+
+export type SuspenseQueryOptionsParams<
+  Paths extends object,
+  Path extends PathsFor<Paths, "get">,
+  Data,
+> = RequestInput<Paths, Path> & {
   select?: (data: ResponseBody<Paths, Path>) => Data;
 };
 
@@ -33,12 +40,7 @@ export type InfiniteQueryOptionsParams<
   Path extends PathsFor<Paths, "get">,
   PageParam,
   Data,
-> = RequestInput<
-  Paths,
-  Path,
-  Params,
-  Record<string, string | number | boolean | undefined>
-> & {
+> = RequestInput<Paths, Path, Record<string, string | number | boolean | undefined>> & {
   pageParamKey?: string;
   initialPageParam: PageParam;
   select?: (data: InfiniteData<ResponseBody<Paths, Path>, PageParam>) => Data;

@@ -15,7 +15,7 @@ import type {
   UseSuspenseQueryOptions,
 } from "@tanstack/react-query";
 
-import type { buildQueryKey } from "./lib/build-query-key";
+import type { buildQueryKey } from "../lib/build-query-key";
 
 export type QueryKey = ReturnType<typeof buildQueryKey>;
 

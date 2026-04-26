@@ -2,7 +2,7 @@ import type { Client, HttpMethod, PathsFor, RequestBody } from "@nijesmik/openap
 
 import { mutationOptions as buildMutationOptions } from "@tanstack/react-query";
 
-import type { MutationOptionsParams } from "./create-mutation-options.types";
+import type { MutationOptionsParams } from "./types/mutation";
 
 export function createMutationOptions<Paths extends object>(api: Client<Paths>) {
   function mutationOptions<

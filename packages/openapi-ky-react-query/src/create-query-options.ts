@@ -18,7 +18,7 @@ import type {
   InfiniteQueryOptionsParams,
   QueryOptionsParams,
   SuspenseQueryOptionsParams,
-} from "./create-query-options.types";
+} from "./types/query";
 import { buildQueryKey } from "./lib/build-query-key";
 
 export function createQueryOptions<Paths extends object>(api: Client<Paths>) {

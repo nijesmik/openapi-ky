@@ -1,5 +1,10 @@
-import type { Params, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
-import type { Options as KyOptions } from "ky";
+import type {
+  HttpMethod,
+  Params,
+  PathsFor,
+  ResponseBody,
+  SearchParams,
+} from "@nijesmik/openapi-ky";
 
 import {
   isServer,
@@ -21,31 +26,47 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     return browserQueryClient;
   }
 
-  function getQueryKey<Path extends PathsFor<Paths, "get">>(
+  function getQueryKey<
+    Path extends PathsFor<Paths, Method>,
+    Method extends HttpMethod = "get",
+  >(
     path: Path,
-    options?: { params?: Params; searchParams?: KyOptions["searchParams"] },
+    options?: { method?: Method; params?: Params; searchParams?: SearchParams },
   ) {
     return buildQueryKey(path, options);
   }
 
-  function setQueryData<Path extends PathsFor<Paths, "get">>({
+  function setQueryData<
+    Path extends PathsFor<Paths, Method>,
+    Method extends HttpMethod = "get",
+  >({
+    method,
     path,
     params,
     searchParams,
     updater,
   }: {
+    method?: Method;
     path: Path;
     params?: Params;
-    searchParams?: KyOptions["searchParams"];
-    updater: Updater<ResponseBody<Paths, Path> | undefined, ResponseBody<Paths, Path> | undefined>;
+    searchParams?: SearchParams;
+    updater: Updater<
+      ResponseBody<Paths, Path, Method> | undefined,
+      ResponseBody<Paths, Path, Method> | undefined
+    >;
   }) {
-    return getQueryClient().setQueryData<ResponseBody<Paths, Path>>(
-      getQueryKey(path, { params, searchParams }),
-      updater,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return getQueryClient().setQueryData<ResponseBody<Paths, Path, Method>>(
+      getQueryKey(path, { method, params, searchParams }),
+      updater as any,
     );
   }
 
-  function invalidateQueries<Path extends PathsFor<Paths, "get">>({
+  function invalidateQueries<
+    Path extends PathsFor<Paths, Method>,
+    Method extends HttpMethod = "get",
+  >({
+    method,
     path,
     params,
     searchParams,
@@ -53,14 +74,15 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     throwOnError,
     ...filters
   }: {
+    method?: Method;
     path: Path;
     params?: Params;
-    searchParams?: KyOptions["searchParams"];
+    searchParams?: SearchParams;
   } & Omit<InvalidateQueryFilters, "queryKey"> &
     InvalidateOptions) {
     return getQueryClient().invalidateQueries(
       {
-        queryKey: getQueryKey(path, { params, searchParams }),
+        queryKey: getQueryKey(path, { method, params, searchParams }),
         ...filters,
       },
       { cancelRefetch, throwOnError },

@@ -1,4 +1,4 @@
-import type { Client, HttpMethod, PathsFor, RequestBody, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Client, HttpMethod, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
   infiniteQueryOptions as buildInfiniteQueryOptions,
@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 
 import type {
+  Flat,
   InfiniteQueryOptionsParams,
   QueryOptionsParams,
   SuspenseQueryOptionsParams,
@@ -22,10 +23,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Data = ResponseBody<Paths, Path, Method>,
   >(options: QueryOptionsParams<Paths, Path, Method, Data>) {
     const { path, method, params, searchParams, kyOptions, select, json, ...queryOptions } =
-      options as Omit<QueryOptionsParams<Paths, Path, Method, Data>, "path"> & {
-        path: Path;
-        json?: RequestBody<Paths, Path, Method>;
-      };
+      options as Flat<QueryOptionsParams<Paths, Path, Method, Data>, Paths, Path, Method>;
 
     if (params !== null) {
       return buildQueryOptions({
@@ -58,9 +56,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Data = ResponseBody<Paths, Path, Method>,
   >(options: SuspenseQueryOptionsParams<Paths, Path, Method, Data>) {
     const { path, method, params, searchParams, kyOptions, select, json, ...queryOptions } =
-      options as SuspenseQueryOptionsParams<Paths, Path, Method, Data> & {
-        json?: RequestBody<Paths, Path, Method>;
-      };
+      options as Flat<SuspenseQueryOptionsParams<Paths, Path, Method, Data>, Paths, Path, Method>;
 
     return buildQueryOptions({
       queryKey: buildQueryKey(path, { method, params, searchParams }),
@@ -97,9 +93,12 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
       select,
       json,
       ...queryOptions
-    } = options as InfiniteQueryOptionsParams<Paths, Path, Method, PageParam, Data> & {
-      json?: RequestBody<Paths, Path, Method>;
-    };
+    } = options as Flat<
+      InfiniteQueryOptionsParams<Paths, Path, Method, PageParam, Data>,
+      Paths,
+      Path,
+      Method
+    >;
 
     return buildInfiniteQueryOptions({
       queryKey: buildQueryKey(path, { method, params, searchParams }),

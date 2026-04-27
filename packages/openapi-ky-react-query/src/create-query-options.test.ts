@@ -65,7 +65,7 @@ describe("createQueryOptions", () => {
         await queryFn({} as never);
 
         expect(getCallableMock(api)).toHaveBeenCalledWith(expectedPath, {
-          method: undefined,
+          method: "get",
           params: expectedParams,
           searchParams: undefined,
         });
@@ -102,7 +102,7 @@ describe("createQueryOptions", () => {
       await opts.queryFn?.({ pageParam: "abc" } as never);
 
       expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
-        method: undefined,
+        method: "get",
         params: undefined,
         searchParams: { size: 10, cursor: "abc" },
       });
@@ -123,7 +123,7 @@ describe("createQueryOptions", () => {
       await opts.queryFn?.({ pageParam: 2 } as never);
 
       expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
-        method: undefined,
+        method: "get",
         params: undefined,
         searchParams: { size: 10, page: 2 },
       });
@@ -143,7 +143,7 @@ describe("createQueryOptions", () => {
       await opts.queryFn?.({ pageParam: "fresh" } as never);
 
       expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
-        method: undefined,
+        method: "get",
         params: undefined,
         searchParams: { cursor: "fresh", size: 10 },
       });

@@ -17,13 +17,11 @@
   },
   "peerDependencies": {
     "@nijesmik/openapi-ky": "workspace:*",
-    "@tanstack/react-query": "^5.45.1",
-    "ky": "^1.14.3"
+    "@tanstack/react-query": "^5.45.1"
   },
   "devDependencies": {
     "@nijesmik/openapi-ky": "workspace:*",
     "@tanstack/react-query": "^5.45.1",
-    "ky": "^1.14.3",
     "tsup": "^8.4.0",
     "typescript": "5.9.3"
   }

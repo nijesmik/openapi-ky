@@ -6,11 +6,10 @@ import {
   type InvalidateOptions,
   type InvalidateQueryFilters,
   type QueryClientConfig,
-  type Updater,
 } from "@tanstack/react-query";
 
 import { buildQueryKey } from "./lib/build-query-key";
-import type { QueryKeyOptions } from "./types/client";
+import type { QueryKeyOptions, SetQueryDataUpdater } from "./types/client";
 
 export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
   let browserQueryClient: QueryClient | undefined;
@@ -36,15 +35,11 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     updater,
   }: QueryKeyOptions<Method> & {
     path: Path;
-    updater: Updater<
-      ResponseBody<Paths, Path, Method> | undefined,
-      ResponseBody<Paths, Path, Method> | undefined
-    >;
+    updater: SetQueryDataUpdater<ResponseBody<Paths, Path, Method>>;
   }) {
     return getQueryClient().setQueryData<ResponseBody<Paths, Path, Method>>(
       getQueryKey(path, { method, params, searchParams }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      updater as any,
+      updater,
     );
   }
 

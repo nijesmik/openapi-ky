@@ -13,23 +13,20 @@ import type { Params, RequestBody } from "./common";
  */
 export type KyOptions = Omit<BaseKyOptions, "json" | "method" | "searchParams">;
 
-export type MethodField<Method extends HttpMethod> = { method?: Method };
+export type MethodField<Method extends HttpMethod = HttpMethod> = { method?: Method };
 
 export type ParamsField = { params?: Params };
 
-export type JsonField<
-  Paths,
-  Path extends keyof Paths,
-  Method extends HttpMethod,
-> = [RequestBody<Paths, Path, Method>] extends [never | void]
+export type JsonField<Paths, Path extends keyof Paths, Method extends HttpMethod> = [
+  RequestBody<Paths, Path, Method>,
+] extends [never | void]
   ? unknown
   : { json: RequestBody<Paths, Path, Method> };
 
-export type Options<
-  Paths,
-  Path extends keyof Paths,
-  Method extends HttpMethod = "get",
-> = Omit<BaseKyOptions, "json" | "method"> &
+export type Options<Paths, Path extends keyof Paths, Method extends HttpMethod = "get"> = Omit<
+  BaseKyOptions,
+  "json" | "method"
+> &
   MethodField<Method> &
   ParamsField &
   JsonField<Paths, Path, Method>;

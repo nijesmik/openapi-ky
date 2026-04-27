@@ -23,7 +23,7 @@ export interface Client<Paths extends object, DefaultMethod extends HttpMethod =
     path: Path,
     options?: Options<Paths, Path, DefaultMethod>,
   ): ResponsePromise<ResponseBody<Paths, Path, DefaultMethod>>;
-  <Method extends HttpMethod, Path extends PathsFor<Paths, Method>>(
+  <Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
     path: Path,
     options: Options<Paths, Path, Method> & Required<MethodField<Method>>,
   ): ResponsePromise<ResponseBody<Paths, Path, Method>>;

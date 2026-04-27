@@ -77,22 +77,22 @@ describe("buildQueryKey", () => {
   });
 
   it("method 'get'은 params와 함께 있을 때도 queryKey에 포함되지 않는다", () => {
-    expect(
-      buildQueryKey("/users/{id}", { method: "get", params: { id: 1 } }),
-    ).toEqual(["/users/{id}", { id: 1 }]);
-  });
-
-  it("비-GET method는 path 다음 두 번째 요소로 포함한다", () => {
-    expect(buildQueryKey("/search", { method: "post" })).toEqual([
-      "/search",
-      "post",
+    expect(buildQueryKey("/users/{id}", { method: "get", params: { id: 1 } })).toEqual([
+      "/users/{id}",
+      { id: 1 },
     ]);
   });
 
+  it("비-GET method는 path 다음 두 번째 요소로 포함한다", () => {
+    expect(buildQueryKey("/search", { method: "post" })).toEqual(["/search", "post"]);
+  });
+
   it("method + params는 [path, method, params] 순서로 포함한다", () => {
-    expect(
-      buildQueryKey("/users/{id}", { method: "post", params: { id: 1 } }),
-    ).toEqual(["/users/{id}", "post", { id: 1 }]);
+    expect(buildQueryKey("/users/{id}", { method: "post", params: { id: 1 } })).toEqual([
+      "/users/{id}",
+      "post",
+      { id: 1 },
+    ]);
   });
 
   it("method + searchParams는 [path, method, searchParams] 순서로 포함한다", () => {

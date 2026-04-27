@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMutationOptions } from "./create-mutation-options";
-import {
-  createFakeCallableClient,
-  getCallableMock,
-} from "./__fixtures__/fake-client";
+import { createFakeCallableClient, getCallableMock } from "./__fixtures__/fake-client";
 
 type TestPaths = {
   "/posts": {
@@ -55,9 +52,7 @@ describe("createMutationOptions", () => {
 
       const opts = mutationOptions({ method: "post", path: "/posts" });
 
-      await expect(
-        opts.mutationFn?.({ title: "Hello" }, {} as never),
-      ).resolves.toEqual({ id: 1 });
+      await expect(opts.mutationFn?.({ title: "Hello" }, {} as never)).resolves.toEqual({ id: 1 });
     });
   });
 
@@ -88,22 +83,16 @@ describe("createMutationOptions", () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
 
-      await mutationOptions.post({ path: "/posts" }).mutationFn?.(
-        { title: "p" },
-        {} as never,
-      );
-      await mutationOptions.put({ path: "/posts/{postId}" }).mutationFn?.(
-        { title: "u" },
-        {} as never,
-      );
-      await mutationOptions.patch({ path: "/posts/{postId}" }).mutationFn?.(
-        { title: "a" },
-        {} as never,
-      );
-      await mutationOptions.delete({ path: "/posts/{postId}" }).mutationFn?.(
-        undefined,
-        {} as never,
-      );
+      await mutationOptions.post({ path: "/posts" }).mutationFn?.({ title: "p" }, {} as never);
+      await mutationOptions
+        .put({ path: "/posts/{postId}" })
+        .mutationFn?.({ title: "u" }, {} as never);
+      await mutationOptions
+        .patch({ path: "/posts/{postId}" })
+        .mutationFn?.({ title: "a" }, {} as never);
+      await mutationOptions
+        .delete({ path: "/posts/{postId}" })
+        .mutationFn?.(undefined, {} as never);
 
       const methods = getCallableMock(api).mock.calls.map(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -17,8 +17,7 @@ type TestPaths = {
   };
 };
 
-const createFakeApi = () =>
-  createFakeCallableClient<TestPaths>({ id: 1, title: "test" });
+const createFakeApi = () => createFakeCallableClient<TestPaths>({ id: 1, title: "test" });
 
 describe("createQueryOptions", () => {
   describe("callable / structure", () => {
@@ -30,7 +29,6 @@ describe("createQueryOptions", () => {
       expect(typeof queryOptions.suspense).toBe("function");
       expect(typeof queryOptions.infinite).toBe("function");
     });
-
   });
 
   describe("params: null → skipToken", () => {

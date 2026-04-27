@@ -18,11 +18,7 @@ export type PathsFor<Paths extends object, Method extends HttpMethod> = PathsWit
 > &
   string;
 
-export type RequestBody<
-  Paths,
-  Path extends keyof Paths,
-  Method extends HttpMethod,
-> =
+export type RequestBody<Paths, Path extends keyof Paths, Method extends HttpMethod> =
   OperationRequestBodyContent<FilterKeys<Paths[Path], Method>> extends undefined
     ? void
     : OperationRequestBodyContent<FilterKeys<Paths[Path], Method>>;

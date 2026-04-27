@@ -119,11 +119,12 @@ describe("Client", () => {
 
   describe("인스턴스 method default", () => {
     it("6. [회귀 테스트] 단축 메서드는 defaultOptions.method를 override한다", async () => {
-      const fetchImpl = vi.fn<typeof fetch>(async () =>
-        new Response("[]", {
-          status: 200,
-          headers: { "content-type": "application/json" },
-        }),
+      const fetchImpl = vi.fn<typeof fetch>(
+        async () =>
+          new Response("[]", {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
       );
       const client = createClient<TestPaths>({
         prefixUrl: "https://api.test/",

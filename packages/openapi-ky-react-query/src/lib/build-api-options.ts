@@ -38,10 +38,10 @@ export function buildApiOptions<
   json?: RequestBody<Paths, Path, Method>;
 }): Options<Paths, Path, Method> & { method: Method } {
   return {
+    ...kyOptions,
     method: method ?? ("get" as Method),
     params,
     searchParams,
-    ...kyOptions,
     json,
   };
 }

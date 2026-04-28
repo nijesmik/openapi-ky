@@ -20,10 +20,10 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
     return buildMutationOptions({
       mutationFn: (variables: Variables) =>
         api(path, {
+          ...kyOptions,
           method,
           params,
           searchParams,
-          ...kyOptions,
           json: variables,
         }).json(),
       ...mutationOpts,

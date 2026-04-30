@@ -38,7 +38,7 @@ describe("createMutationOptions", () => {
 
       const opts = mutationOptions({ method: "post", path: "/posts" });
       const body = { title: "Hello" };
-      await opts.mutationFn?.(body, {} as never);
+      await opts.mutationFn?.({ json: body }, {} as never);
 
       expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
         method: "post",
@@ -52,7 +52,9 @@ describe("createMutationOptions", () => {
 
       const opts = mutationOptions({ method: "post", path: "/posts" });
 
-      await expect(opts.mutationFn?.({ title: "Hello" }, {} as never)).resolves.toEqual({ id: 1 });
+      await expect(opts.mutationFn?.({ json: { title: "Hello" } }, {} as never)).resolves.toEqual({
+        id: 1,
+      });
     });
   });
 
@@ -70,7 +72,7 @@ describe("createMutationOptions", () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const opts = (mutationOptions[method] as any)({ path });
         const body = { title: "x" };
-        await opts.mutationFn?.(body, {} as never);
+        await opts.mutationFn?.({ json: body }, {} as never);
 
         expect(getCallableMock(api)).toHaveBeenCalledWith(path, {
           method,
@@ -83,16 +85,16 @@ describe("createMutationOptions", () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
 
-      await mutationOptions.post({ path: "/posts" }).mutationFn?.({ title: "p" }, {} as never);
+      await mutationOptions
+        .post({ path: "/posts" })
+        .mutationFn?.({ json: { title: "p" } }, {} as never);
       await mutationOptions
         .put({ path: "/posts/{postId}" })
-        .mutationFn?.({ title: "u" }, {} as never);
+        .mutationFn?.({ json: { title: "u" } }, {} as never);
       await mutationOptions
         .patch({ path: "/posts/{postId}" })
-        .mutationFn?.({ title: "a" }, {} as never);
-      await mutationOptions
-        .delete({ path: "/posts/{postId}" })
-        .mutationFn?.(undefined, {} as never);
+        .mutationFn?.({ json: { title: "a" } }, {} as never);
+      await mutationOptions.delete({ path: "/posts/{postId}" }).mutationFn?.({}, {} as never);
 
       const methods = getCallableMock(api).mock.calls.map(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

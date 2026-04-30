@@ -1,4 +1,4 @@
-import type { Client, HttpMethod, PathsFor, RequestBody } from "@nijesmik/openapi-ky";
+import type { Client, HttpMethod, Options, PathsFor } from "@nijesmik/openapi-ky";
 
 import { mutationOptions as buildMutationOptions } from "@tanstack/react-query";
 
@@ -8,12 +8,10 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
   function mutationOptions<
     Path extends PathsFor<Paths, Method>,
     Method extends HttpMethod,
-    Variables extends RequestBody<Paths, Path, Method>,
+    Variables extends Omit<Options<Paths, Path, Method>, "method">,
   >({
     method,
     path,
-    params,
-    searchParams,
     kyOptions,
     ...mutationOpts
   }: MutationOptionsParams<Paths, Path, Method, Variables>) {
@@ -21,10 +19,8 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
       mutationFn: (variables: Variables) =>
         api(path, {
           ...kyOptions,
+          ...variables,
           method,
-          params,
-          searchParams,
-          json: variables,
         }).json(),
       ...mutationOpts,
     });
@@ -33,7 +29,7 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
   function mutationOptionsWithMethod<Method extends HttpMethod>(method: Method) {
     return <
       Path extends PathsFor<Paths, Method>,
-      Variables extends RequestBody<Paths, Path, Method>,
+      Variables extends Omit<Options<Paths, Path, Method>, "method">,
     >(
       args: Omit<MutationOptionsParams<Paths, Path, Method, Variables>, "method">,
     ) => mutationOptions({ ...args, method });

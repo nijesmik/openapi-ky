@@ -11,8 +11,7 @@ import type {
   UseDynamicMutationOptions,
   UseStaticMutationOptions,
 } from "./types/mutation";
-
-type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
+import type { DistributiveOmit } from "./types/utils";
 
 export function createMutationOptions<Paths extends object>(api: Client<Paths>) {
   function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(

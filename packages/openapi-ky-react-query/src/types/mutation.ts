@@ -11,6 +11,8 @@ import type {
 
 import type { UseMutationOptions } from "@tanstack/react-query";
 
+// ----- mutationFn variables (mutate() argument shapes) -----
+
 export type StaticMutationFunctionVariables<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
@@ -30,6 +32,8 @@ export type MutationFunctionVariables<
 > =
   | StaticMutationFunctionVariables<Paths, Path, Method>
   | DynamicMutationFunctionVariables<Paths, Path, Method>;
+
+// ----- mutationOptions input params -----
 
 type BaseMutationOptionsParams<
   Paths extends object,
@@ -78,6 +82,8 @@ export type MutationOptionsParams<
 > =
   | StaticMutationOptionsParams<Paths, Path, Method>
   | DynamicMutationOptionsParams<Paths, Path, Method>;
+
+// ----- useMutation options output (UseMutationOptions aliases) -----
 
 export type UseStaticMutationOptions<
   Paths extends object,

@@ -1,8 +1,9 @@
 import { skipToken } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 
-import { createQueryOptions } from "./create-query-options";
-import { createFakeCallableClient, getCallableMock } from "./__fixtures__/fake-client";
+import { createFakeCallableClient, getCallableMock } from "@/__fixtures__/fake-client";
+
+import { createQueryOptions } from "./index";
 
 type TestPaths = {
   "/posts": {
@@ -59,7 +60,9 @@ describe("createQueryOptions", () => {
         const opts = queryOptions(input as any);
 
         const queryFn = opts.queryFn;
-        if (typeof queryFn !== "function") throw new Error("expected function queryFn");
+        if (typeof queryFn !== "function") {
+          throw new Error("expected function queryFn");
+        }
         await queryFn({} as never);
 
         expect(getCallableMock(api)).toHaveBeenCalledWith(expectedPath, {
@@ -80,7 +83,9 @@ describe("createQueryOptions", () => {
       });
 
       const queryFn = opts.queryFn;
-      if (typeof queryFn !== "function") throw new Error("expected function queryFn");
+      if (typeof queryFn !== "function") {
+        throw new Error("expected function queryFn");
+      }
       await expect(queryFn({} as never)).resolves.toEqual({ id: 1, title: "test" });
     });
   });

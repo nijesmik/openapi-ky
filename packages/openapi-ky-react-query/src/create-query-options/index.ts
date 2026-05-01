@@ -8,11 +8,7 @@ import type {
   CreateSuspenseQueryOptions,
 } from "@/types/query";
 
-import {
-  buildInfiniteQueryOptions,
-  buildQueryOptions,
-  buildSuspenseQueryOptions,
-} from "@/lib/build-query-options";
+import { buildInfiniteQueryOptions, buildQueryOptions, buildSuspenseQueryOptions } from "./builder";
 
 /**
  * Creates a typed factory of TanStack Query option builders bound to an

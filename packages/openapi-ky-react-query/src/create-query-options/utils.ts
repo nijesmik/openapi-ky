@@ -20,7 +20,7 @@ import type {
  * (2) Asserts `method` as required (`{ method: Method }`); sound because (1)
  *     always provides a concrete value.
  */
-export function buildApiOptions<
+export function apiOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,

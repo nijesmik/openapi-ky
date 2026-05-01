@@ -18,8 +18,9 @@ import type {
   Flat,
 } from "@/types/query";
 
-import { buildApiOptions } from "./build-api-options";
-import { buildQueryKey } from "./build-query-key";
+import { buildQueryKey } from "@/lib/build-query-key";
+
+import { apiOptions } from "./utils";
 
 export function buildQueryOptions<
   Paths extends object,
@@ -51,7 +52,7 @@ export function buildQueryOptions<
     queryFn: () =>
       api(
         path,
-        buildApiOptions<Paths, Path, Method>({
+        apiOptions<Paths, Path, Method>({
           method,
           params,
           searchParams,
@@ -87,7 +88,7 @@ export function buildSuspenseQueryOptions<
     queryFn: () =>
       api(
         path,
-        buildApiOptions<Paths, Path, Method>({
+        apiOptions<Paths, Path, Method>({
           method,
           params,
           searchParams,
@@ -126,7 +127,7 @@ export function buildInfiniteQueryOptions<
     queryFn: ({ pageParam }) =>
       api(
         path,
-        buildApiOptions<Paths, Path, Method>({
+        apiOptions<Paths, Path, Method>({
           method,
           params,
           searchParams: {

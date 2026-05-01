@@ -33,7 +33,7 @@ type RequestInput<
   kyOptions?: KyOptions;
 } & JsonField<Paths, Path, Method>;
 
-export type QueryOptionsParams<
+export type CreateQueryOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",
@@ -46,7 +46,7 @@ export type QueryOptionsParams<
     "queryFn" | "queryKey" | "select"
   >;
 
-export type SuspenseQueryOptionsParams<
+export type CreateSuspenseQueryOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",
@@ -58,7 +58,7 @@ export type SuspenseQueryOptionsParams<
     "queryFn" | "queryKey" | "select"
   >;
 
-export type InfiniteQueryOptionsParams<
+export type CreateInfiniteQueryOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,
@@ -87,7 +87,7 @@ export type InfiniteQueryOptionsParams<
  *    indirection so call sites (e.g. `api(path, ...)`) can satisfy
  *    `PathsFor<Paths, Method>`.
  *
- * @template T - The original option-params type (e.g. `QueryOptionsParams`).
+ * @template T - The original option-params type (e.g. `CreateQueryOptions`).
  * @template Paths - The OpenAPI paths object.
  * @template Path - The narrowed path literal in the caller's generic context.
  * @template Method - The HTTP method matching `Path`.

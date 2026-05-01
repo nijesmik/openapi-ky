@@ -8,10 +8,10 @@ import {
 } from "@tanstack/react-query";
 
 import type {
+  CreateInfiniteQueryOptions,
+  CreateQueryOptions,
+  CreateSuspenseQueryOptions,
   Flat,
-  InfiniteQueryOptionsParams,
-  QueryOptionsParams,
-  SuspenseQueryOptionsParams,
 } from "./types/query";
 import { buildApiOptions } from "./lib/build-api-options";
 import { buildQueryKey } from "./lib/build-query-key";
@@ -49,13 +49,13 @@ import { buildQueryKey } from "./lib/build-query-key";
  * For write endpoints (mutations), use `createMutationOptions` instead.
  */
 export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
-  function queryOptions<
+  function _queryOptions<
     Path extends PathsFor<Paths, Method>,
     Method extends HttpMethod = "get",
     Data = ResponseBody<Paths, Path, Method>,
-  >(options: QueryOptionsParams<Paths, Path, Method, Data>) {
+  >(options: CreateQueryOptions<Paths, Path, Method, Data>) {
     const { path, method, params, searchParams, kyOptions, select, json, ...queryOptions } =
-      options as Flat<QueryOptionsParams<Paths, Path, Method, Data>, Paths, Path, Method>;
+      options as Flat<CreateQueryOptions<Paths, Path, Method, Data>, Paths, Path, Method>;
 
     if (params !== null) {
       return buildQueryOptions({
@@ -86,9 +86,9 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Path extends PathsFor<Paths, Method>,
     Method extends HttpMethod = "get",
     Data = ResponseBody<Paths, Path, Method>,
-  >(options: SuspenseQueryOptionsParams<Paths, Path, Method, Data>) {
+  >(options: CreateSuspenseQueryOptions<Paths, Path, Method, Data>) {
     const { path, method, params, searchParams, kyOptions, select, json, ...queryOptions } =
-      options as Flat<SuspenseQueryOptionsParams<Paths, Path, Method, Data>, Paths, Path, Method>;
+      options as Flat<CreateSuspenseQueryOptions<Paths, Path, Method, Data>, Paths, Path, Method>;
 
     return buildQueryOptions({
       queryKey: buildQueryKey(path, { method, params, searchParams }),
@@ -113,7 +113,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Method extends HttpMethod = "get",
     PageParam extends string | number | undefined = string | undefined,
     Data = InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>,
-  >(options: InfiniteQueryOptionsParams<Paths, Path, Method, PageParam, Data>) {
+  >(options: CreateInfiniteQueryOptions<Paths, Path, Method, PageParam, Data>) {
     const {
       path,
       method,
@@ -126,7 +126,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
       json,
       ...queryOptions
     } = options as Flat<
-      InfiniteQueryOptionsParams<Paths, Path, Method, PageParam, Data>,
+      CreateInfiniteQueryOptions<Paths, Path, Method, PageParam, Data>,
       Paths,
       Path,
       Method
@@ -154,7 +154,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     });
   }
 
-  return Object.assign(queryOptions, {
+  return Object.assign(_queryOptions, {
     suspense: suspenseQueryOptions,
     infinite: infiniteQueryOptions,
   });

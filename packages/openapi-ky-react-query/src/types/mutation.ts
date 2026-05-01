@@ -33,9 +33,9 @@ export type MutationFunctionVariables<
   | StaticMutationFunctionVariables<Paths, Path, Method>
   | DynamicMutationFunctionVariables<Paths, Path, Method>;
 
-// ----- mutationOptions input params -----
+// ----- create-time options (input args for mutationOptions builder) -----
 
-type BaseMutationOptionsParams<
+type CreateBaseMutationOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,
@@ -46,11 +46,11 @@ type BaseMutationOptionsParams<
   kyOptions?: KyOptions;
 };
 
-export type StaticMutationOptionsParams<
+export type CreateStaticMutationOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,
-> = BaseMutationOptionsParams<
+> = CreateBaseMutationOptions<
   Paths,
   Path,
   Method,
@@ -61,11 +61,11 @@ export type StaticMutationOptionsParams<
     | { params?: never; searchParams: SearchParams }
   );
 
-export type DynamicMutationOptionsParams<
+export type CreateDynamicMutationOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,
-> = BaseMutationOptionsParams<
+> = CreateBaseMutationOptions<
   Paths,
   Path,
   Method,
@@ -75,13 +75,13 @@ export type DynamicMutationOptionsParams<
   searchParams?: never;
 };
 
-export type MutationOptionsParams<
+export type CreateMutationOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,
 > =
-  | StaticMutationOptionsParams<Paths, Path, Method>
-  | DynamicMutationOptionsParams<Paths, Path, Method>;
+  | CreateStaticMutationOptions<Paths, Path, Method>
+  | CreateDynamicMutationOptions<Paths, Path, Method>;
 
 // ----- useMutation options output (UseMutationOptions aliases) -----
 

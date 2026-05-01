@@ -3,11 +3,11 @@ import type { Client, HttpMethod, PathsFor } from "@nijesmik/openapi-ky";
 import { mutationOptions as buildMutationOptions } from "@tanstack/react-query";
 
 import type {
+  CreateDynamicMutationOptions,
+  CreateMutationOptions,
+  CreateStaticMutationOptions,
   DynamicMutationFunctionVariables,
-  DynamicMutationOptionsParams,
-  MutationOptionsParams,
   StaticMutationFunctionVariables,
-  StaticMutationOptionsParams,
   UseDynamicMutationOptions,
   UseStaticMutationOptions,
 } from "./types/mutation";
@@ -15,16 +15,16 @@ import type { DistributiveOmit } from "./types/utils";
 
 export function createMutationOptions<Paths extends object>(api: Client<Paths>) {
   function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: StaticMutationOptionsParams<Paths, Path, Method>,
+    options: CreateStaticMutationOptions<Paths, Path, Method>,
   ): UseStaticMutationOptions<Paths, Path, Method>;
   function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: DynamicMutationOptionsParams<Paths, Path, Method>,
+    options: CreateDynamicMutationOptions<Paths, Path, Method>,
   ): UseDynamicMutationOptions<Paths, Path, Method>;
   function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: MutationOptionsParams<Paths, Path, Method>,
+    options: CreateMutationOptions<Paths, Path, Method>,
   ): UseStaticMutationOptions<Paths, Path, Method> | UseDynamicMutationOptions<Paths, Path, Method>;
   function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: MutationOptionsParams<Paths, Path, Method>,
+    options: CreateMutationOptions<Paths, Path, Method>,
   ) {
     if (options.params !== undefined || options.searchParams !== undefined) {
       const { method, path, params, searchParams, kyOptions, ...mutationOptions } = options;
@@ -55,13 +55,13 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
 
   function createMutationOptionsWithMethod<Method extends HttpMethod>(method: Method) {
     function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
-      options: DistributiveOmit<StaticMutationOptionsParams<Paths, Path, Method>, "method">,
+      options: DistributiveOmit<CreateStaticMutationOptions<Paths, Path, Method>, "method">,
     ): UseStaticMutationOptions<Paths, Path, Method>;
     function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
-      options: DistributiveOmit<DynamicMutationOptionsParams<Paths, Path, Method>, "method">,
+      options: DistributiveOmit<CreateDynamicMutationOptions<Paths, Path, Method>, "method">,
     ): UseDynamicMutationOptions<Paths, Path, Method>;
     function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
-      options: DistributiveOmit<MutationOptionsParams<Paths, Path, Method>, "method">,
+      options: DistributiveOmit<CreateMutationOptions<Paths, Path, Method>, "method">,
     ) {
       return _mutationOptions({ ...options, method });
     }

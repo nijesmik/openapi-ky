@@ -1,44 +1,79 @@
-import type { Client, HttpMethod, Options, PathsFor } from "@nijesmik/openapi-ky";
+import type { Client, HttpMethod, PathsFor } from "@nijesmik/openapi-ky";
 
 import { mutationOptions as buildMutationOptions } from "@tanstack/react-query";
 
-import type { MutationOptionsParams } from "./types/mutation";
+import type {
+  DynamicMutationFunctionVariables,
+  DynamicMutationOptionsParams,
+  MutationOptionsParams,
+  StaticMutationFunctionVariables,
+  StaticMutationOptionsParams,
+  UseDynamicMutationOptions,
+  UseStaticMutationOptions,
+} from "./types/mutation";
+
+type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
 
 export function createMutationOptions<Paths extends object>(api: Client<Paths>) {
-  function mutationOptions<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod,
-    Variables extends Omit<Options<Paths, Path, Method>, "method">,
-  >({
-    method,
-    path,
-    kyOptions,
-    ...mutationOpts
-  }: MutationOptionsParams<Paths, Path, Method, Variables>) {
+  function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
+    options: StaticMutationOptionsParams<Paths, Path, Method>,
+  ): UseStaticMutationOptions<Paths, Path, Method>;
+  function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
+    options: DynamicMutationOptionsParams<Paths, Path, Method>,
+  ): UseDynamicMutationOptions<Paths, Path, Method>;
+  function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
+    options: MutationOptionsParams<Paths, Path, Method>,
+  ) {
+    if (options.params !== undefined || options.searchParams !== undefined) {
+      const { method, path, params, searchParams, kyOptions, ...mutationOptions } = options;
+      return buildMutationOptions({
+        mutationFn: (variables: StaticMutationFunctionVariables<Paths, Path, Method>) =>
+          api(path, {
+            ...kyOptions,
+            params,
+            searchParams,
+            json: variables,
+            method,
+          }).json(),
+        ...mutationOptions,
+      });
+    }
+
+    const { method, path, kyOptions, ...mutationOptions } = options;
     return buildMutationOptions({
-      mutationFn: (variables: Variables) =>
+      mutationFn: (variables: DynamicMutationFunctionVariables<Paths, Path, Method>) =>
         api(path, {
           ...kyOptions,
           ...variables,
           method,
         }).json(),
-      ...mutationOpts,
+      ...mutationOptions,
     });
   }
 
-  function mutationOptionsWithMethod<Method extends HttpMethod>(method: Method) {
-    return <
-      Path extends PathsFor<Paths, Method>,
-      Variables extends Omit<Options<Paths, Path, Method>, "method">,
-    >(
-      args: Omit<MutationOptionsParams<Paths, Path, Method, Variables>, "method">,
-    ) => mutationOptions({ ...args, method });
+  function createMutationOptionsWithMethod<Method extends HttpMethod>(method: Method) {
+    function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
+      options: DistributiveOmit<StaticMutationOptionsParams<Paths, Path, Method>, "method">,
+    ): UseStaticMutationOptions<Paths, Path, Method>;
+    function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
+      options: DistributiveOmit<DynamicMutationOptionsParams<Paths, Path, Method>, "method">,
+    ): UseDynamicMutationOptions<Paths, Path, Method>;
+    function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
+      options: DistributiveOmit<MutationOptionsParams<Paths, Path, Method>, "method">,
+    ) {
+      if (options.params !== undefined || options.searchParams !== undefined) {
+        return _mutationOptions({ ...options, method });
+      }
+      return _mutationOptions({ ...options, method });
+    }
+
+    return mutationOptionsWithMethod;
   }
 
-  return Object.assign(mutationOptions, {
-    post: mutationOptionsWithMethod("post"),
-    put: mutationOptionsWithMethod("put"),
-    patch: mutationOptionsWithMethod("patch"),
-    delete: mutationOptionsWithMethod("delete"),
+  return Object.assign(_mutationOptions, {
+    post: createMutationOptionsWithMethod("post"),
+    put: createMutationOptionsWithMethod("put"),
+    patch: createMutationOptionsWithMethod("patch"),
+    delete: createMutationOptionsWithMethod("delete"),
   });
 }

@@ -22,6 +22,9 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
   ): UseDynamicMutationOptions<Paths, Path, Method>;
   function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
     options: MutationOptionsParams<Paths, Path, Method>,
+  ): UseStaticMutationOptions<Paths, Path, Method> | UseDynamicMutationOptions<Paths, Path, Method>;
+  function _mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
+    options: MutationOptionsParams<Paths, Path, Method>,
   ) {
     if (options.params !== undefined || options.searchParams !== undefined) {
       const { method, path, params, searchParams, kyOptions, ...mutationOptions } = options;
@@ -60,9 +63,6 @@ export function createMutationOptions<Paths extends object>(api: Client<Paths>) 
     function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
       options: DistributiveOmit<MutationOptionsParams<Paths, Path, Method>, "method">,
     ) {
-      if (options.params !== undefined || options.searchParams !== undefined) {
-        return _mutationOptions({ ...options, method });
-      }
       return _mutationOptions({ ...options, method });
     }
 

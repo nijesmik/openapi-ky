@@ -10,8 +10,8 @@ import type {
   StaticMutationFunctionVariables,
   UseDynamicMutationOptions,
   UseStaticMutationOptions,
-} from "./types/mutation";
-import type { DistributiveOmit } from "./types/utils";
+} from "@/types/mutation";
+import type { DistributiveOmit } from "@/types/utils";
 
 /**
  * Creates a typed factory of TanStack Query mutation option builders bound to

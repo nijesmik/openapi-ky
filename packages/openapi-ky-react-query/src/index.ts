@@ -1,3 +1,3 @@
-export { createMutationOptions } from "./create-mutation-options";
-export { createQueryOptions } from "./create-query-options";
-export { createQueryClient } from "./create-query-client";
+export { createMutationOptions } from "./core/create-mutation-options";
+export { createQueryClient } from "./core/create-query-client";
+export { createQueryOptions } from "./core/create-query-options";

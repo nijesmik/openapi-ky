@@ -8,15 +8,20 @@ import {
   type QueryClientConfig,
 } from "@tanstack/react-query";
 
-import { buildQueryKey } from "./lib/build-query-key";
-import type { QueryKeyOptions, SetQueryDataUpdater } from "./types/client";
+import type { QueryKeyOptions, SetQueryDataUpdater } from "@/types/client";
+
+import { buildQueryKey } from "@/lib/build-query-key";
 
 export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
   let browserQueryClient: QueryClient | undefined;
 
   function getQueryClient() {
-    if (isServer) return new QueryClient(config);
-    if (!browserQueryClient) browserQueryClient = new QueryClient(config);
+    if (isServer) {
+      return new QueryClient(config);
+    }
+    if (!browserQueryClient) {
+      browserQueryClient = new QueryClient(config);
+    }
     return browserQueryClient;
   }
 

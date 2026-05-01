@@ -1,20 +1,18 @@
 import type { Client, HttpMethod, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
-import {
-  infiniteQueryOptions as buildInfiniteQueryOptions,
-  queryOptions as buildQueryOptions,
-  skipToken,
-  type InfiniteData,
-} from "@tanstack/react-query";
+import { type InfiniteData } from "@tanstack/react-query";
 
 import type {
   CreateInfiniteQueryOptions,
   CreateQueryOptions,
   CreateSuspenseQueryOptions,
-  Flat,
-} from "./types/query";
-import { buildApiOptions } from "./lib/build-api-options";
-import { buildQueryKey } from "./lib/build-query-key";
+} from "@/types/query";
+
+import {
+  buildInfiniteQueryOptions,
+  buildQueryOptions,
+  buildSuspenseQueryOptions,
+} from "@/lib/build-query-options";
 
 /**
  * Creates a typed factory of TanStack Query option builders bound to an
@@ -49,37 +47,12 @@ import { buildQueryKey } from "./lib/build-query-key";
  * For write endpoints (mutations), use `createMutationOptions` instead.
  */
 export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
-  function _queryOptions<
+  function queryOptions<
     Path extends PathsFor<Paths, Method>,
     Method extends HttpMethod = "get",
     Data = ResponseBody<Paths, Path, Method>,
   >(options: CreateQueryOptions<Paths, Path, Method, Data>) {
-    const { path, method, params, searchParams, kyOptions, select, json, ...queryOptions } =
-      options as Flat<CreateQueryOptions<Paths, Path, Method, Data>, Paths, Path, Method>;
-
-    if (params !== null) {
-      return buildQueryOptions({
-        queryKey: buildQueryKey(path, { method, params, searchParams }),
-        queryFn: () =>
-          api(
-            path,
-            buildApiOptions<Paths, Path, Method>({
-              method,
-              params,
-              searchParams,
-              kyOptions,
-              json,
-            }),
-          ).json(),
-        select,
-        ...queryOptions,
-      });
-    }
-
-    return buildQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>({
-      queryKey: buildQueryKey(path, { method }),
-      queryFn: skipToken,
-    });
+    return buildQueryOptions(options, api);
   }
 
   function suspenseQueryOptions<
@@ -87,25 +60,7 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     Method extends HttpMethod = "get",
     Data = ResponseBody<Paths, Path, Method>,
   >(options: CreateSuspenseQueryOptions<Paths, Path, Method, Data>) {
-    const { path, method, params, searchParams, kyOptions, select, json, ...queryOptions } =
-      options as Flat<CreateSuspenseQueryOptions<Paths, Path, Method, Data>, Paths, Path, Method>;
-
-    return buildQueryOptions({
-      queryKey: buildQueryKey(path, { method, params, searchParams }),
-      queryFn: () =>
-        api(
-          path,
-          buildApiOptions<Paths, Path, Method>({
-            method,
-            params,
-            searchParams,
-            kyOptions,
-            json,
-          }),
-        ).json(),
-      select,
-      ...queryOptions,
-    });
+    return buildSuspenseQueryOptions(options, api);
   }
 
   function infiniteQueryOptions<
@@ -114,47 +69,10 @@ export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
     PageParam extends string | number | undefined = string | undefined,
     Data = InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>,
   >(options: CreateInfiniteQueryOptions<Paths, Path, Method, PageParam, Data>) {
-    const {
-      path,
-      method,
-      params,
-      searchParams,
-      pageParamKey = "cursor",
-      kyOptions,
-      initialPageParam,
-      select,
-      json,
-      ...queryOptions
-    } = options as Flat<
-      CreateInfiniteQueryOptions<Paths, Path, Method, PageParam, Data>,
-      Paths,
-      Path,
-      Method
-    >;
-
-    return buildInfiniteQueryOptions({
-      queryKey: buildQueryKey(path, { method, params, searchParams }),
-      queryFn: ({ pageParam }) =>
-        api(
-          path,
-          buildApiOptions<Paths, Path, Method>({
-            method,
-            params,
-            searchParams: {
-              ...searchParams,
-              [pageParamKey]: pageParam as PageParam,
-            },
-            kyOptions,
-            json,
-          }),
-        ).json(),
-      initialPageParam,
-      select,
-      ...queryOptions,
-    });
+    return buildInfiniteQueryOptions(options, api);
   }
 
-  return Object.assign(_queryOptions, {
+  return Object.assign(queryOptions, {
     suspense: suspenseQueryOptions,
     infinite: infiniteQueryOptions,
   });

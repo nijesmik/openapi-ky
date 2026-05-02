@@ -1,14 +1,7 @@
 pre-commit:
   commands:
-    "eslint:packages/openapi-ky-react-query":
-      glob: "*.{ts,tsx}"
-      root: "packages/openapi-ky-react-query/"
-      run: pnpm exec eslint --fix {staged_files}
-      stage_fixed: true
     eslint:
       glob: "*.{ts,tsx}"
-      exclude:
-        - "packages/openapi-ky-react-query/**"
       run: pnpm exec eslint --fix {staged_files}
       stage_fixed: true
     prettier:

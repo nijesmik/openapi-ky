@@ -1,5 +1,4 @@
 import type { HttpMethod, Params, SearchParams } from "@nijesmik/openapi-ky";
-
 import type { QueryClient } from "@tanstack/react-query";
 
 export type QueryKeyOptions<Method extends HttpMethod = HttpMethod> = {

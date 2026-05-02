@@ -8,7 +8,6 @@ import type {
   ResponseBody,
   SearchParams,
 } from "@nijesmik/openapi-ky";
-
 import type { UseMutationOptions } from "@tanstack/react-query";
 
 // ----- mutationFn variables (mutate() argument shapes) -----

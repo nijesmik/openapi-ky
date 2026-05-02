@@ -1,3 +1,4 @@
+import type { Options as KyOptions } from "ky";
 import type {
   FilterKeys,
   HttpMethod,
@@ -6,7 +7,6 @@ import type {
   ResponseObjectMap,
   SuccessResponse,
 } from "openapi-typescript-helpers";
-import type { Options as KyOptions } from "ky";
 
 export type Params = Record<string, boolean | number | string>;
 

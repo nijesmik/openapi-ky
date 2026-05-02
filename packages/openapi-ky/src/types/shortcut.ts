@@ -1,5 +1,5 @@
-import type { HttpMethod } from "openapi-typescript-helpers";
 import type { ResponsePromise } from "ky";
+import type { HttpMethod } from "openapi-typescript-helpers";
 
 import type { PathsFor, ResponseBody } from "./common";
 import type { Options } from "./options";

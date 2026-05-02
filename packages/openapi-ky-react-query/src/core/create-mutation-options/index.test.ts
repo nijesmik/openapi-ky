@@ -74,6 +74,29 @@ describe("createMutationOptions", () => {
         expect.objectContaining({ timeout: 5000 }),
       );
     });
+
+    it("[회귀 테스트] kyOptions로 우회 주입된 method/json은 explicit 필드를 override할 수 없다", async () => {
+      const api = createFakeApi();
+      const mutationOptions = createMutationOptions(api);
+
+      const opts = mutationOptions({
+        method: "post",
+        path: "/posts",
+        kyOptions: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          method: "delete" as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          json: { malicious: true } as any,
+        },
+      });
+      await opts.mutationFn?.({ json: { title: "real" } }, {} as never);
+
+      const callArgs = getCallableMock(api).mock.calls[0];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((callArgs?.[1] as any).method).toBe("post");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((callArgs?.[1] as any).json).toEqual({ title: "real" });
+    });
   });
 
   describe("static 모드 (create 시 params 또는 searchParams 지정)", () => {
@@ -131,6 +154,30 @@ describe("createMutationOptions", () => {
         "/posts/{postId}",
         expect.objectContaining({ timeout: 5000, params: { postId: 1 } }),
       );
+    });
+
+    it("[회귀 테스트] kyOptions로 우회 주입된 method/json은 explicit 필드를 override할 수 없다", async () => {
+      const api = createFakeApi();
+      const mutationOptions = createMutationOptions(api);
+
+      const opts = mutationOptions({
+        method: "put",
+        path: "/posts/{postId}",
+        params: { postId: 1 },
+        kyOptions: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          method: "delete" as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          json: { malicious: true } as any,
+        },
+      });
+      await opts.mutationFn?.({ title: "real" }, {} as never);
+
+      const callArgs = getCallableMock(api).mock.calls[0];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((callArgs?.[1] as any).method).toBe("put");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((callArgs?.[1] as any).json).toEqual({ title: "real" });
     });
   });
 

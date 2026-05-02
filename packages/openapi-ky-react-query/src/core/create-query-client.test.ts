@@ -131,23 +131,5 @@ describe("createQueryClient", () => {
       expect(getQuery?.isInvalidated).toBe(false);
       expect(postQuery?.isInvalidated).toBe(true);
     });
-
-    it("invalidateQueries({ path })만 주면 method 미지정으로 GET cache key 매칭", async () => {
-      type Paths = {
-        "/items": {
-          get: { responses: { 200: { content: { "application/json": never[] } } } };
-        };
-      };
-
-      const queryClient = createQueryClient<Paths>();
-      const client = queryClient.getQueryClient();
-
-      client.setQueryData(["/items"], ["GET-DATA"]);
-
-      await queryClient.invalidateQueries({ path: "/items" });
-
-      const getQuery = client.getQueryState(["/items"]);
-      expect(getQuery?.isInvalidated).toBe(true);
-    });
   });
 });

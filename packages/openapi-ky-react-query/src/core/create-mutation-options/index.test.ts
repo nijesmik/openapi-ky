@@ -82,12 +82,8 @@ describe("createMutationOptions", () => {
       const opts = mutationOptions({
         method: "post",
         path: "/posts",
-        kyOptions: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          method: "delete" as any,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          json: { malicious: true } as any,
-        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        kyOptions: { method: "delete", json: { malicious: true } } as any,
       });
       await opts.mutationFn?.({ json: { title: "real" } }, {} as never);
 
@@ -164,12 +160,8 @@ describe("createMutationOptions", () => {
         method: "put",
         path: "/posts/{postId}",
         params: { postId: 1 },
-        kyOptions: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          method: "delete" as any,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          json: { malicious: true } as any,
-        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        kyOptions: { method: "delete", json: { malicious: true } } as any,
       });
       await opts.mutationFn?.({ title: "real" }, {} as never);
 

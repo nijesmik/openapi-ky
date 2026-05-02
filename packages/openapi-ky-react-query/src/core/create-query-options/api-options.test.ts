@@ -17,12 +17,8 @@ describe("apiOptions", () => {
     const result = apiOptions<TestPaths, "/posts", "post">({
       method: "post",
       json: { title: "real" },
-      kyOptions: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        method: "delete" as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        json: { malicious: true } as any,
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      kyOptions: { method: "delete", json: { malicious: true } } as any,
     });
 
     expect(result.method).toBe("post");

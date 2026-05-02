@@ -1,14 +1,8 @@
-import type { Client, HttpMethod, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type { Client } from "@nijesmik/openapi-ky";
 
-import { type InfiniteData } from "@tanstack/react-query";
-
-import type {
-  CreateInfiniteQueryOptions,
-  CreateQueryOptions,
-  CreateSuspenseQueryOptions,
-} from "@/types/query";
-
-import { buildInfiniteQueryOptions, buildQueryOptions, buildSuspenseQueryOptions } from "./builder";
+import { infiniteQueryOptions } from "./infinite-query-options";
+import { queryOptions } from "./query-options";
+import { suspenseQueryOptions } from "./suspense-query-options";
 
 /**
  * Creates a typed factory of TanStack Query option builders bound to an
@@ -43,33 +37,8 @@ import { buildInfiniteQueryOptions, buildQueryOptions, buildSuspenseQueryOptions
  * For write endpoints (mutations), use `createMutationOptions` instead.
  */
 export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
-  function queryOptions<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
-    Data = ResponseBody<Paths, Path, Method>,
-  >(options: CreateQueryOptions<Paths, Path, Method, Data>) {
-    return buildQueryOptions(options, api);
-  }
-
-  function suspenseQueryOptions<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
-    Data = ResponseBody<Paths, Path, Method>,
-  >(options: CreateSuspenseQueryOptions<Paths, Path, Method, Data>) {
-    return buildSuspenseQueryOptions(options, api);
-  }
-
-  function infiniteQueryOptions<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
-    PageParam extends string | number | undefined = string | undefined,
-    Data = InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>,
-  >(options: CreateInfiniteQueryOptions<Paths, Path, Method, PageParam, Data>) {
-    return buildInfiniteQueryOptions(options, api);
-  }
-
-  return Object.assign(queryOptions, {
-    suspense: suspenseQueryOptions,
-    infinite: infiniteQueryOptions,
+  return Object.assign(queryOptions(api), {
+    suspense: suspenseQueryOptions(api),
+    infinite: infiniteQueryOptions(api),
   });
 }

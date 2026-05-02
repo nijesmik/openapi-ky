@@ -126,7 +126,7 @@ describe("Client", () => {
             headers: { "content-type": "application/json" },
           }),
       );
-      const client = createClient<TestPaths>({
+      const client = createClient<TestPaths, "post">({
         prefixUrl: "https://api.test/",
         fetch: fetchImpl,
         retry: 0,

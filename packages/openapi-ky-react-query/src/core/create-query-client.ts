@@ -10,7 +10,7 @@ import {
 
 import type { QueryKeyOptions, SetQueryDataUpdater } from "@/types/client";
 
-import { buildQueryKey } from "@/lib/build-query-key";
+import { queryKey } from "@/lib/query-key";
 
 export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
   let browserQueryClient: QueryClient | undefined;
@@ -29,7 +29,7 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     path: Path,
     options?: QueryKeyOptions<Method>,
   ) {
-    return buildQueryKey(path, options);
+    return queryKey(path, options);
   }
 
   function setQueryData<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">({

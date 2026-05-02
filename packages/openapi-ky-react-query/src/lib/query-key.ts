@@ -4,7 +4,7 @@ import type { QueryKeyOptions } from "@/types/client";
 
 type QueryKey = (string | Params)[];
 
-export function buildQueryKey(path: string, options?: QueryKeyOptions): Readonly<QueryKey> {
+export function queryKey(path: string, options?: QueryKeyOptions): Readonly<QueryKey> {
   const { method, params, searchParams } = options ?? {};
 
   const normalizedSearchParams = searchParams && new URLSearchParams(searchParams as string);

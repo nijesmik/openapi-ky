@@ -8,7 +8,6 @@ import type {
   ResponseBody,
   SearchParams,
 } from "@nijesmik/openapi-ky";
-
 import type {
   InfiniteData,
   UseInfiniteQueryOptions,
@@ -16,47 +15,49 @@ import type {
   UseSuspenseQueryOptions,
 } from "@tanstack/react-query";
 
-import type { buildQueryKey } from "../lib/build-query-key";
+import type { queryKey } from "@/lib/query-key";
 
-export type QueryKey = ReturnType<typeof buildQueryKey>;
+export type QueryKey = ReturnType<typeof queryKey>;
 
 type RequestInput<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",
   S extends SearchParams = SearchParams,
-> = {
+> = JsonField<Paths, Path, Method> & {
   path: Path;
   method?: Method;
   params?: Params;
   searchParams?: S;
   kyOptions?: KyOptions;
-} & JsonField<Paths, Path, Method>;
+};
 
 export type CreateQueryOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",
   Data = ResponseBody<Paths, Path, Method>,
-> = Omit<RequestInput<Paths, Path, Method>, "params"> & {
-  params?: Params | null;
-  select?: (data: ResponseBody<Paths, Path, Method>) => Data;
-} & Omit<
-    UseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
-    "queryFn" | "queryKey" | "select"
-  >;
+> = Omit<
+  UseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
+  "queryFn" | "queryKey" | "select"
+> &
+  Omit<RequestInput<Paths, Path, Method>, "params"> & {
+    params?: Params | null;
+    select?: (data: ResponseBody<Paths, Path, Method>) => Data;
+  };
 
 export type CreateSuspenseQueryOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",
   Data = ResponseBody<Paths, Path, Method>,
-> = RequestInput<Paths, Path, Method> & {
-  select?: (data: ResponseBody<Paths, Path, Method>) => Data;
-} & Omit<
-    UseSuspenseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
-    "queryFn" | "queryKey" | "select"
-  >;
+> = Omit<
+  UseSuspenseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
+  "queryFn" | "queryKey" | "select"
+> &
+  RequestInput<Paths, Path, Method> & {
+    select?: (data: ResponseBody<Paths, Path, Method>) => Data;
+  };
 
 export type CreateInfiniteQueryOptions<
   Paths extends object,
@@ -64,14 +65,15 @@ export type CreateInfiniteQueryOptions<
   Method extends HttpMethod,
   PageParam,
   Data = InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>,
-> = RequestInput<Paths, Path, Method, Record<string, string | number | boolean | undefined>> & {
-  pageParamKey?: string;
-  initialPageParam: PageParam;
-  select?: (data: InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>) => Data;
-} & Omit<
-    UseInfiniteQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data, QueryKey, PageParam>,
-    "queryFn" | "queryKey" | "initialPageParam" | "select"
-  >;
+> = Omit<
+  UseInfiniteQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data, QueryKey, PageParam>,
+  "queryFn" | "queryKey" | "initialPageParam" | "select"
+> &
+  RequestInput<Paths, Path, Method, Record<string, string | number | boolean | undefined>> & {
+    pageParamKey?: string;
+    initialPageParam: PageParam;
+    select?: (data: InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>) => Data;
+  };
 
 /**
  * Flattens the option-params shape so it can be safely destructured inside a

@@ -8,7 +8,7 @@ import { skipToken, queryOptions as tanstackQueryOptions } from "@tanstack/react
 
 import type { CreateQueryOptions, Flat } from "@/types/query";
 
-import { buildQueryKey } from "@/lib/build-query-key";
+import { queryKey } from "@/lib/query-key";
 
 import { apiOptions } from "./api-options";
 
@@ -23,13 +23,13 @@ export function queryOptions<Paths extends object>(api: Client<Paths>) {
 
     if (params === null) {
       return tanstackQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>({
-        queryKey: buildQueryKey(path, { method }),
+        queryKey: queryKey(path, { method }),
         queryFn: skipToken,
       });
     }
 
     return tanstackQueryOptions({
-      queryKey: buildQueryKey(path, { method, params, searchParams }),
+      queryKey: queryKey(path, { method, params, searchParams }),
       queryFn: () =>
         api(
           path,

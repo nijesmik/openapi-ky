@@ -11,7 +11,7 @@ import {
 
 import type { CreateInfiniteQueryOptions, Flat } from "@/types/query";
 
-import { buildQueryKey } from "@/lib/build-query-key";
+import { queryKey } from "@/lib/query-key";
 
 import { apiOptions } from "./api-options";
 
@@ -41,7 +41,7 @@ export function infiniteQueryOptions<Paths extends object>(api: Client<Paths>) {
     >;
 
     return tanstackInfiniteQueryOptions({
-      queryKey: buildQueryKey(path, { method, params, searchParams }),
+      queryKey: queryKey(path, { method, params, searchParams }),
       queryFn: ({ pageParam }) =>
         api(
           path,

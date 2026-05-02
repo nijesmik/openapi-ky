@@ -8,7 +8,7 @@ import { queryOptions as tanstackQueryOptions } from "@tanstack/react-query";
 
 import type { CreateSuspenseQueryOptions, Flat } from "@/types/query";
 
-import { buildQueryKey } from "@/lib/build-query-key";
+import { queryKey } from "@/lib/query-key";
 
 import { apiOptions } from "./api-options";
 
@@ -22,7 +22,7 @@ export function suspenseQueryOptions<Paths extends object>(api: Client<Paths>) {
       options as Flat<CreateSuspenseQueryOptions<Paths, Path, Method, Data>, Paths, Path, Method>;
 
     return tanstackQueryOptions({
-      queryKey: buildQueryKey(path, { method, params, searchParams }),
+      queryKey: queryKey(path, { method, params, searchParams }),
       queryFn: () =>
         api(
           path,

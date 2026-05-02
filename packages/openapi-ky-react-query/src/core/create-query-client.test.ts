@@ -88,13 +88,14 @@ describe("createQueryClient", () => {
       const invalidateSpy = vi.spyOn(QueryClient.prototype, "invalidateQueries");
       const factory = createQueryClient<TestPaths>();
 
-      factory.invalidateQueries({
-        path: "/posts/{postId}",
-        params: { postId: 1 },
-        exact: true,
-        cancelRefetch: false,
-        throwOnError: true,
-      });
+      factory.invalidateQueries(
+        {
+          path: "/posts/{postId}",
+          params: { postId: 1 },
+          exact: true,
+        },
+        { cancelRefetch: false, throwOnError: true },
+      );
 
       expect(invalidateSpy).toHaveBeenCalledWith(
         expect.objectContaining({ exact: true, queryKey: expect.any(Array) }),

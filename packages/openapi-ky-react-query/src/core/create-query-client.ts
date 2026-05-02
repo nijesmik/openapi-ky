@@ -51,25 +51,20 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
   function invalidateQueries<
     Path extends PathsFor<Paths, Method>,
     Method extends HttpMethod = "get",
-  >({
-    method,
-    path,
-    params,
-    searchParams,
-    cancelRefetch,
-    throwOnError,
-    ...filters
-  }: Omit<InvalidateQueryFilters, "queryKey"> &
-    QueryKeyOptions<Method> &
-    InvalidateOptions & {
-      path: Path;
-    }) {
+  >(
+    filters: Omit<InvalidateQueryFilters, "queryKey"> &
+      QueryKeyOptions<Method> & {
+        path: Path;
+      },
+    options?: InvalidateOptions,
+  ) {
+    const { method, path, params, searchParams, ...rest } = filters;
     return getQueryClient().invalidateQueries(
       {
         queryKey: getQueryKey(path, { method, params, searchParams }),
-        ...filters,
+        ...rest,
       },
-      { cancelRefetch, throwOnError },
+      options,
     );
   }
 

@@ -5,14 +5,20 @@ import ky from "ky";
 
 import type { Client } from "./types/client";
 import type { Params } from "./types/common";
+import type { TypeError } from "./types/error";
 
 import { buildUrl } from "./lib/build-url";
 
 type _Options = KyOptions & { params?: Params };
 
-export function createClient<Paths extends object, DefaultMethod extends HttpMethod = "get">(
-  defaultOptions: Omit<KyOptions, "method"> & { method?: DefaultMethod },
-): Client<Paths, DefaultMethod> {
+export function createClient<Paths extends object, DefaultMethod extends HttpMethod = never>(
+  defaultOptions: Omit<KyOptions, "method"> & {
+    method?: [DefaultMethod] extends [never]
+      ? TypeError<"Specify <Paths, Method> generic to set method">
+      : DefaultMethod;
+  },
+): Client<Paths, [DefaultMethod] extends [never] ? "get" : DefaultMethod>;
+export function createClient(defaultOptions: Omit<KyOptions, "method"> & { method?: HttpMethod }) {
   const api = ky.create(defaultOptions);
 
   const request = (path: string, options: _Options = {}): ResponsePromise => {
@@ -51,5 +57,5 @@ export function createClient<Paths extends object, DefaultMethod extends HttpMet
     patch: (path: string, options: _Options = {}) => request(path, { ...options, method: "patch" }),
     delete: (path: string, options: _Options = {}) =>
       request(path, { ...options, method: "delete" }),
-  }) as unknown as Client<Paths, DefaultMethod>;
+  });
 }

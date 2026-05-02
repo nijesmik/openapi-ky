@@ -66,13 +66,13 @@ const key = getQueryKey('/posts/{postId}', { params: { postId } });
 setQueryData({
   path: '/users/{userId}',
   params: { userId },
-  data: userData,
+  updater: userData,
 });
 
 // with updater function
 setQueryData({
   path: '/posts',
-  data: (old) => [...(old ?? []), newPost],
+  updater: (old) => [...(old ?? []), newPost],
 });
 
 // invalidateQueries — invalidate all queries under a path
@@ -276,7 +276,7 @@ If you genuinely need `ky.stop`, call the `client` method directly outside the w
 | `createQueryClient<Paths>(config?)` | Create `{ getQueryClient, getQueryKey, setQueryData, invalidateQueries }` bound to `Paths` |
 | `getQueryClient()` | SSR-safe `QueryClient` accessor (singleton on client, new on server) |
 | `getQueryKey(path, { params?, searchParams? })` | Type-safe query key for a path |
-| `setQueryData({ path, params?, searchParams?, data })` | Type-safe cache update |
+| `setQueryData({ path, params?, searchParams?, updater })` | Type-safe cache update |
 | `invalidateQueries({ path, params?, searchParams?, ...filters })` | Type-safe cache invalidation (accepts TanStack filter + option fields) |
 | `queryOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useQuery` |
 | `queryOptions.suspense({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | Options for `useSuspenseQuery` |
@@ -356,13 +356,13 @@ const key = getQueryKey('/posts/{postId}', { params: { postId } });
 setQueryData({
   path: '/users/{userId}',
   params: { userId },
-  data: userData,
+  updater: userData,
 });
 
 // updater 함수 사용
 setQueryData({
   path: '/posts',
-  data: (old) => [...(old ?? []), newPost],
+  updater: (old) => [...(old ?? []), newPost],
 });
 
 // invalidateQueries — path 하위 전체 무효화
@@ -566,7 +566,7 @@ useQuery({
 | `createQueryClient<Paths>(config?)` | `Paths`에 바인딩된 `{ getQueryClient, getQueryKey, setQueryData, invalidateQueries }` 생성 |
 | `getQueryClient()` | SSR-safe `QueryClient` 접근자 (클라이언트는 싱글톤, 서버는 매번 새로) |
 | `getQueryKey(path, { params?, searchParams? })` | 경로에 대한 타입 세이프 캐시 키 |
-| `setQueryData({ path, params?, searchParams?, data })` | 타입 세이프 캐시 갱신 |
+| `setQueryData({ path, params?, searchParams?, updater })` | 타입 세이프 캐시 갱신 |
 | `invalidateQueries({ path, params?, searchParams?, ...filters })` | 타입 세이프 캐시 무효화 (TanStack 필터/옵션 함께 전달) |
 | `queryOptions({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useQuery` 옵션 |
 | `queryOptions.suspense({ path, params?, searchParams?, kyOptions?, select?, ...queryOptions })` | `useSuspenseQuery` 옵션 |

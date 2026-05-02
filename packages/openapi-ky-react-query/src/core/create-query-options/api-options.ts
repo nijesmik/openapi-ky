@@ -13,7 +13,7 @@ import type {
  * so that TypeScript can resolve the explicit-method overload from inside a
  * generic context, where it cannot otherwise be selected.
  *
- * Together (1) and (2) satisfy the overload's `Required<MethodField<Method>>`
+ * Together (1) and (2) satisfy the overload's `{ method: Method }`
  * constraint — neither works on its own:
  *
  * (1) Defaults `method` to `"get"` (queries map to HTTP GET).

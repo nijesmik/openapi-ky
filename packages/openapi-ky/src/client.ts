@@ -1,12 +1,14 @@
-import type { HttpMethod } from "openapi-typescript-helpers";
 import type { Options as KyOptions, ResponsePromise } from "ky";
+import type { HttpMethod } from "openapi-typescript-helpers";
+
 import ky from "ky";
 
 import type { Client } from "./types/client";
-import type { ParamsField } from "./types/options";
+import type { Params } from "./types/common";
+
 import { buildUrl } from "./lib/build-url";
 
-type _Options = KyOptions & ParamsField;
+type _Options = KyOptions & { params?: Params };
 
 export function createClient<Paths extends object, DefaultMethod extends HttpMethod = "get">(
   defaultOptions: Omit<KyOptions, "method"> & { method?: DefaultMethod },

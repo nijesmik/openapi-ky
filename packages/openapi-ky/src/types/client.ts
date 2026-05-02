@@ -1,8 +1,8 @@
-import type { HttpMethod } from "openapi-typescript-helpers";
 import type { ResponsePromise } from "ky";
+import type { HttpMethod } from "openapi-typescript-helpers";
 
 import type { PathsFor, ResponseBody } from "./common";
-import type { MethodField, Options } from "./options";
+import type { Options } from "./options";
 import type { Fetcher } from "./shortcut";
 
 export interface Client<Paths extends object, DefaultMethod extends HttpMethod = "get"> {
@@ -25,7 +25,7 @@ export interface Client<Paths extends object, DefaultMethod extends HttpMethod =
   ): ResponsePromise<ResponseBody<Paths, Path, DefaultMethod>>;
   <Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
     path: Path,
-    options: Options<Paths, Path, Method> & Required<MethodField<Method>>,
+    options: Options<Paths, Path, Method> & { method: Method },
   ): ResponsePromise<ResponseBody<Paths, Path, Method>>;
 
   get: Fetcher<Paths, "get">;

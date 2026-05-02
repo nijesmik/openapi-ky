@@ -1,5 +1,5 @@
-import type { HttpMethod } from "openapi-typescript-helpers";
 import type { Options as BaseKyOptions } from "ky";
+import type { HttpMethod } from "openapi-typescript-helpers";
 
 import type { Params, RequestBody } from "./common";
 
@@ -13,10 +13,6 @@ import type { Params, RequestBody } from "./common";
  */
 export type KyOptions = Omit<BaseKyOptions, "json" | "method" | "searchParams">;
 
-export type MethodField<Method extends HttpMethod = HttpMethod> = { method?: Method };
-
-export type ParamsField = { params?: Params };
-
 export type JsonField<Paths, Path extends keyof Paths, Method extends HttpMethod> = [
   RequestBody<Paths, Path, Method>,
 ] extends [never | void]
@@ -27,6 +23,4 @@ export type Options<Paths, Path extends keyof Paths, Method extends HttpMethod =
   BaseKyOptions,
   "json" | "method"
 > &
-  MethodField<Method> &
-  ParamsField &
-  JsonField<Paths, Path, Method>;
+  JsonField<Paths, Path, Method> & { method?: Method; params?: Params };

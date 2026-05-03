@@ -8,7 +8,8 @@ import {
 } from "@nijesmik/openapi-ky";
 import { queryOptions as tanstackQueryOptions } from "@tanstack/react-query";
 
-import type { CreateSuspenseQueryOptions, Flat } from "@/types/query";
+import type { Flat } from "@/types/internal";
+import type { CreateSuspenseQueryOptions } from "@/types/query";
 
 import { queryKey } from "@/lib/query-key";
 

@@ -8,7 +8,8 @@ import {
 } from "@nijesmik/openapi-ky";
 import { skipToken, queryOptions as tanstackQueryOptions } from "@tanstack/react-query";
 
-import type { CreateQueryOptions, Flat } from "@/types/query";
+import type { Flat } from "@/types/internal";
+import type { CreateQueryOptions } from "@/types/query";
 
 import { queryKey } from "@/lib/query-key";
 

@@ -47,7 +47,7 @@ describe("createQueryClient", () => {
   });
 
   describe("setQueryData", () => {
-    it("setQueryData를 dispatch하며 updater를 그대로 전달한다", () => {
+    it("setQueryData를 dispatch하며 queryKey와 updater를 그대로 전달한다", () => {
       const setSpy = vi.spyOn(QueryClient.prototype, "setQueryData");
       const factory = createQueryClient<TestPaths>();
       const updater = (prev: { id: number; title: string } | undefined) => prev;
@@ -59,6 +59,7 @@ describe("createQueryClient", () => {
       });
 
       expect(setSpy).toHaveBeenCalledTimes(1);
+      expect(setSpy.mock.calls[0]?.[0]).toEqual(["/posts/{postId}", { postId: 1 }]);
       expect(setSpy.mock.calls[0]?.[1]).toBe(updater);
     });
 

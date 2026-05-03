@@ -110,8 +110,21 @@ describe("Client", () => {
     );
   });
 
+  describe("URL 경로 치환", () => {
+    it("4. params는 path template을 치환한 URL로 fetch된다", async () => {
+      const fetchImpl = vi.fn<typeof fetch>(async () => new Response(null, { status: 204 }));
+      const client = createTestClient(fetchImpl);
+
+      await client.delete("/posts/{postId}", { params: { postId: 1 } });
+
+      const url = (fetchImpl.mock.calls[0]![0] as Request).url;
+      expect(url).toContain("/posts/1");
+      expect(url).not.toContain("{postId}");
+    });
+  });
+
   describe("callable 본체 dispatch", () => {
-    it("4. callable 본체로 호출하면 method가 옵션에서 풀려 ky로 전달된다", async () => {
+    it("5. callable 본체로 호출하면 method가 옵션에서 풀려 ky로 전달된다", async () => {
       const fetchImpl = vi.fn<typeof fetch>(async () => new Response(null, { status: 201 }));
       const client = createTestClient(fetchImpl);
 
@@ -122,7 +135,7 @@ describe("Client", () => {
   });
 
   describe("인스턴스 method default", () => {
-    it("5. [회귀 테스트] 단축 메서드는 defaultOptions.method를 override한다", async () => {
+    it("6. [회귀 테스트] 단축 메서드는 defaultOptions.method를 override한다", async () => {
       const fetchImpl = vi.fn<typeof fetch>(
         async () =>
           new Response("[]", {
@@ -144,7 +157,7 @@ describe("Client", () => {
   });
 
   describe("실패 처리", () => {
-    it("6. [회귀 테스트] 호출자가 catch한 요청 실패가 unhandledRejection을 발동시키지 않는다", async () => {
+    it("7. [회귀 테스트] 호출자가 catch한 요청 실패가 unhandledRejection을 발동시키지 않는다", async () => {
       const fetchImpl = vi.fn(async () => {
         throw new TypeError("network down");
       });

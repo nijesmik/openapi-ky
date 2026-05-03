@@ -15,7 +15,7 @@ export type KyOptions = Omit<BaseKyOptions, "json" | "method" | "searchParams">;
 
 export type JsonField<Paths, Path extends keyof Paths, Method extends HttpMethod> = [
   RequestBody<Paths, Path, Method>,
-] extends [never | void]
+] extends [void]
   ? unknown
   : { json: RequestBody<Paths, Path, Method> };
 

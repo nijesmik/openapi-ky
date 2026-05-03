@@ -12,18 +12,23 @@ type TestPaths = {
     };
   };
   "/posts/{postId}": {
+    parameters: { path: { postId: number } };
     get: {
+      parameters: { path: { postId: number } };
       responses: { 200: { content: { "application/json": { id: number } } } };
     };
     put: {
+      parameters: { path: { postId: number } };
       requestBody: { content: { "application/json": { title: string } } };
       responses: { 200: { content: { "application/json": { id: number } } } };
     };
     patch: {
+      parameters: { path: { postId: number } };
       requestBody: { content: { "application/json": { title: string } } };
       responses: { 200: { content: { "application/json": { id: number } } } };
     };
     delete: {
+      parameters: { path: { postId: number } };
       responses: { 204: { content: never } };
     };
   };
@@ -320,7 +325,6 @@ describe("createMutationOptions", () => {
         const opts = mutationOptions({ method: "post", path: "/posts" });
 
         opts.mutationFn?.({ json: { title: "x" } }, {} as never);
-        opts.mutationFn?.({ json: { title: "x" }, params: { foo: "bar" } }, {} as never);
         opts.mutationFn?.({ json: { title: "x" }, searchParams: { lang: "ko" } }, {} as never);
 
         // @ts-expect-error — dynamic 모드에서는 body를 { json: ... }로 래핑해야 함

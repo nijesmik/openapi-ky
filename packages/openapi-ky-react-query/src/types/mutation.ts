@@ -2,8 +2,8 @@ import type {
   HttpMethod,
   KyOptions,
   Options,
-  Params,
   PathsFor,
+  PathParams,
   RequestBody,
   ResponseBody,
   SearchParams,
@@ -56,7 +56,7 @@ export type CreateStaticMutationOptions<
   StaticMutationFunctionVariables<Paths, Path, Method>
 > &
   (
-    | { params: Params; searchParams?: SearchParams }
+    | { params: PathParams<Paths, Path, Method>; searchParams?: SearchParams }
     | { params?: never; searchParams: SearchParams }
   );
 

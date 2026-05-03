@@ -1,6 +1,4 @@
-import type { Params } from "../types";
-
-export function buildUrl(path: string, params?: Params) {
+export function buildUrl(path: string, params?: Record<string, boolean | number | string>) {
   const stripped = path.replace(/^\//, "");
 
   if (!params) {

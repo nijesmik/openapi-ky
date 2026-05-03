@@ -42,8 +42,8 @@ export function infiniteQueryOptions<Paths extends object>(api: Client<Paths>) {
 
     return tanstackInfiniteQueryOptions({
       // Cast: PathParams<...> resolves to a path-specific shape, but the runtime
-      // queryKey() helper accepts the wider Params record. Sound because the
-      // path-specific shape is structurally a subtype of Params at runtime.
+      // queryKey() helper accepts the wider Record<string, boolean | number | string>
+      // shape. Sound because the path-specific shape is structurally a subtype.
       queryKey: queryKey(path, { method, params, searchParams } as Parameters<typeof queryKey>[1]),
       queryFn: ({ pageParam }) =>
         api(

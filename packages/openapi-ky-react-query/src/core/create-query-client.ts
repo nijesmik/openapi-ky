@@ -30,10 +30,10 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     options?: QueryKeyOptions<Paths, Path, Method>,
   ) {
     // Cast: PathParams<...> resolves to a path-specific shape, but the runtime
-    // queryKey() helper accepts the wider Params record. Sound because the
-    // path-specific shape is structurally a subtype of Params at runtime.
-    // Tied to queryKey's signature so internal changes (e.g. Params removal)
-    // are auto-tracked here without needing a manual update.
+    // queryKey() helper accepts the wider Record<string, boolean | number | string>
+    // shape. Sound because the path-specific shape is structurally a subtype.
+    // Tied to queryKey's signature so internal changes are auto-tracked here
+    // without needing a manual update.
     return queryKey(path, options as Parameters<typeof queryKey>[1]);
   }
 

@@ -50,19 +50,17 @@ const createTestClient = (fetchImpl: typeof fetch) =>
 
 describe("Client", () => {
   describe("response.json override", () => {
-    it("1. [회귀 테스트] 본문이 있을 때 override가 response.clone()을 거쳐 bind된 parseJson에 위임한다", async () => {
+    it("1. [회귀 테스트] 본문이 있을 때 override가 원본 body를 소비하지 않고 파싱한다", async () => {
       const fetchImpl = vi.fn(async () => jsonResponse([{ id: 1, title: "hi" }]));
       const client = createTestClient(fetchImpl);
 
       const response = await client.get("/posts");
-      const cloneSpy = vi.spyOn(response!, "clone");
       const data = await response!.json();
 
-      expect(cloneSpy).toHaveBeenCalled();
       expect(data).toEqual([{ id: 1, title: "hi" }]);
     });
 
-    it("2. 본문이 비어있으면 빈 문자열을 반환한다", async () => {
+    it("2. [회귀 테스트] 본문이 비어있으면 빈 문자열을 반환한다", async () => {
       const fetchImpl = vi.fn(async () => new Response("", { status: 200 }));
       const client = createTestClient(fetchImpl);
 

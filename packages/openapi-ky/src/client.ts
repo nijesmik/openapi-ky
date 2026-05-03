@@ -49,15 +49,13 @@ export function createClient(defaultOptions: Omit<KyOptions, "method"> & { metho
   };
 
   return Object.assign(request, {
-    get: (path: string, options: Internal.Options = {}) =>
-      request(path, { ...options, method: "get" }),
-    post: (path: string, options: Internal.Options = {}) =>
+    get: (path: string, options?: Internal.Options) => request(path, { ...options, method: "get" }),
+    post: (path: string, options?: Internal.Options) =>
       request(path, { ...options, method: "post" }),
-    put: (path: string, options: Internal.Options = {}) =>
-      request(path, { ...options, method: "put" }),
-    patch: (path: string, options: Internal.Options = {}) =>
+    put: (path: string, options?: Internal.Options) => request(path, { ...options, method: "put" }),
+    patch: (path: string, options?: Internal.Options) =>
       request(path, { ...options, method: "patch" }),
-    delete: (path: string, options: Internal.Options = {}) =>
+    delete: (path: string, options?: Internal.Options) =>
       request(path, { ...options, method: "delete" }),
   }) as Client<object, HttpMethod>;
 }

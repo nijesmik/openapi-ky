@@ -1,15 +1,9 @@
-import type { HttpMethod, SearchParams } from "@nijesmik/openapi-ky";
-import type { Internal } from "@nijesmik/openapi-ky/internal";
+import type * as Internal from "@/types/internal";
 
-type QueryKey = (string | Internal.PathParams)[];
-
-type RuntimeQueryKeyOptions = {
-  method?: HttpMethod;
-  params?: Internal.PathParams;
-  searchParams?: SearchParams;
-};
-
-export function queryKey(path: string, options?: RuntimeQueryKeyOptions): Readonly<QueryKey> {
+export function queryKey(
+  path: string,
+  options?: Internal.QueryKeyOptions,
+): Readonly<Internal.QueryKey> {
   const { method, params, searchParams } = options ?? {};
 
   const normalizedSearchParams = searchParams && new URLSearchParams(searchParams as string);
@@ -17,7 +11,7 @@ export function queryKey(path: string, options?: RuntimeQueryKeyOptions): Readon
     normalizedSearchParams.sort();
   }
 
-  const key: QueryKey = [path];
+  const key: Internal.QueryKey = [path];
 
   if (method && method !== "get") {
     key.push(method);

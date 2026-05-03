@@ -343,5 +343,17 @@ describe("createMutationOptions", () => {
         opts.mutationFn?.({ title: "x" }, {} as never);
       });
     });
+
+    it("static mode: path-param 키가 schema와 다르면 컴파일 에러", () => {
+      const api = createFakeApi();
+      const mutationOptions = createMutationOptions(api);
+
+      // @ts-expect-error '/posts/{postId}'.put expects { postId: number }, not { wrongKey: number }
+      mutationOptions({
+        method: "put",
+        path: "/posts/{postId}",
+        params: { wrongKey: 1 },
+      });
+    });
   });
 });

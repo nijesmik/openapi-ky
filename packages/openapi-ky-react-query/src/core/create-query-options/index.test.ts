@@ -216,4 +216,27 @@ describe("createQueryOptions", () => {
       expect(opts.queryKey).toEqual(["/posts"]);
     });
   });
+
+  describe("타입 추론 (compile-time)", () => {
+    it("path-param 키가 schema와 다르면 컴파일 에러", () => {
+      type _Paths = {
+        "/posts/{postId}": {
+          parameters: { path: { postId: number } };
+          get: {
+            parameters: { path: { postId: number } };
+            responses: { 200: { content: { "application/json": [] } } };
+          };
+        };
+      };
+
+      const api = createFakeCallableClient<_Paths>([]);
+      const queryOptions = createQueryOptions(api);
+
+      queryOptions({
+        path: "/posts/{postId}",
+        // @ts-expect-error '/posts/{postId}'.get expects { postId: number }, not { wrongKey: number }
+        params: { wrongKey: 1 },
+      });
+    });
+  });
 });

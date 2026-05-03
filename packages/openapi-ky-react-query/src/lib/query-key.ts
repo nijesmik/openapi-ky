@@ -1,10 +1,11 @@
 import type { HttpMethod, SearchParams } from "@nijesmik/openapi-ky";
+import type { Internal } from "@nijesmik/openapi-ky/internal";
 
-type QueryKey = (string | Record<string, boolean | number | string>)[];
+type QueryKey = (string | Internal.PathParams)[];
 
 type RuntimeQueryKeyOptions = {
   method?: HttpMethod;
-  params?: Record<string, boolean | number | string>;
+  params?: Internal.PathParams;
   searchParams?: SearchParams;
 };
 

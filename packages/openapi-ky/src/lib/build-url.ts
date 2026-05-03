@@ -1,4 +1,6 @@
-export function buildUrl(path: string, params?: Record<string, boolean | number | string>) {
+import type * as Internal from "@/types/internal";
+
+export function buildUrl(path: string, params?: Internal.PathParams) {
   const stripped = path.replace(/^\//, "");
 
   if (!params) {

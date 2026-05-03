@@ -3,12 +3,11 @@ import type { HttpMethod } from "openapi-typescript-helpers";
 
 import ky from "ky";
 
-import type { Client } from "./types/client";
-import type { TypeError } from "./types/error";
+import type { Client } from "@/types/client";
+import type { TypeError } from "@/types/error";
+import type * as Internal from "@/types/internal";
 
-import { buildUrl } from "./lib/build-url";
-
-type _Options = KyOptions & { params?: Record<string, boolean | number | string> };
+import { buildUrl } from "@/lib/build-url";
 
 export function createClient<Paths extends object, DefaultMethod extends HttpMethod = never>(
   defaultOptions: Omit<KyOptions, "method"> & {
@@ -20,7 +19,7 @@ export function createClient<Paths extends object, DefaultMethod extends HttpMet
 export function createClient(defaultOptions: Omit<KyOptions, "method"> & { method?: HttpMethod }) {
   const api = ky.create(defaultOptions);
 
-  const request = (path: string, options: _Options = {}): ResponsePromise => {
+  const request = (path: string, options: Internal.Options = {}): ResponsePromise => {
     const { params, ...kyOptions } = options;
     const url = buildUrl(path, params);
     const promise = api(url, kyOptions);
@@ -49,15 +48,16 @@ export function createClient(defaultOptions: Omit<KyOptions, "method"> & { metho
     return promise;
   };
 
-  // The runtime function uses an erased `_Options` (wide `params`); the public
-  // overload above carries the narrow `Options<Paths, Path, Method>`. Cast to
-  // bridge the two — the overload's typed face is what callers see.
   return Object.assign(request, {
-    get: (path: string, options: _Options = {}) => request(path, { ...options, method: "get" }),
-    post: (path: string, options: _Options = {}) => request(path, { ...options, method: "post" }),
-    put: (path: string, options: _Options = {}) => request(path, { ...options, method: "put" }),
-    patch: (path: string, options: _Options = {}) => request(path, { ...options, method: "patch" }),
-    delete: (path: string, options: _Options = {}) =>
+    get: (path: string, options: Internal.Options = {}) =>
+      request(path, { ...options, method: "get" }),
+    post: (path: string, options: Internal.Options = {}) =>
+      request(path, { ...options, method: "post" }),
+    put: (path: string, options: Internal.Options = {}) =>
+      request(path, { ...options, method: "put" }),
+    patch: (path: string, options: Internal.Options = {}) =>
+      request(path, { ...options, method: "patch" }),
+    delete: (path: string, options: Internal.Options = {}) =>
       request(path, { ...options, method: "delete" }),
   }) as Client<object, HttpMethod>;
 }

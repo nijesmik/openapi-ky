@@ -1,7 +1,7 @@
 import type { Options as BaseKyOptions } from "ky";
 import type { HttpMethod } from "openapi-typescript-helpers";
 
-import type { Params, RequestBody } from "./common";
+import type { PathParams, RequestBody } from "./common";
 
 /**
  * Subset of ky's `Options` excluding fields this library lifts to the
@@ -23,4 +23,7 @@ export type Options<Paths, Path extends keyof Paths, Method extends HttpMethod =
   BaseKyOptions,
   "json" | "method"
 > &
-  JsonField<Paths, Path, Method> & { method?: Method; params?: Params };
+  JsonField<Paths, Path, Method> & {
+    method?: Method;
+    params?: PathParams<Paths, Path, Method>;
+  };

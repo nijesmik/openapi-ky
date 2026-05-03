@@ -4,12 +4,11 @@ import type { HttpMethod } from "openapi-typescript-helpers";
 import ky from "ky";
 
 import type { Client } from "./types/client";
-import type { Params } from "./types/common";
 import type { TypeError } from "./types/error";
 
 import { buildUrl } from "./lib/build-url";
 
-type _Options = KyOptions & { params?: Params };
+type _Options = KyOptions & { params?: Record<string, boolean | number | string> };
 
 export function createClient<Paths extends object, DefaultMethod extends HttpMethod = never>(
   defaultOptions: Omit<KyOptions, "method"> & {
@@ -50,6 +49,9 @@ export function createClient(defaultOptions: Omit<KyOptions, "method"> & { metho
     return promise;
   };
 
+  // The runtime function uses an erased `_Options` (wide `params`); the public
+  // overload above carries the narrow `Options<Paths, Path, Method>`. Cast to
+  // bridge the two — the overload's typed face is what callers see.
   return Object.assign(request, {
     get: (path: string, options: _Options = {}) => request(path, { ...options, method: "get" }),
     post: (path: string, options: _Options = {}) => request(path, { ...options, method: "post" }),
@@ -57,5 +59,5 @@ export function createClient(defaultOptions: Omit<KyOptions, "method"> & { metho
     patch: (path: string, options: _Options = {}) => request(path, { ...options, method: "patch" }),
     delete: (path: string, options: _Options = {}) =>
       request(path, { ...options, method: "delete" }),
-  });
+  }) as Client<object, HttpMethod>;
 }

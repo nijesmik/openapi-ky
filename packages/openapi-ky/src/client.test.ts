@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { Options } from "./types/options";
+
 import { createClient } from "./client";
 
 type Post = { id: number; title: string };
@@ -15,19 +17,36 @@ type TestPaths = {
     };
   };
   "/posts/{postId}": {
+    parameters: { path: { postId: number } };
     put: {
+      parameters: { path: { postId: number } };
       requestBody: { content: { "application/json": { title: string } } };
       responses: { 200: { content: { "application/json": Post } } };
     };
     patch: {
+      parameters: { path: { postId: number } };
       requestBody: { content: { "application/json": { title: string } } };
       responses: { 200: { content: { "application/json": Post } } };
     };
     delete: {
+      parameters: { path: { postId: number } };
       responses: { 204: { content: { "application/json": never } } };
     };
   };
 };
+
+// Type-level regression: wrong path-param key must not compile.
+// This block exists only for type checking — there is no runtime test.
+const _typeOnlyRegression = () => {
+  const _wrong: Options<TestPaths, "/posts/{postId}", "put"> = {
+    // @ts-expect-error '/posts/{postId}'.put expects { postId: number }, not { wrongKey: number }
+    params: { wrongKey: 1 },
+    json: { title: "x" },
+    method: "put",
+  };
+  void _wrong;
+};
+void _typeOnlyRegression;
 
 const jsonResponse = (body: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(body), {

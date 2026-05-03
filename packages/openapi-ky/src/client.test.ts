@@ -35,19 +35,6 @@ type TestPaths = {
   };
 };
 
-// Type-level regression: wrong path-param key must not compile.
-// This block exists only for type checking — there is no runtime test.
-const _typeOnlyRegression = () => {
-  const _wrong: Options<TestPaths, "/posts/{postId}", "put"> = {
-    // @ts-expect-error '/posts/{postId}'.put expects { postId: number }, not { wrongKey: number }
-    params: { wrongKey: 1 },
-    json: { title: "x" },
-    method: "put",
-  };
-  void _wrong;
-};
-void _typeOnlyRegression;
-
 const jsonResponse = (body: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(body), {
     headers: { "content-type": "application/json" },
@@ -177,6 +164,18 @@ describe("Client", () => {
       } finally {
         process.off("unhandledRejection", unhandled);
       }
+    });
+  });
+
+  describe("타입 추론 (compile-time)", () => {
+    it("path-param 키가 schema와 다르면 컴파일 에러", () => {
+      const _wrong: Options<TestPaths, "/posts/{postId}", "put"> = {
+        // @ts-expect-error '/posts/{postId}'.put expects { postId: number }, not { wrongKey: number }
+        params: { wrongKey: 1 },
+        json: { title: "x" },
+        method: "put",
+      };
+      void _wrong;
     });
   });
 });

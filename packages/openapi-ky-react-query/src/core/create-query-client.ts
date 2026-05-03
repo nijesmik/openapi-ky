@@ -13,6 +13,15 @@ import type * as Internal from "@/types/internal";
 
 import { queryKey } from "@/lib/query-key";
 
+/**
+ * Creates a typed `QueryClient` accessor with `getQueryKey`, `setQueryData`,
+ * and `invalidateQueries` shortcuts bound to the given `Paths`.
+ *
+ * **SSR singleton pattern:** On the server, every call returns a fresh
+ * `QueryClient` to prevent state from leaking between concurrent requests.
+ * On the browser, the first call creates the client and subsequent calls
+ * return the cached instance. Follows TanStack Query's SSR guidance.
+ */
 export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
   let browserQueryClient: QueryClient | undefined;
 

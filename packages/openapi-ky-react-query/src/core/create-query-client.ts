@@ -1,10 +1,4 @@
-import type {
-  HttpMethod,
-  Params,
-  PathsFor,
-  ResponseBody,
-  SearchParams,
-} from "@nijesmik/openapi-ky";
+import type { HttpMethod, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
 
 import {
   isServer,
@@ -38,10 +32,9 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     // Cast: PathParams<...> resolves to a path-specific shape, but the runtime
     // queryKey() helper accepts the wider Params record. Sound because the
     // path-specific shape is structurally a subtype of Params at runtime.
-    return queryKey(
-      path,
-      options as { method?: HttpMethod; params?: Params; searchParams?: SearchParams } | undefined,
-    );
+    // Tied to queryKey's signature so internal changes (e.g. Params removal)
+    // are auto-tracked here without needing a manual update.
+    return queryKey(path, options as Parameters<typeof queryKey>[1]);
   }
 
   function setQueryData<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">({

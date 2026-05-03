@@ -17,7 +17,9 @@ type TestPaths = {
     };
   };
   "/posts/{postId}": {
+    parameters: { path: { postId: number } };
     get: {
+      parameters: { path: { postId: number } };
       responses: { 200: { content: { "application/json": { id: number; title: string } } } };
     };
   };

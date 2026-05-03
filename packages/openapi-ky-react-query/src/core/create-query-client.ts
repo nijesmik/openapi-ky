@@ -1,4 +1,10 @@
-import type { HttpMethod, PathsFor, ResponseBody } from "@nijesmik/openapi-ky";
+import type {
+  HttpMethod,
+  Params,
+  PathsFor,
+  ResponseBody,
+  SearchParams,
+} from "@nijesmik/openapi-ky";
 
 import {
   isServer,
@@ -27,9 +33,15 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
 
   function getQueryKey<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">(
     path: Path,
-    options?: QueryKeyOptions<Method>,
+    options?: QueryKeyOptions<Paths, Path, Method>,
   ) {
-    return queryKey(path, options);
+    // Cast: PathParams<...> resolves to a path-specific shape, but the runtime
+    // queryKey() helper accepts the wider Params record. Sound because the
+    // path-specific shape is structurally a subtype of Params at runtime.
+    return queryKey(
+      path,
+      options as { method?: HttpMethod; params?: Params; searchParams?: SearchParams } | undefined,
+    );
   }
 
   function setQueryData<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">({
@@ -38,7 +50,7 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     params,
     searchParams,
     updater,
-  }: QueryKeyOptions<Method> & {
+  }: QueryKeyOptions<Paths, Path, Method> & {
     path: Path;
     updater: SetQueryDataUpdater<ResponseBody<Paths, Path, Method>>;
   }) {
@@ -53,7 +65,7 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     Method extends HttpMethod = "get",
   >(
     filters: Omit<InvalidateQueryFilters, "queryKey"> &
-      QueryKeyOptions<Method> & {
+      QueryKeyOptions<Paths, Path, Method> & {
         path: Path;
       },
     options?: InvalidateOptions,

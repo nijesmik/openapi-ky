@@ -1,9 +1,13 @@
-import type { HttpMethod, Params, SearchParams } from "@nijesmik/openapi-ky";
+import type { HttpMethod, PathParams, SearchParams } from "@nijesmik/openapi-ky";
 import type { QueryClient } from "@tanstack/react-query";
 
-export type QueryKeyOptions<Method extends HttpMethod = HttpMethod> = {
+export type QueryKeyOptions<
+  Paths extends object,
+  Path extends keyof Paths,
+  Method extends HttpMethod = HttpMethod,
+> = {
   method?: Method;
-  params?: Params;
+  params?: PathParams<Paths, Path, Method>;
   searchParams?: SearchParams;
 };
 

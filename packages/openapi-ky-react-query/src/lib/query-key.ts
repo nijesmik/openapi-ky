@@ -1,10 +1,14 @@
-import type { Params } from "@nijesmik/openapi-ky";
+import type { HttpMethod, SearchParams } from "@nijesmik/openapi-ky";
 
-import type { QueryKeyOptions } from "@/types/client";
+type QueryKey = (string | Record<string, boolean | number | string>)[];
 
-type QueryKey = (string | Params)[];
+type RuntimeQueryKeyOptions = {
+  method?: HttpMethod;
+  params?: Record<string, boolean | number | string>;
+  searchParams?: SearchParams;
+};
 
-export function queryKey(path: string, options?: QueryKeyOptions): Readonly<QueryKey> {
+export function queryKey(path: string, options?: RuntimeQueryKeyOptions): Readonly<QueryKey> {
   const { method, params, searchParams } = options ?? {};
 
   const normalizedSearchParams = searchParams && new URLSearchParams(searchParams as string);

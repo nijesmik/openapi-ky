@@ -25,12 +25,8 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
   function mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
     options: CreateMutationOptions<Paths, Path, Method>,
   ) {
-    if (options.params !== undefined || options.searchParams !== undefined) {
-      // Narrow: the runtime guard above implies the static branch, but TS
-      // can't discriminate the union by `params`/`searchParams` presence —
-      // both branches type those fields, so we assert the narrowing here.
-      const { method, path, params, searchParams, kyOptions, ...rest } =
-        options as CreateStaticMutationOptions<Paths, Path, Method>;
+    if (isStaticMutationOptions(options)) {
+      const { method, path, params, searchParams, kyOptions, ...rest } = options;
       return tanstackMutationOptions({
         mutationFn: (variables: StaticMutationFunctionVariables<Paths, Path, Method>) =>
           api(path, {
@@ -44,11 +40,7 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
       });
     }
 
-    const { method, path, kyOptions, ...rest } = options as CreateDynamicMutationOptions<
-      Paths,
-      Path,
-      Method
-    >;
+    const { method, path, kyOptions, ...rest } = options;
     return tanstackMutationOptions({
       mutationFn: (variables: DynamicMutationFunctionVariables<Paths, Path, Method>) =>
         api(path, {
@@ -61,4 +53,14 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
   }
 
   return mutationOptions;
+}
+
+function isStaticMutationOptions<
+  Paths extends object,
+  Path extends PathsFor<Paths, Method>,
+  Method extends HttpMethod,
+>(
+  options: CreateMutationOptions<Paths, Path, Method>,
+): options is CreateStaticMutationOptions<Paths, Path, Method> {
+  return options.params !== undefined || options.searchParams !== undefined;
 }

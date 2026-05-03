@@ -1,3 +1,5 @@
+import type { Internal } from "@nijesmik/openapi-ky/internal";
+
 import {
   type Client,
   type HttpMethod,
@@ -22,10 +24,7 @@ export function suspenseQueryOptions<Paths extends object>(api: Client<Paths>) {
       options as Flat<CreateSuspenseQueryOptions<Paths, Path, Method, Data>, Paths, Path, Method>;
 
     return tanstackQueryOptions({
-      // Cast: PathParams<...> resolves to a path-specific shape, but the runtime
-      // queryKey() helper accepts the wider Record<string, boolean | number | string>
-      // shape. Sound because the path-specific shape is structurally a subtype.
-      queryKey: queryKey(path, { method, params, searchParams } as Parameters<typeof queryKey>[1]),
+      queryKey: queryKey(path, { method, params: params as Internal.PathParams, searchParams }),
       queryFn: () =>
         api(
           path,

@@ -2,8 +2,8 @@ import type {
   HttpMethod,
   KyOptions,
   Options,
-  Params,
   PathsFor,
+  PathParams,
   RequestBody,
   SearchParams,
 } from "@nijesmik/openapi-ky";
@@ -32,7 +32,7 @@ export function apiOptions<
   json,
 }: {
   method?: Method;
-  params?: Params;
+  params?: PathParams<Paths, Path, Method>;
   searchParams?: SearchParams;
   kyOptions?: KyOptions;
   json?: RequestBody<Paths, Path, Method>;

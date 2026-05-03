@@ -2,8 +2,8 @@ import type {
   HttpMethod,
   JsonField,
   KyOptions,
-  Params,
   PathsFor,
+  PathParams,
   RequestBody,
   ResponseBody,
   SearchParams,
@@ -27,7 +27,7 @@ type RequestInput<
 > = JsonField<Paths, Path, Method> & {
   path: Path;
   method?: Method;
-  params?: Params;
+  params?: PathParams<Paths, Path, Method>;
   searchParams?: S;
   kyOptions?: KyOptions;
 };
@@ -42,7 +42,7 @@ export type CreateQueryOptions<
   "queryFn" | "queryKey" | "select"
 > &
   Omit<RequestInput<Paths, Path, Method>, "params"> & {
-    params?: Params | null;
+    params?: PathParams<Paths, Path, Method> | null;
     select?: (data: ResponseBody<Paths, Path, Method>) => Data;
   };
 

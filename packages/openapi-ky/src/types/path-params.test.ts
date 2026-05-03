@@ -34,19 +34,19 @@ type FixturePaths = {
 };
 
 describe("PathParams", () => {
-  it("returns the path parameters for a method that declares them", () => {
+  it("메서드에 선언된 path parameters를 추출한다", () => {
     expectTypeOf<PathParams<FixturePaths, "/posts/{postId}", "get">>().toEqualTypeOf<{
       postId: number;
     }>();
   });
 
-  it("supports multiple path parameters", () => {
+  it("여러 path parameters를 지원한다", () => {
     expectTypeOf<
       PathParams<FixturePaths, "/posts/{postId}/comments/{commentId}", "get">
     >().toEqualTypeOf<{ postId: number; commentId: number }>();
   });
 
-  it("returns never for paths that declare no path parameters", () => {
+  it("path parameters가 없는 경로는 never를 반환한다", () => {
     expectTypeOf<PathParams<FixturePaths, "/posts", "get">>().toEqualTypeOf<never>();
   });
 });

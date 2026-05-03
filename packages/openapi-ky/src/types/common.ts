@@ -30,3 +30,9 @@ export type ResponseBody<
 > = SuccessResponse<
   Extract<ResponseObjectMap<FilterKeys<Paths[Path], Method>>, Record<number | string, unknown>>
 >;
+
+export type PathParams<
+  Paths,
+  Path extends keyof Paths,
+  Method extends HttpMethod,
+> = Paths[Path] extends { [M in Method]?: { parameters: { path: infer P } } } ? P : never;

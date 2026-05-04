@@ -1,6 +1,8 @@
 import type { HttpMethod, PathsFor, RequestBody, SearchParams } from "@nijesmik/openapi-ky";
 import type { Internal } from "@openapi-ky/internal";
 
+import type { RequestInput } from "@/types/query";
+
 /** @internal */
 export type QueryKey = (string | Internal.PathParams)[];
 
@@ -33,7 +35,7 @@ export type QueryKeyOptions = {
  * @internal
  */
 export type Flat<
-  T,
+  T extends Omit<RequestInput<Paths, Path, Method>, "params">,
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,

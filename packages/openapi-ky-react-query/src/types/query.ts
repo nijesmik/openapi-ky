@@ -30,7 +30,7 @@ type MethodField<Method extends HttpMethod> = { method?: Method } & (Method exte
   ? unknown
   : { method: Method });
 
-type RequestInput<
+export type RequestInput<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",

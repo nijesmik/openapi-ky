@@ -18,18 +18,30 @@ import type { queryKey } from "@/lib/query-key";
 
 export type QueryKey = ReturnType<typeof queryKey>;
 
+/**
+ * `Method` must be inferable from an unconditional intersection position —
+ * if `{ method?: Method }` is moved into the conditional branches, TS fixes
+ * `Method` to the default `"get"` before resolving and rejects value-based
+ * inference like `method: "post"` → `Method = "post"`. The non-GET branch's
+ * `& { method: Method }` makes the field required so externally-bound
+ * `Method` (e.g. `<Path, "post">`) cannot pass with `method` omitted.
+ */
+type MethodField<Method extends HttpMethod> = { method?: Method } & (Method extends "get"
+  ? unknown
+  : { method: Method });
+
 type RequestInput<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",
   S extends SearchParams = SearchParams,
-> = JsonField<Paths, Path, Method> & {
-  path: Path;
-  method?: Method;
-  params?: PathParams<Paths, Path, Method>;
-  searchParams?: S;
-  kyOptions?: KyOptions;
-};
+> = JsonField<Paths, Path, Method> &
+  MethodField<Method> & {
+    path: Path;
+    params?: PathParams<Paths, Path, Method>;
+    searchParams?: S;
+    kyOptions?: KyOptions;
+  };
 
 export type CreateQueryOptions<
   Paths extends object,

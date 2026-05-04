@@ -1,3 +1,5 @@
+import type { Internal } from "@openapi-ky/internal";
+
 import {
   type Client,
   type HttpMethod,
@@ -13,8 +15,6 @@ import type { Flat } from "@/types/internal";
 import type { CreateInfiniteQueryOptions } from "@/types/query";
 
 import { queryKey } from "@/lib/query-key";
-
-import type { Internal } from "../../../../openapi-ky/src/internal";
 
 import { apiOptions } from "./api-options";
 

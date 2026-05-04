@@ -5,7 +5,8 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@openapi-ky/internal": ["../openapi-ky/src/internal"]
     }
   },
   "include": ["src"]

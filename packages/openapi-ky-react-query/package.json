@@ -12,8 +12,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch"
+    "build": "rimraf dist && rollup -c --configPlugin esbuild",
+    "dev": "rollup -c -w --configPlugin esbuild"
   },
   "peerDependencies": {
     "@nijesmik/openapi-ky": "workspace:*",
@@ -22,7 +22,6 @@
   "devDependencies": {
     "@nijesmik/openapi-ky": "workspace:*",
     "@tanstack/react-query": "^5.45.1",
-    "tsup": "^8.4.0",
     "typescript": "5.9.3"
   }
 }

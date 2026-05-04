@@ -124,7 +124,7 @@ describe("Client", () => {
   });
 
   describe("callable 본체 dispatch", () => {
-    it("5. callable 본체로 호출하면 method가 옵션에서 풀려 ky로 전달된다", async () => {
+    it("5. callable 본체로 호출하면 옵션의 method가 ky로 전달된다", async () => {
       const fetchImpl = vi.fn<typeof fetch>(async () => new Response(null, { status: 201 }));
       const client = createTestClient(fetchImpl);
 

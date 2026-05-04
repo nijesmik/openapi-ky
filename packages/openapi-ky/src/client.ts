@@ -12,7 +12,7 @@ import { buildUrl } from "@/lib/build-url";
 export function createClient<Paths extends object, DefaultMethod extends HttpMethod = never>(
   defaultOptions: Omit<KyOptions, "method"> & {
     method?: [DefaultMethod] extends [never]
-      ? TypeError<"Specify <Paths, Method> generic to set method">
+      ? TypeError<"Specify <Paths, DefaultMethod> generic to set method">
       : DefaultMethod;
   },
 ): Client<Paths, [DefaultMethod] extends [never] ? "get" : DefaultMethod>;

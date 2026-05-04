@@ -1,5 +1,6 @@
 import type { HttpMethod, PathsFor, RequestBody, SearchParams } from "@nijesmik/openapi-ky";
-import type { Internal } from "@nijesmik/openapi-ky/internal";
+
+import type { Internal } from "../../../openapi-ky/src/internal";
 
 /** @internal */
 export type QueryKey = (string | Internal.PathParams)[];

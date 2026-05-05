@@ -53,6 +53,11 @@ export type CreateQueryOptions<
   "queryFn" | "queryKey" | "select"
 > &
   Omit<RequestInput<Paths, Path, Method>, "params"> & {
+    /**
+     * `null` is a sentinel that switches `queryFn` to TanStack's `skipToken`
+     * (disables the query). Only `CreateQueryOptions` accepts it — suspense /
+     * infinite always fire the query and do not expose this disable knob.
+     */
     params?: PathParams<Paths, Path, Method> | null;
     select?: (data: ResponseBody<Paths, Path, Method>) => Data;
   };

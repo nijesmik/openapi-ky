@@ -1,11 +1,19 @@
 import { QueryClient } from "@tanstack/react-query";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// vitest의 기본 node 환경에선 `isServer`가 true라 매 호출마다 새 QueryClient를 만든다.
-// 브라우저 싱글턴 동작을 검증하려면 `isServer`를 false로 강제해야 한다.
+// `isServer` is a module-level constant that drives the browser/server branch
+// in `getQueryClient`. Vitest's default node environment exposes it as `true`,
+// so a `vi.hoisted` + getter mock is used to flip the branch per test.
+const mocks = vi.hoisted(() => ({ isServer: false }));
+
 vi.mock("@tanstack/react-query", async (importActual) => {
   const actual = await importActual<typeof import("@tanstack/react-query")>();
-  return { ...actual, isServer: false };
+  return {
+    ...actual,
+    get isServer() {
+      return mocks.isServer;
+    },
+  };
 });
 
 import { createQueryClient } from "./create-query-client";
@@ -26,6 +34,10 @@ type TestPaths = {
 };
 
 describe("createQueryClient", () => {
+  beforeEach(() => {
+    mocks.isServer = false;
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -35,6 +47,13 @@ describe("createQueryClient", () => {
       const factory = createQueryClient<TestPaths>();
 
       expect(factory.getQueryClient()).toBe(factory.getQueryClient());
+    });
+
+    it("서버에서는 매 호출마다 새 인스턴스를 반환한다 (SSR state leak 방지)", () => {
+      mocks.isServer = true;
+      const factory = createQueryClient<TestPaths>();
+
+      expect(factory.getQueryClient()).not.toBe(factory.getQueryClient());
     });
   });
 

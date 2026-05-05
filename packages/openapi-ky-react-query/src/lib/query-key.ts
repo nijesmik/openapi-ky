@@ -6,7 +6,8 @@ export function queryKey(
 ): Readonly<Internal.QueryKey> {
   const { method, params, searchParams } = options ?? {};
 
-  const normalizedSearchParams = searchParams && new URLSearchParams(searchParams as string);
+  const normalizedSearchParams =
+    searchParams && new URLSearchParams(searchParams as Internal.URLSearchParamsInit);
   if (normalizedSearchParams) {
     normalizedSearchParams.sort();
   }

@@ -13,6 +13,9 @@ export type QueryKeyOptions = {
   searchParams?: SearchParams;
 };
 
+/** @internal */
+export type URLSearchParamsInit = ConstructorParameters<typeof URLSearchParams>[0];
+
 /**
  * Re-shapes the option-params type so `json` / `path` survive destructuring in
  * a generic context.

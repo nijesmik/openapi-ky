@@ -192,7 +192,6 @@ describe("createQueryOptions", () => {
         json: { criteria: "ts" },
       });
 
-      // queryFn 실행 → callable 본체 호출 형태 검증
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (opts.queryFn as any)?.({} as never);
 

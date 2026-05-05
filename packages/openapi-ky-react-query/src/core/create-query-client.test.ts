@@ -122,13 +122,11 @@ describe("createQueryClient", () => {
       const queryClient = createQueryClient<Paths>();
       const client = queryClient.getQueryClient();
 
-      // GET cache, POST cache 둘 다 미리 채움.
       client.setQueryData(["/items"], ["GET-DATA"]);
       client.setQueryData(["/items", "post"], ["POST-DATA"]);
 
       await queryClient.invalidateQueries({ method: "post", path: "/items" });
 
-      // POST 캐시는 invalidated, GET은 그대로
       const getQuery = client.getQueryState(["/items"]);
       const postQuery = client.getQueryState(["/items", "post"]);
 

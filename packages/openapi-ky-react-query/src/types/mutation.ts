@@ -10,8 +10,6 @@ import type {
 } from "@nijesmik/openapi-ky";
 import type { UseMutationOptions } from "@tanstack/react-query";
 
-// ----- mutationFn variables (mutate() argument shapes) -----
-
 export type StaticMutationFunctionVariables<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
@@ -31,8 +29,6 @@ export type MutationFunctionVariables<
 > =
   | StaticMutationFunctionVariables<Paths, Path, Method>
   | DynamicMutationFunctionVariables<Paths, Path, Method>;
-
-// ----- create-time options (input args for mutationOptions builder) -----
 
 type CreateBaseMutationOptions<
   Paths extends object,
@@ -81,8 +77,6 @@ export type CreateMutationOptions<
 > =
   | CreateStaticMutationOptions<Paths, Path, Method>
   | CreateDynamicMutationOptions<Paths, Path, Method>;
-
-// ----- useMutation options output (UseMutationOptions aliases) -----
 
 export type UseStaticMutationOptions<
   Paths extends object,

@@ -32,7 +32,9 @@ describe("buildUrl", () => {
     expect(buildUrl(path, params)).toBe(expected);
   });
 
-  it("누락된 파라미터가 있으면 에러를 던진다", () => {
-    expect(() => buildUrl("/users/{id}", {})).toThrow("Missing path parameter: id");
+  it("누락된 파라미터가 있으면 키와 path를 포함한 에러를 던진다", () => {
+    expect(() => buildUrl("/users/{id}", {})).toThrow(
+      `Missing path parameter "id" for path "/users/{id}"`,
+    );
   });
 });

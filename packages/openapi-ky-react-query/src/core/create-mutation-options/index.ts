@@ -4,12 +4,8 @@ import { mutationOptions } from "./mutation-options";
 import { mutationOptionsWithMethod } from "./mutation-options-with-method";
 
 /**
- * Creates a typed factory of TanStack Query mutation option builders bound to
- * an `openapi-ky` `Client`.
- *
- * The returned value is itself the default `mutationOptions` builder. It also
- * exposes `.post`, `.put`, `.patch`, and `.delete` shortcuts that pre-bind
- * `method`:
+ * Returns a `mutationOptions` builder bound to `client`, with `.post`,
+ * `.put`, `.patch`, and `.delete` shortcuts that pre-bind `method`:
  *
  * ```ts
  * const mutationOptions = createMutationOptions(client);
@@ -18,12 +14,20 @@ import { mutationOptionsWithMethod } from "./mutation-options-with-method";
  * useMutation(mutationOptions.post({ path: "/posts" }));
  * ```
  *
- * **`mutate` argument shape:** depends on whether `params` / `searchParams`
- * are provided at create time. The builder runs in one of two modes:
+ * **`mutate` argument shape** — determined at runtime by whether `params`
+ * or `searchParams` are passed at create time.
  *
- * (1) **Static mode** — pass `params` / `searchParams` to the builder when
- * their values are known in the surrounding scope (`useParams`, props,
- * closure). `mutate` then takes the request body directly.
+ * By default, `mutate` takes the full request shape (`json`, `params`,
+ * `searchParams`, etc.) so per-call values are passed at mutate time:
+ *
+ * ```ts
+ * const opts = mutationOptions.put({ path: "/posts/{postId}" });
+ * mutate({ params: { postId }, json: { title: "..." } });
+ * ```
+ *
+ * If `params` or `searchParams` are stable at create time, passing them to
+ * the builder lifts them out of `mutate`, which then takes the request body
+ * directly:
  *
  * ```ts
  * const opts = mutationOptions.put({
@@ -31,15 +35,6 @@ import { mutationOptionsWithMethod } from "./mutation-options-with-method";
  *   params: { postId },
  * });
  * mutate({ title: "..." }); // body only
- * ```
- *
- * (2) **Dynamic mode** — omit `params` / `searchParams` at create time when
- * they vary per call. `mutate` then takes a ky-options shape (`json`,
- * `params`, `searchParams`, etc.).
- *
- * ```ts
- * const opts = mutationOptions.put({ path: "/posts/{postId}" });
- * mutate({ params: { postId }, json: { title: "..." } });
  * ```
  *
  * For read endpoints (queries), use `createQueryOptions` instead.

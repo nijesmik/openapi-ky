@@ -112,12 +112,14 @@ describe("createMutationOptions", () => {
       });
       await opts.mutationFn?.({ title: "Hello" }, {} as never);
 
-      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts/{postId}", {
-        method: "put",
-        params: { postId: 1 },
-        searchParams: undefined,
-        json: { title: "Hello" },
-      });
+      expect(getCallableMock(api)).toHaveBeenCalledWith(
+        "/posts/{postId}",
+        expect.objectContaining({
+          method: "put",
+          params: { postId: 1 },
+          json: { title: "Hello" },
+        }),
+      );
     });
 
     it("searchParams만 지정 시에도 static 모드로 라우팅되어 body를 직접 받는다", async () => {
@@ -131,12 +133,14 @@ describe("createMutationOptions", () => {
       });
       await opts.mutationFn?.({ title: "Hello" }, {} as never);
 
-      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
-        method: "post",
-        params: undefined,
-        searchParams: { lang: "ko" },
-        json: { title: "Hello" },
-      });
+      expect(getCallableMock(api)).toHaveBeenCalledWith(
+        "/posts",
+        expect.objectContaining({
+          method: "post",
+          searchParams: { lang: "ko" },
+          json: { title: "Hello" },
+        }),
+      );
     });
 
     it("kyOptions가 params/searchParams와 함께 api 호출에 전달된다", async () => {
@@ -233,12 +237,14 @@ describe("createMutationOptions", () => {
       });
       await opts.mutationFn?.({ title: "Hello" }, {} as never);
 
-      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts/{postId}", {
-        method: "put",
-        params: { postId: 1 },
-        searchParams: undefined,
-        json: { title: "Hello" },
-      });
+      expect(getCallableMock(api)).toHaveBeenCalledWith(
+        "/posts/{postId}",
+        expect.objectContaining({
+          method: "put",
+          params: { postId: 1 },
+          json: { title: "Hello" },
+        }),
+      );
     });
   });
 

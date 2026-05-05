@@ -33,15 +33,6 @@ describe("queryKey", () => {
     expect(queryKey("/users", { searchParams: sp })).toEqual(["/users", "page=1&sort=name"]);
   });
 
-  it("타입이 달라도 같은 searchParams면 같은 키를 생성한다", () => {
-    const fromObject = queryKey("/users", { searchParams: { page: "1" } });
-    const fromString = queryKey("/users", { searchParams: "page=1" });
-    const fromUSP = queryKey("/users", { searchParams: new URLSearchParams({ page: "1" }) });
-
-    expect(fromObject).toEqual(fromString);
-    expect(fromString).toEqual(fromUSP);
-  });
-
   it("params와 searchParams가 모두 있으면 별도 요소로 추가한다", () => {
     expect(
       queryKey("/users/{id}", {

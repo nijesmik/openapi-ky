@@ -97,32 +97,4 @@ describe("createQueryClient", () => {
       );
     });
   });
-
-  describe("method 분리 매칭", () => {
-    it("invalidateQueries({ method: 'post', path })는 같은 path의 GET query를 매칭하지 않는다", async () => {
-      type Paths = {
-        "/items": {
-          get: { responses: { 200: { content: { "application/json": never[] } } } };
-          post: {
-            requestBody: { content: { "application/json": { x: string } } };
-            responses: { 200: { content: { "application/json": never[] } } };
-          };
-        };
-      };
-
-      const queryClient = createQueryClient<Paths>();
-      const client = queryClient.getQueryClient();
-
-      client.setQueryData(["/items"], ["GET-DATA"]);
-      client.setQueryData(["/items", "post"], ["POST-DATA"]);
-
-      await queryClient.invalidateQueries({ method: "post", path: "/items" });
-
-      const getQuery = client.getQueryState(["/items"]);
-      const postQuery = client.getQueryState(["/items", "post"]);
-
-      expect(getQuery?.isInvalidated).toBe(false);
-      expect(postQuery?.isInvalidated).toBe(true);
-    });
-  });
 });

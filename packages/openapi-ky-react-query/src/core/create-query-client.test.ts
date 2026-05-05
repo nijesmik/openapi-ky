@@ -78,15 +78,6 @@ describe("createQueryClient", () => {
   });
 
   describe("invalidateQueries", () => {
-    it("invalidateQueries를 dispatch한다", () => {
-      const invalidateSpy = vi.spyOn(QueryClient.prototype, "invalidateQueries");
-      const factory = createQueryClient<TestPaths>();
-
-      factory.invalidateQueries({ path: "/posts" });
-
-      expect(invalidateSpy).toHaveBeenCalledTimes(1);
-    });
-
     it("filter 옵션과 invalidate 옵션을 분리해 전달한다", () => {
       const invalidateSpy = vi.spyOn(QueryClient.prototype, "invalidateQueries");
       const factory = createQueryClient<TestPaths>();

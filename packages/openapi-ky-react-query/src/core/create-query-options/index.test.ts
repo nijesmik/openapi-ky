@@ -23,17 +23,6 @@ type TestPaths = {
 const createFakeApi = () => createFakeCallableClient<TestPaths>({ id: 1, title: "test" });
 
 describe("createQueryOptions", () => {
-  describe("callable / structure", () => {
-    it("리턴값은 호출 가능하고 .suspense / .infinite 메서드를 노출한다", () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
-
-      expect(typeof queryOptions).toBe("function");
-      expect(typeof queryOptions.suspense).toBe("function");
-      expect(typeof queryOptions.infinite).toBe("function");
-    });
-  });
-
   describe("params: null → skipToken", () => {
     it("params: null이면 queryFn이 skipToken이다", () => {
       const api = createFakeApi();

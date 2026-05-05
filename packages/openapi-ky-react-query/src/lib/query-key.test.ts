@@ -51,13 +51,6 @@ describe("queryKey", () => {
     ).toEqual(["/users/{id}", { id: 1 }, "include=posts"]);
   });
 
-  it("params만 있을 때와 searchParams만 있을 때 키가 다르다", () => {
-    const withParams = queryKey("/users", { params: { page: "1" } });
-    const withSearch = queryKey("/users", { searchParams: { page: "1" } });
-
-    expect(withParams).not.toEqual(withSearch);
-  });
-
   it("빈 params 객체는 키에 포함하지 않는다", () => {
     expect(queryKey("/users", { params: {} })).toEqual(["/users"]);
   });

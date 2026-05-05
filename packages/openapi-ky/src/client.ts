@@ -42,7 +42,8 @@ export function createClient(defaultOptions: Omit<KyOptions, "method"> & { metho
       })
       .catch(() => {
         // `.then()` creates a derived promise that rejects independently when `promise` rejects.
-        // The caller awaits/catches `promise` itself, so swallow this branch to avoid `unhandledRejection`.
+        // The caller awaits/catches `promise` itself, so swallow only this derived branch
+        // (not `promise`) to avoid `unhandledRejection`.
       });
 
     return promise;

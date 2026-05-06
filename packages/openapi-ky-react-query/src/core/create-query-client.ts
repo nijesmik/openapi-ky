@@ -15,7 +15,8 @@ import { queryKey } from "@/lib/query-key";
 
 /**
  * Creates a typed `QueryClient` accessor with `getQueryKey`, `setQueryData`,
- * and `invalidateQueries` shortcuts bound to the given `TPaths`.
+ * and `invalidateQueries` shortcuts bound to the given `TPaths`. Calling the
+ * accessor directly is equivalent to `getQueryClient()`.
  *
  * **SSR singleton pattern:** On the server, every call returns a fresh
  * `QueryClient` to prevent state from leaking between concurrent requests.

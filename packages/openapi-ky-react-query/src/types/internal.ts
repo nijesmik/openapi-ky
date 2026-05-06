@@ -1,7 +1,7 @@
 import type { HttpMethod, PathsFor, RequestBody, SearchParams } from "@nijesmik/openapi-ky";
 import type { Internal } from "@openapi-ky/internal";
 
-import type { RequestInput } from "@/types/query";
+import type { QueryRequestOptions } from "@/types/query";
 
 /** @internal */
 export type QueryKey = (string | Internal.PathParams)[];
@@ -26,14 +26,14 @@ export type URLSearchParamsInit = ConstructorParameters<typeof URLSearchParams>[
  *    cannot be destructured directly. Adding `json?` as an optional flat
  *    field collapses the conditional.
  * 2. Distributive indexed access over the underlying intersection makes the
- *    destructured `path` resolve to `RequestInput<...>["path"]` rather than
+ *    destructured `path` resolve to `QueryRequestOptions<...>["path"]` rather than
  *    the outer `Path` generic. Re-injecting `path: Path` short-circuits this
  *    indirection.
  *
  * @internal
  */
 export type Flat<
-  T extends Omit<RequestInput<Paths, Path, Method>, "params">,
+  T extends Omit<QueryRequestOptions<Paths, Path, Method>, "params">,
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod,

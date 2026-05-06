@@ -30,7 +30,7 @@ type MethodField<Method extends HttpMethod> = { method?: Method } & (Method exte
   ? unknown
   : { method: Method });
 
-export type RequestInput<
+export type QueryRequestOptions<
   Paths extends object,
   Path extends PathsFor<Paths, Method>,
   Method extends HttpMethod = "get",
@@ -52,7 +52,7 @@ export type CreateQueryOptions<
   UseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
   "queryFn" | "queryKey" | "select"
 > &
-  Omit<RequestInput<Paths, Path, Method>, "params"> & {
+  Omit<QueryRequestOptions<Paths, Path, Method>, "params"> & {
     /**
      * `null` is a sentinel that switches `queryFn` to TanStack's `skipToken`
      * (disables the query). Only `CreateQueryOptions` accepts it — suspense /
@@ -71,7 +71,7 @@ export type CreateSuspenseQueryOptions<
   UseSuspenseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
   "queryFn" | "queryKey" | "select"
 > &
-  RequestInput<Paths, Path, Method> & {
+  QueryRequestOptions<Paths, Path, Method> & {
     select?: (data: ResponseBody<Paths, Path, Method>) => Data;
   };
 
@@ -85,7 +85,12 @@ export type CreateInfiniteQueryOptions<
   UseInfiniteQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data, QueryKey, PageParam>,
   "queryFn" | "queryKey" | "initialPageParam" | "select"
 > &
-  RequestInput<Paths, Path, Method, Record<string, string | number | boolean | undefined>> & {
+  QueryRequestOptions<
+    Paths,
+    Path,
+    Method,
+    Record<string, string | number | boolean | undefined>
+  > & {
     pageParamKey?: string;
     initialPageParam: PageParam;
     select?: (data: InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>) => Data;

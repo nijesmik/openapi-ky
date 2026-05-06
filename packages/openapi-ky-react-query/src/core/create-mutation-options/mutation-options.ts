@@ -50,9 +50,10 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
       mutationFn: (variables: DynamicMutationFunctionVariables<Paths, Path, Method>) =>
         api(
           path,
-          // `variables` carries the full ky-options shape; `JsonField` is
-          // method-conditional and cannot be reduced in a generic context, so
-          // assert the call-site type after merging method.
+          // `JsonField` is method-conditional and cannot be reduced in a
+          // generic context. `apiOptions` covers this via destructured args,
+          // but `variables` here carries the full ky-options shape, so we
+          // cast inline instead.
           {
             ...kyOptions,
             ...variables,

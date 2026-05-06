@@ -12,8 +12,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "rimraf dist && rollup -c --configPlugin esbuild",
-    "dev": "rollup -c -w --configPlugin esbuild"
+    "build": "pnpm typecheck && rimraf dist && rollup -c --configPlugin esbuild",
+    "dev": "rollup -c -w --configPlugin esbuild",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "openapi-typescript-helpers": "^0.1.0"

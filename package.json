@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
-    "test": "vitest run",
+    "test": "pnpm typecheck && vitest run",
+    "typecheck": "pnpm -r run typecheck",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "changeset": "changeset",

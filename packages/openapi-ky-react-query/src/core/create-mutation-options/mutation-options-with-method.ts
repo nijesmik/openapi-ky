@@ -11,18 +11,18 @@ import type { DistributiveOmit } from "@/types/utils";
 
 import type { mutationOptions } from "./mutation-options";
 
-export function mutationOptionsWithMethod<Paths extends object, Method extends HttpMethod>(
-  boundMutationOptions: ReturnType<typeof mutationOptions<Paths>>,
-  method: Method,
+export function mutationOptionsWithMethod<TPaths extends object, TMethod extends HttpMethod>(
+  boundMutationOptions: ReturnType<typeof mutationOptions<TPaths>>,
+  method: TMethod,
 ) {
-  function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
-    options: DistributiveOmit<CreateStaticMutationOptions<Paths, Path, Method>, "method">,
-  ): UseStaticMutationOptions<Paths, Path, Method>;
-  function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
-    options: DistributiveOmit<CreateDynamicMutationOptions<Paths, Path, Method>, "method">,
-  ): UseDynamicMutationOptions<Paths, Path, Method>;
-  function mutationOptionsWithMethod<Path extends PathsFor<Paths, Method>>(
-    options: DistributiveOmit<CreateMutationOptions<Paths, Path, Method>, "method">,
+  function mutationOptionsWithMethod<TPath extends PathsFor<TPaths, TMethod>>(
+    options: DistributiveOmit<CreateStaticMutationOptions<TPaths, TPath, TMethod>, "method">,
+  ): UseStaticMutationOptions<TPaths, TPath, TMethod>;
+  function mutationOptionsWithMethod<TPath extends PathsFor<TPaths, TMethod>>(
+    options: DistributiveOmit<CreateDynamicMutationOptions<TPaths, TPath, TMethod>, "method">,
+  ): UseDynamicMutationOptions<TPaths, TPath, TMethod>;
+  function mutationOptionsWithMethod<TPath extends PathsFor<TPaths, TMethod>>(
+    options: DistributiveOmit<CreateMutationOptions<TPaths, TPath, TMethod>, "method">,
   ) {
     return boundMutationOptions({ ...options, method });
   }

@@ -20,7 +20,7 @@ import { suspenseQueryOptions } from "./suspense-query-options";
  * // queryOptions.infinite(...) — see TanStack Query docs for pageParam fields.
  * ```
  *
- * **Method default:** `method` defaults to `"get"` when omitted (query
+ * **TMethod default:** `method` defaults to `"get"` when omitted (query
  * semantics ≡ HTTP GET). This default is applied inside `createQueryOptions`
  * and takes precedence over any `method` configured on the `Client` via
  * `createClient`. For read endpoints that aren't `GET` (e.g. `POST /search`),
@@ -36,7 +36,7 @@ import { suspenseQueryOptions } from "./suspense-query-options";
  *
  * For write endpoints (mutations), use `createMutationOptions` instead.
  */
-export function createQueryOptions<Paths extends object>(api: Client<Paths>) {
+export function createQueryOptions<TPaths extends object>(api: Client<TPaths>) {
   return Object.assign(queryOptions(api), {
     suspense: suspenseQueryOptions(api),
     infinite: infiniteQueryOptions(api),

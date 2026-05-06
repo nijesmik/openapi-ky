@@ -245,7 +245,7 @@ describe("createQueryOptions", () => {
       });
     });
 
-    it("[회귀 테스트] explicit Method generic 바인딩 + method 값 누락은 컴파일 에러", () => {
+    it("[회귀 테스트] explicit TMethod generic 바인딩 + method 값 누락은 컴파일 에러", () => {
       type _Paths = {
         "/search": {
           post: {
@@ -258,7 +258,7 @@ describe("createQueryOptions", () => {
       const api = createFakeCallableClient<_Paths>({ items: [] });
       const queryOptions = createQueryOptions(api);
 
-      // @ts-expect-error Method='post'를 explicit하게 바인딩했으면 method 값이 필수
+      // @ts-expect-error TMethod='post'를 explicit하게 바인딩했으면 method 값이 필수
       queryOptions<"/search", "post">({
         path: "/search",
         json: { criteria: "x" },

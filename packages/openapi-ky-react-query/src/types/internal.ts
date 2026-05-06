@@ -27,17 +27,17 @@ export type URLSearchParamsInit = ConstructorParameters<typeof URLSearchParams>[
  *    field collapses the conditional.
  * 2. Distributive indexed access over the underlying intersection makes the
  *    destructured `path` resolve to `QueryRequestOptions<...>["path"]` rather than
- *    the outer `Path` generic. Re-injecting `path: Path` short-circuits this
+ *    the outer `TPath` generic. Re-injecting `path: TPath` short-circuits this
  *    indirection.
  *
  * @internal
  */
 export type Flat<
-  T extends Omit<QueryRequestOptions<Paths, Path, Method>, "params">,
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
-> = Omit<T, "path"> & {
-  path: Path;
-  json?: RequestBody<Paths, Path, Method>;
+  TOptions extends Omit<QueryRequestOptions<TPaths, TPath, TMethod>, "params">,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
+> = Omit<TOptions, "path"> & {
+  path: TPath;
+  json?: RequestBody<TPaths, TPath, TMethod>;
 };

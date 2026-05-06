@@ -19,79 +19,79 @@ import type { queryKey } from "@/lib/query-key";
 export type QueryKey = ReturnType<typeof queryKey>;
 
 /**
- * `Method` must be inferable from an unconditional intersection position —
- * if `{ method?: Method }` is moved into the conditional branches, TS fixes
- * `Method` to the default `"get"` before resolving and rejects value-based
- * inference like `method: "post"` → `Method = "post"`. The non-GET branch's
- * `& { method: Method }` makes the field required so externally-bound
- * `Method` (e.g. `<Path, "post">`) cannot pass with `method` omitted.
+ * `TMethod` must be inferable from an unconditional intersection position —
+ * if `{ method?: TMethod }` is moved into the conditional branches, TS fixes
+ * `TMethod` to the default `"get"` before resolving and rejects value-based
+ * inference like `method: "post"` → `TMethod = "post"`. The non-GET branch's
+ * `& { method: TMethod }` makes the field required so externally-bound
+ * `TMethod` (e.g. `<TPath, "post">`) cannot pass with `method` omitted.
  */
-type MethodField<Method extends HttpMethod> = { method?: Method } & (Method extends "get"
+type MethodField<TMethod extends HttpMethod> = { method?: TMethod } & (TMethod extends "get"
   ? unknown
-  : { method: Method });
+  : { method: TMethod });
 
 export type QueryRequestOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod = "get",
-  S extends SearchParams = SearchParams,
-> = JsonField<Paths, Path, Method> &
-  MethodField<Method> & {
-    path: Path;
-    params?: PathParams<Paths, Path, Method>;
-    searchParams?: S;
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod = "get",
+  TSearchParams extends SearchParams = SearchParams,
+> = JsonField<TPaths, TPath, TMethod> &
+  MethodField<TMethod> & {
+    path: TPath;
+    params?: PathParams<TPaths, TPath, TMethod>;
+    searchParams?: TSearchParams;
     kyOptions?: KyOptions;
   };
 
 export type CreateQueryOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod = "get",
-  Data = ResponseBody<Paths, Path, Method>,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod = "get",
+  TData = ResponseBody<TPaths, TPath, TMethod>,
 > = Omit<
-  UseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
+  UseQueryOptions<ResponseBody<TPaths, TPath, TMethod>, Error, TData>,
   "queryFn" | "queryKey" | "select"
 > &
-  Omit<QueryRequestOptions<Paths, Path, Method>, "params"> & {
+  Omit<QueryRequestOptions<TPaths, TPath, TMethod>, "params"> & {
     /**
      * `null` is a sentinel that switches `queryFn` to TanStack's `skipToken`
      * (disables the query). Only `CreateQueryOptions` accepts it — suspense /
      * infinite always fire the query and do not expose this disable knob.
      */
-    params?: PathParams<Paths, Path, Method> | null;
-    select?: (data: ResponseBody<Paths, Path, Method>) => Data;
+    params?: PathParams<TPaths, TPath, TMethod> | null;
+    select?: (data: ResponseBody<TPaths, TPath, TMethod>) => TData;
   };
 
 export type CreateSuspenseQueryOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod = "get",
-  Data = ResponseBody<Paths, Path, Method>,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod = "get",
+  TData = ResponseBody<TPaths, TPath, TMethod>,
 > = Omit<
-  UseSuspenseQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>,
+  UseSuspenseQueryOptions<ResponseBody<TPaths, TPath, TMethod>, Error, TData>,
   "queryFn" | "queryKey" | "select"
 > &
-  QueryRequestOptions<Paths, Path, Method> & {
-    select?: (data: ResponseBody<Paths, Path, Method>) => Data;
+  QueryRequestOptions<TPaths, TPath, TMethod> & {
+    select?: (data: ResponseBody<TPaths, TPath, TMethod>) => TData;
   };
 
 export type CreateInfiniteQueryOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
-  PageParam,
-  Data = InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
+  TPageParam,
+  TData = InfiniteData<ResponseBody<TPaths, TPath, TMethod>, TPageParam>,
 > = Omit<
-  UseInfiniteQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data, QueryKey, PageParam>,
+  UseInfiniteQueryOptions<ResponseBody<TPaths, TPath, TMethod>, Error, TData, QueryKey, TPageParam>,
   "queryFn" | "queryKey" | "initialPageParam" | "select"
 > &
   QueryRequestOptions<
-    Paths,
-    Path,
-    Method,
+    TPaths,
+    TPath,
+    TMethod,
     Record<string, string | number | boolean | undefined>
   > & {
     pageParamKey?: string;
-    initialPageParam: PageParam;
-    select?: (data: InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>) => Data;
+    initialPageParam: TPageParam;
+    select?: (data: InfiniteData<ResponseBody<TPaths, TPath, TMethod>, TPageParam>) => TData;
   };

@@ -11,89 +11,92 @@ import type {
 import type { UseMutationOptions } from "@tanstack/react-query";
 
 export type StaticMutationFunctionVariables<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
-> = RequestBody<Paths, Path, Method>;
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
+> = RequestBody<TPaths, TPath, TMethod>;
 
 export type DynamicMutationFunctionVariables<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
-> = Omit<Options<Paths, Path, Method>, "method">;
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
+> = Omit<Options<TPaths, TPath, TMethod>, "method">;
 
 export type MutationFunctionVariables<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 > =
-  | StaticMutationFunctionVariables<Paths, Path, Method>
-  | DynamicMutationFunctionVariables<Paths, Path, Method>;
+  | StaticMutationFunctionVariables<TPaths, TPath, TMethod>
+  | DynamicMutationFunctionVariables<TPaths, TPath, TMethod>;
 
 type CreateBaseMutationOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
-  Variables extends MutationFunctionVariables<Paths, Path, Method>,
-> = Omit<UseMutationOptions<ResponseBody<Paths, Path, Method>, Error, Variables>, "mutationFn"> & {
-  method: Method;
-  path: Path;
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
+  TVariables extends MutationFunctionVariables<TPaths, TPath, TMethod>,
+> = Omit<
+  UseMutationOptions<ResponseBody<TPaths, TPath, TMethod>, Error, TVariables>,
+  "mutationFn"
+> & {
+  method: TMethod;
+  path: TPath;
   kyOptions?: KyOptions;
 };
 
 export type CreateStaticMutationOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 > = CreateBaseMutationOptions<
-  Paths,
-  Path,
-  Method,
-  StaticMutationFunctionVariables<Paths, Path, Method>
+  TPaths,
+  TPath,
+  TMethod,
+  StaticMutationFunctionVariables<TPaths, TPath, TMethod>
 > &
   (
-    | { params: PathParams<Paths, Path, Method>; searchParams?: SearchParams }
+    | { params: PathParams<TPaths, TPath, TMethod>; searchParams?: SearchParams }
     | { params?: never; searchParams: SearchParams }
   );
 
 export type CreateDynamicMutationOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 > = CreateBaseMutationOptions<
-  Paths,
-  Path,
-  Method,
-  DynamicMutationFunctionVariables<Paths, Path, Method>
+  TPaths,
+  TPath,
+  TMethod,
+  DynamicMutationFunctionVariables<TPaths, TPath, TMethod>
 > & {
   params?: never;
   searchParams?: never;
 };
 
 export type CreateMutationOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 > =
-  | CreateStaticMutationOptions<Paths, Path, Method>
-  | CreateDynamicMutationOptions<Paths, Path, Method>;
+  | CreateStaticMutationOptions<TPaths, TPath, TMethod>
+  | CreateDynamicMutationOptions<TPaths, TPath, TMethod>;
 
 export type UseStaticMutationOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 > = UseMutationOptions<
-  ResponseBody<Paths, Path, Method>,
+  ResponseBody<TPaths, TPath, TMethod>,
   Error,
-  StaticMutationFunctionVariables<Paths, Path, Method>
+  StaticMutationFunctionVariables<TPaths, TPath, TMethod>
 >;
 
 export type UseDynamicMutationOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 > = UseMutationOptions<
-  ResponseBody<Paths, Path, Method>,
+  ResponseBody<TPaths, TPath, TMethod>,
   Error,
-  DynamicMutationFunctionVariables<Paths, Path, Method>
+  DynamicMutationFunctionVariables<TPaths, TPath, TMethod>
 >;

@@ -14,17 +14,17 @@ import type { CreateQueryOptions } from "@/types/query";
 import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
 
-export function queryOptions<Paths extends object>(api: Client<Paths>) {
+export function queryOptions<TPaths extends object>(api: Client<TPaths>) {
   return function queryOptions<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
-    Data = ResponseBody<Paths, Path, Method>,
-  >(options: CreateQueryOptions<Paths, Path, Method, Data>) {
+    TPath extends PathsFor<TPaths, TMethod>,
+    TMethod extends HttpMethod = "get",
+    TData = ResponseBody<TPaths, TPath, TMethod>,
+  >(options: CreateQueryOptions<TPaths, TPath, TMethod, TData>) {
     const { path, method, params, searchParams, kyOptions, select, json, ...rest } =
-      options as Flat<CreateQueryOptions<Paths, Path, Method, Data>, Paths, Path, Method>;
+      options as Flat<CreateQueryOptions<TPaths, TPath, TMethod, TData>, TPaths, TPath, TMethod>;
 
     if (params === null) {
-      return tanstackQueryOptions<ResponseBody<Paths, Path, Method>, Error, Data>({
+      return tanstackQueryOptions<ResponseBody<TPaths, TPath, TMethod>, Error, TData>({
         queryKey: queryKey(path, { method }),
         queryFn: skipToken,
       });
@@ -35,7 +35,7 @@ export function queryOptions<Paths extends object>(api: Client<Paths>) {
       queryFn: () =>
         api(
           path,
-          apiOptions<Paths, Path, Method>({
+          apiOptions<TPaths, TPath, TMethod>({
             method,
             params,
             searchParams,

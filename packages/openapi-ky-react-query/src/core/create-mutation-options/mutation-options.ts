@@ -14,26 +14,28 @@ import type {
 
 import { apiOptions } from "@/lib/api-options";
 
-export function mutationOptions<Paths extends object>(api: Client<Paths>) {
-  function mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: CreateStaticMutationOptions<Paths, Path, Method>,
-  ): UseStaticMutationOptions<Paths, Path, Method>;
-  function mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: CreateDynamicMutationOptions<Paths, Path, Method>,
-  ): UseDynamicMutationOptions<Paths, Path, Method>;
-  function mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: CreateMutationOptions<Paths, Path, Method>,
-  ): UseStaticMutationOptions<Paths, Path, Method> | UseDynamicMutationOptions<Paths, Path, Method>;
-  function mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(
-    options: CreateMutationOptions<Paths, Path, Method>,
+export function mutationOptions<TPaths extends object>(api: Client<TPaths>) {
+  function mutationOptions<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
+    options: CreateStaticMutationOptions<TPaths, TPath, TMethod>,
+  ): UseStaticMutationOptions<TPaths, TPath, TMethod>;
+  function mutationOptions<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
+    options: CreateDynamicMutationOptions<TPaths, TPath, TMethod>,
+  ): UseDynamicMutationOptions<TPaths, TPath, TMethod>;
+  function mutationOptions<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
+    options: CreateMutationOptions<TPaths, TPath, TMethod>,
+  ):
+    | UseStaticMutationOptions<TPaths, TPath, TMethod>
+    | UseDynamicMutationOptions<TPaths, TPath, TMethod>;
+  function mutationOptions<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
+    options: CreateMutationOptions<TPaths, TPath, TMethod>,
   ) {
     if (isStaticMutationOptions(options)) {
       const { method, path, params, searchParams, kyOptions, ...rest } = options;
       return tanstackMutationOptions({
-        mutationFn: (variables: StaticMutationFunctionVariables<Paths, Path, Method>) =>
+        mutationFn: (variables: StaticMutationFunctionVariables<TPaths, TPath, TMethod>) =>
           api(
             path,
-            apiOptions<Paths, Path, Method>({
+            apiOptions<TPaths, TPath, TMethod>({
               method,
               params,
               searchParams,
@@ -47,7 +49,7 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
 
     const { method, path, kyOptions, ...rest } = options;
     return tanstackMutationOptions({
-      mutationFn: (variables: DynamicMutationFunctionVariables<Paths, Path, Method>) =>
+      mutationFn: (variables: DynamicMutationFunctionVariables<TPaths, TPath, TMethod>) =>
         api(
           path,
           // `JsonField` is method-conditional and cannot be reduced in a
@@ -58,7 +60,7 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
             ...kyOptions,
             ...variables,
             method,
-          } as OptionsWithRequiredMethod<Paths, Path, Method>,
+          } as OptionsWithRequiredMethod<TPaths, TPath, TMethod>,
         ).json(),
       ...rest,
     });
@@ -68,11 +70,11 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
 }
 
 function isStaticMutationOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 >(
-  options: CreateMutationOptions<Paths, Path, Method>,
-): options is CreateStaticMutationOptions<Paths, Path, Method> {
+  options: CreateMutationOptions<TPaths, TPath, TMethod>,
+): options is CreateStaticMutationOptions<TPaths, TPath, TMethod> {
   return options.params !== undefined || options.searchParams !== undefined;
 }

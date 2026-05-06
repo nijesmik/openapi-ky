@@ -271,7 +271,7 @@ describe("createMutationOptions", () => {
       });
     });
 
-    describe("static 모드: Variables = RequestBody (body 직접)", () => {
+    describe("static 모드: TVariables = RequestBody (body 직접)", () => {
       it("params 지정 시 mutationFn 인자는 body 그대로이며 ky options 래핑은 거부된다", () => {
         const api = createFakeApi();
         const mutationOptions = createMutationOptions(api);
@@ -287,11 +287,11 @@ describe("createMutationOptions", () => {
         // @ts-expect-error — static 모드에서는 { json: ... }로 래핑할 수 없음
         opts.mutationFn?.({ json: { title: "x" } }, {} as never);
 
-        // @ts-expect-error — static 모드 Variables는 RequestBody이므로 ky options 키 거부
+        // @ts-expect-error — static 모드 TVariables는 RequestBody이므로 ky options 키 거부
         opts.mutationFn?.({ params: { postId: 1 } }, {} as never);
       });
 
-      it("searchParams만 지정해도 Variables는 body 그대로다", () => {
+      it("searchParams만 지정해도 TVariables는 body 그대로다", () => {
         const api = createFakeApi();
         const mutationOptions = createMutationOptions(api);
 
@@ -323,7 +323,7 @@ describe("createMutationOptions", () => {
       });
     });
 
-    describe("dynamic 모드: Variables = Omit<Options, 'method'> (ky options 형태)", () => {
+    describe("dynamic 모드: TVariables = Omit<Options, 'method'> (ky options 형태)", () => {
       it("params/searchParams 미지정 시 mutationFn 인자는 ky options 형태이며 body 직접 전달은 거부된다", () => {
         const api = createFakeApi();
         const mutationOptions = createMutationOptions(api);

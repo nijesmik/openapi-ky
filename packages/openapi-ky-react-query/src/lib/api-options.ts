@@ -17,16 +17,16 @@ import type {
  * own:
  *
  * (1) Defaults `method` to `"get"` when omitted (queries map to HTTP GET).
- * (2) Asserts the value as `Method` so the required method field is
+ * (2) Asserts the value as `TMethod` so the required method field is
  *     concretely typed.
- * (3) Casts the return shape because `JsonField<Paths, Path, Method>` is
+ * (3) Casts the return shape because `JsonField<TPaths, TPath, TMethod>` is
  *     method-conditional and cannot be reduced in a generic context — TS
  *     rejects the structural match even though the runtime shape is correct.
  */
 export function apiOptions<
-  Paths extends object,
-  Path extends PathsFor<Paths, Method>,
-  Method extends HttpMethod,
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
 >({
   method,
   params,
@@ -34,17 +34,17 @@ export function apiOptions<
   kyOptions,
   json,
 }: {
-  method?: Method;
-  params?: PathParams<Paths, Path, Method>;
+  method?: TMethod;
+  params?: PathParams<TPaths, TPath, TMethod>;
   searchParams?: SearchParams;
   kyOptions?: KyOptions;
-  json?: RequestBody<Paths, Path, Method>;
-}): OptionsWithRequiredMethod<Paths, Path, Method> {
+  json?: RequestBody<TPaths, TPath, TMethod>;
+}): OptionsWithRequiredMethod<TPaths, TPath, TMethod> {
   return {
     ...kyOptions,
-    method: method ?? ("get" as Method),
+    method: method ?? ("get" as TMethod),
     params,
     searchParams,
     json,
-  } as OptionsWithRequiredMethod<Paths, Path, Method>;
+  } as OptionsWithRequiredMethod<TPaths, TPath, TMethod>;
 }

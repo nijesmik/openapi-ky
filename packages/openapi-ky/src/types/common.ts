@@ -10,27 +10,27 @@ import type {
 
 export type SearchParams = NonNullable<KyOptions["searchParams"]>;
 
-export type PathsFor<Paths extends object, Method extends HttpMethod> = PathsWithMethod<
-  Paths,
-  Method
+export type PathsFor<TPaths extends object, TMethod extends HttpMethod> = PathsWithMethod<
+  TPaths,
+  TMethod
 > &
   string;
 
-export type RequestBody<Paths, Path extends keyof Paths, Method extends HttpMethod> =
-  OperationRequestBodyContent<FilterKeys<Paths[Path], Method>> extends undefined
+export type RequestBody<TPaths, TPath extends keyof TPaths, TMethod extends HttpMethod> =
+  OperationRequestBodyContent<FilterKeys<TPaths[TPath], TMethod>> extends undefined
     ? void
-    : OperationRequestBodyContent<FilterKeys<Paths[Path], Method>>;
+    : OperationRequestBodyContent<FilterKeys<TPaths[TPath], TMethod>>;
 
 export type ResponseBody<
-  Paths,
-  Path extends keyof Paths,
-  Method extends HttpMethod = "get",
+  TPaths,
+  TPath extends keyof TPaths,
+  TMethod extends HttpMethod = "get",
 > = SuccessResponse<
-  Extract<ResponseObjectMap<FilterKeys<Paths[Path], Method>>, Record<number | string, unknown>>
+  Extract<ResponseObjectMap<FilterKeys<TPaths[TPath], TMethod>>, Record<number | string, unknown>>
 >;
 
 export type PathParams<
-  Paths,
-  Path extends keyof Paths,
-  Method extends HttpMethod,
-> = Paths[Path] extends { [M in Method]?: { parameters: { path: infer P } } } ? P : never;
+  TPaths,
+  TPath extends keyof TPaths,
+  TMethod extends HttpMethod,
+> = TPaths[TPath] extends { [M in TMethod]?: { parameters: { path: infer P } } } ? P : never;

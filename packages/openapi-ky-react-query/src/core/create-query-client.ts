@@ -15,14 +15,14 @@ import { queryKey } from "@/lib/query-key";
 
 /**
  * Creates a typed `QueryClient` accessor with `getQueryKey`, `setQueryData`,
- * and `invalidateQueries` shortcuts bound to the given `Paths`.
+ * and `invalidateQueries` shortcuts bound to the given `TPaths`.
  *
  * **SSR singleton pattern:** On the server, every call returns a fresh
  * `QueryClient` to prevent state from leaking between concurrent requests.
  * On the browser, the first call creates the client and subsequent calls
  * return the cached instance. Follows TanStack Query's SSR guidance.
  */
-export function createQueryClient<Paths extends object = object>(config?: QueryClientConfig) {
+export function createQueryClient<TPaths extends object = object>(config?: QueryClientConfig) {
   let browserQueryClient: QueryClient | undefined;
 
   function getQueryClient() {
@@ -35,36 +35,39 @@ export function createQueryClient<Paths extends object = object>(config?: QueryC
     return browserQueryClient;
   }
 
-  function getQueryKey<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">(
-    path: Path,
-    options?: QueryKeyOptions<Paths, Path, Method>,
+  function getQueryKey<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod = "get">(
+    path: TPath,
+    options?: QueryKeyOptions<TPaths, TPath, TMethod>,
   ) {
     return queryKey(path, options as Internal.QueryKeyOptions);
   }
 
-  function setQueryData<Path extends PathsFor<Paths, Method>, Method extends HttpMethod = "get">({
+  function setQueryData<
+    TPath extends PathsFor<TPaths, TMethod>,
+    TMethod extends HttpMethod = "get",
+  >({
     method,
     path,
     params,
     searchParams,
     updater,
-  }: QueryKeyOptions<Paths, Path, Method> & {
-    path: Path;
-    updater: SetQueryDataUpdater<ResponseBody<Paths, Path, Method>>;
+  }: QueryKeyOptions<TPaths, TPath, TMethod> & {
+    path: TPath;
+    updater: SetQueryDataUpdater<ResponseBody<TPaths, TPath, TMethod>>;
   }) {
-    return getQueryClient().setQueryData<ResponseBody<Paths, Path, Method>>(
+    return getQueryClient().setQueryData<ResponseBody<TPaths, TPath, TMethod>>(
       getQueryKey(path, { method, params, searchParams }),
       updater,
     );
   }
 
   function invalidateQueries<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
+    TPath extends PathsFor<TPaths, TMethod>,
+    TMethod extends HttpMethod = "get",
   >(
     filters: Omit<InvalidateQueryFilters, "queryKey"> &
-      QueryKeyOptions<Paths, Path, Method> & {
-        path: Path;
+      QueryKeyOptions<TPaths, TPath, TMethod> & {
+        path: TPath;
       },
     options?: InvalidateOptions,
   ) {

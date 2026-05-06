@@ -2,12 +2,12 @@ import type { HttpMethod, PathParams, SearchParams } from "@nijesmik/openapi-ky"
 import type { QueryClient } from "@tanstack/react-query";
 
 export type QueryKeyOptions<
-  Paths extends object,
-  Path extends keyof Paths,
-  Method extends HttpMethod = HttpMethod,
+  TPaths extends object,
+  TPath extends keyof TPaths,
+  TMethod extends HttpMethod = HttpMethod,
 > = {
-  method?: Method;
-  params?: PathParams<Paths, Path, Method>;
+  method?: TMethod;
+  params?: PathParams<TPaths, TPath, TMethod>;
   searchParams?: SearchParams;
 };
 
@@ -17,7 +17,7 @@ declare const _queryClient: QueryClient;
  * Updater type extracted from `QueryClient.setQueryData<T>`'s signature.
  *
  * React Query 5 wraps the updater's `T` with `NoInfer<T>`. When `T` is a
- * deeply computed type like `ResponseBody<Paths, Path, Method>`, TypeScript
+ * deeply computed type like `ResponseBody<TPaths, TPath, TMethod>`, TypeScript
  * cannot unify `Updater<X, X>` with `Updater<NoInfer<X>, NoInfer<X>>` and
  * rejects every form of cast — including `as unknown as Updater<NoInfer<X>>`.
  * Re-using the parameter type via `Parameters<>` preserves the symbolic

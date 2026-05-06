@@ -17,13 +17,13 @@ import type { CreateInfiniteQueryOptions } from "@/types/query";
 import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
 
-export function infiniteQueryOptions<Paths extends object>(api: Client<Paths>) {
+export function infiniteQueryOptions<TPaths extends object>(api: Client<TPaths>) {
   return function infiniteQueryOptions<
-    Path extends PathsFor<Paths, Method>,
-    Method extends HttpMethod = "get",
-    PageParam extends string | number | undefined = string | undefined,
-    Data = InfiniteData<ResponseBody<Paths, Path, Method>, PageParam>,
-  >(options: CreateInfiniteQueryOptions<Paths, Path, Method, PageParam, Data>) {
+    TPath extends PathsFor<TPaths, TMethod>,
+    TMethod extends HttpMethod = "get",
+    TPageParam extends string | number | undefined = string | undefined,
+    TData = InfiniteData<ResponseBody<TPaths, TPath, TMethod>, TPageParam>,
+  >(options: CreateInfiniteQueryOptions<TPaths, TPath, TMethod, TPageParam, TData>) {
     const {
       path,
       method,
@@ -36,10 +36,10 @@ export function infiniteQueryOptions<Paths extends object>(api: Client<Paths>) {
       json,
       ...rest
     } = options as Flat<
-      CreateInfiniteQueryOptions<Paths, Path, Method, PageParam, Data>,
-      Paths,
-      Path,
-      Method
+      CreateInfiniteQueryOptions<TPaths, TPath, TMethod, TPageParam, TData>,
+      TPaths,
+      TPath,
+      TMethod
     >;
 
     return tanstackInfiniteQueryOptions({
@@ -47,12 +47,12 @@ export function infiniteQueryOptions<Paths extends object>(api: Client<Paths>) {
       queryFn: ({ pageParam }) =>
         api(
           path,
-          apiOptions<Paths, Path, Method>({
+          apiOptions<TPaths, TPath, TMethod>({
             method,
             params,
             searchParams: {
               ...searchParams,
-              [pageParamKey]: pageParam as PageParam,
+              [pageParamKey]: pageParam as TPageParam,
             },
             kyOptions,
             json,

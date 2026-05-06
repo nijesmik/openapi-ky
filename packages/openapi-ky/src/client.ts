@@ -9,13 +9,13 @@ import type * as Internal from "@/types/internal";
 
 import { buildUrl } from "@/lib/build-url";
 
-export function createClient<Paths extends object, DefaultMethod extends HttpMethod = never>(
+export function createClient<TPaths extends object, TDefaultMethod extends HttpMethod = never>(
   defaultOptions: Omit<KyOptions, "method"> & {
-    method?: [DefaultMethod] extends [never]
-      ? TypeError<"Specify <Paths, DefaultMethod> generic to set method">
-      : DefaultMethod;
+    method?: [TDefaultMethod] extends [never]
+      ? TypeError<"Specify <TPaths, TDefaultMethod> generic to set method">
+      : TDefaultMethod;
   },
-): Client<Paths, [DefaultMethod] extends [never] ? "get" : DefaultMethod>;
+): Client<TPaths, [TDefaultMethod] extends [never] ? "get" : TDefaultMethod>;
 export function createClient(defaultOptions: Omit<KyOptions, "method"> & { method?: HttpMethod }) {
   const api = ky.create(defaultOptions);
 

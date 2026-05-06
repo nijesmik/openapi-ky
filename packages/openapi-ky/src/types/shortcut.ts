@@ -4,9 +4,9 @@ import type { HttpMethod } from "openapi-typescript-helpers";
 import type { PathsFor, ResponseBody } from "./common";
 import type { Options } from "./options";
 
-export type Fetcher<Paths extends object, Method extends HttpMethod> = <
-  Path extends PathsFor<Paths, Method>,
+export type Fetcher<TPaths extends object, TMethod extends HttpMethod> = <
+  TPath extends PathsFor<TPaths, TMethod>,
 >(
-  path: Path,
-  options?: Omit<Options<Paths, Path, Method>, "method">,
-) => ResponsePromise<ResponseBody<Paths, Path, Method>>;
+  path: TPath,
+  options?: Omit<Options<TPaths, TPath, TMethod>, "method">,
+) => ResponsePromise<ResponseBody<TPaths, TPath, TMethod>>;

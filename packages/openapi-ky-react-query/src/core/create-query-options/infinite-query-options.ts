@@ -14,9 +14,8 @@ import {
 import type { Flat } from "@/types/internal";
 import type { CreateInfiniteQueryOptions } from "@/types/query";
 
+import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
-
-import { apiOptions } from "./api-options";
 
 export function infiniteQueryOptions<Paths extends object>(api: Client<Paths>) {
   return function infiniteQueryOptions<

@@ -11,9 +11,8 @@ import { skipToken, queryOptions as tanstackQueryOptions } from "@tanstack/react
 import type { Flat } from "@/types/internal";
 import type { CreateQueryOptions } from "@/types/query";
 
+import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
-
-import { apiOptions } from "./api-options";
 
 export function queryOptions<Paths extends object>(api: Client<Paths>) {
   return function queryOptions<

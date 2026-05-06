@@ -12,7 +12,7 @@ import type {
   UseStaticMutationOptions,
 } from "@/types/mutation";
 
-import { apiOptions } from "../create-query-options/api-options";
+import { apiOptions } from "@/lib/api-options";
 
 export function mutationOptions<Paths extends object>(api: Client<Paths>) {
   function mutationOptions<Path extends PathsFor<Paths, Method>, Method extends HttpMethod>(

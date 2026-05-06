@@ -11,9 +11,8 @@ import { queryOptions as tanstackQueryOptions } from "@tanstack/react-query";
 import type { Flat } from "@/types/internal";
 import type { CreateSuspenseQueryOptions } from "@/types/query";
 
+import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
-
-import { apiOptions } from "./api-options";
 
 export function suspenseQueryOptions<Paths extends object>(api: Client<Paths>) {
   return function suspenseQueryOptions<

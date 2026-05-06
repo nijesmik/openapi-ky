@@ -8,5 +8,5 @@ export type Fetcher<Paths extends object, Method extends HttpMethod> = <
   Path extends PathsFor<Paths, Method>,
 >(
   path: Path,
-  options?: Options<Paths, Path, Method>,
+  options?: Omit<Options<Paths, Path, Method>, "method">,
 ) => ResponsePromise<ResponseBody<Paths, Path, Method>>;

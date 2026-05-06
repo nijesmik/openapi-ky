@@ -1,4 +1,4 @@
-import type { Client, HttpMethod, Options, PathsFor } from "@nijesmik/openapi-ky";
+import type { Client, HttpMethod, OptionsWithRequiredMethod, PathsFor } from "@nijesmik/openapi-ky";
 
 import { mutationOptions as tanstackMutationOptions } from "@tanstack/react-query";
 
@@ -57,7 +57,7 @@ export function mutationOptions<Paths extends object>(api: Client<Paths>) {
             ...kyOptions,
             ...variables,
             method,
-          } as Options<Paths, Path, Method> & { method: Method },
+          } as OptionsWithRequiredMethod<Paths, Path, Method>,
         ).json(),
       ...rest,
     });

@@ -27,3 +27,9 @@ export type Options<Paths, Path extends keyof Paths, Method extends HttpMethod =
     method?: Method;
     params?: PathParams<Paths, Path, Method>;
   };
+
+export type OptionsWithRequiredMethod<
+  Paths,
+  Path extends keyof Paths,
+  Method extends HttpMethod,
+> = Options<Paths, Path, Method> & { method: Method };

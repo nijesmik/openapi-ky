@@ -16,13 +16,13 @@ export interface Client<TPaths extends object, TDefaultMethod extends HttpMethod
    *
    * If a `beforeRetry` hook returns `ky.stop`, the resolved value is `undefined`
    * at runtime, and chained body methods will throw `TypeError`. This is an
-   * upstream ky limitation — use the `await` pattern with a `null`/`undefined`
-   * guard if you rely on `ky.stop`.
+   * upstream ky limitation — use the `await` pattern with an `undefined` guard
+   * if you rely on `ky.stop`.
    *
-   * Empty response bodies (e.g. `204 No Content`) resolve via chained `.json()`
-   * to `""` — ky's documented behavior. Type assertions like `.json<Post[]>()`
-   * lie about the runtime shape; check `response.status` or use `await` +
-   * manual parsing if the endpoint may return empty bodies.
+   * Empty response bodies (e.g. `204 No Content`) resolve via `.json()` to `""`
+   * (the library's `Response.json()` override matches ky's chained `.json()`).
+   * Type assertions like `.json<Post[]>()` lie about the runtime shape; check
+   * `response.status` or read via `response.text()` and parse conditionally.
    */
   <TPath extends PathsFor<TPaths, TDefaultMethod>>(
     path: TPath,

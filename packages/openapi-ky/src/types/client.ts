@@ -11,13 +11,18 @@ export interface Client<TPaths extends object, TDefaultMethod extends HttpMethod
    * be consumed by chaining a body parser (`.json()`, `.text()`, ...) or by
    * `await`ing the response and parsing it manually.
    *
-   * TMethod resolution priority: `options.method` (call-site) → `defaultOptions.method`
+   * Method resolution priority: `options.method` (call-site) → `defaultOptions.method`
    * (instance, set via `createClient`) → ky's built-in `"get"` fallback.
    *
    * If a `beforeRetry` hook returns `ky.stop`, the resolved value is `undefined`
    * at runtime, and chained body methods will throw `TypeError`. This is an
    * upstream ky limitation — use the `await` pattern with a `null`/`undefined`
    * guard if you rely on `ky.stop`.
+   *
+   * Empty response bodies (e.g. `204 No Content`) resolve via chained `.json()`
+   * to `""` — ky's documented behavior. Type assertions like `.json<Post[]>()`
+   * lie about the runtime shape; check `response.status` or use `await` +
+   * manual parsing if the endpoint may return empty bodies.
    */
   <TPath extends PathsFor<TPaths, TDefaultMethod>>(
     path: TPath,

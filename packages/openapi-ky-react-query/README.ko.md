@@ -28,7 +28,7 @@ export const queryOptions = createQueryOptions(client);
 export const mutationOptions = createMutationOptions(client);
 ```
 
-`queryOptions(...)`는 `useQuery` 옵션을 만들고, `.suspense`와 `.infinite`로 다른 변형을 지원합니다. `mutationOptions(...)`는 `method`를 명시하는 형태이며, `.post` / `.put` / `.patch` / `.delete` 단축 메서드는 method를 자동으로 주입합니다.
+`queryOptions(...)`는 `useQuery` 옵션을 만들고, `.suspense`와 `.infinite`로 다른 변형을 지원합니다. `mutationOptions(...)`는 `method`를 명시하는 형태이며, `.post` / `.put` / `.patch` / `.delete` 단축 메서드는 `method`를 자동으로 주입합니다.
 
 ## Queries
 

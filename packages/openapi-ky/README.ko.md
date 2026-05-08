@@ -33,7 +33,7 @@ const created = await client
 
 `params`는 ky에 없는 path template substitution 필드입니다 (예: `{userId}` → `1`). 그 외 ky 옵션(`headers`, `searchParams`, `hooks`, `retry`, `timeout`, …)은 그대로 전달됩니다. [ky 문서](https://github.com/sindresorhus/ky)를 참고하세요.
 
-## 기본 method
+## 기본 메서드
 
 ```ts
 const client = createClient<paths, 'post'>({
@@ -46,7 +46,7 @@ await client('/posts', { json: { title: 'Hello' } }).json();
 
 `client` 자체가 callable이며 (`client(path, opts)`), 이 형태는 인스턴스 기본 method로 dispatch합니다. 단축 메서드(`client.get`, `client.post`, …)는 단축에 명시된 method를 항상 사용합니다.
 
-Method 우선순위: `options.method` (호출 시) → `defaultOptions.method` (인스턴스) → `'get'` (ky의 fallback).
+메서드 우선순위: `options.method` (호출 시) → `defaultOptions.method` (인스턴스) → `'get'` (ky의 fallback).
 
 ## 타입 헬퍼
 

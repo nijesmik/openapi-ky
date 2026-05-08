@@ -2,6 +2,12 @@
   "name": "@nijesmik/openapi-ky-react-query",
   "version": "0.3.1",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nijesmik/openapi-ky.git",
+    "directory": "packages/openapi-ky-react-query"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

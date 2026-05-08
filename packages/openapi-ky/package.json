@@ -2,6 +2,12 @@
   "name": "@nijesmik/openapi-ky",
   "version": "0.2.0",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nijesmik/openapi-ky.git",
+    "directory": "packages/openapi-ky"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

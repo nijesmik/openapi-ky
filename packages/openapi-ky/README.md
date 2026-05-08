@@ -10,7 +10,7 @@ Type-safe ky client driven by an OpenAPI schema.
 npm install @nijesmik/openapi-ky ky
 ```
 
-`ky` is a peer dependency.
+`ky` is a peer dependency. Generate the `paths` type from your OpenAPI document with [`openapi-typescript`](https://github.com/openapi-ts/openapi-typescript) and import it as shown below.
 
 ## Usage
 
@@ -36,6 +36,9 @@ const created = await client
 ## Default method
 
 ```ts
+import { createClient } from '@nijesmik/openapi-ky';
+import type { paths } from './schema';
+
 const client = createClient<paths, 'post'>({
   prefixUrl: 'https://api.example.com',
   method: 'post',
@@ -54,7 +57,7 @@ Method resolution: `options.method` (per call) → `defaultOptions.method` (inst
 import type { RequestBody, ResponseBody } from '@nijesmik/openapi-ky';
 import type { paths } from './schema';
 
-type CreatePostBody = RequestBody<paths, '/posts', 'post'>;
+type CreatePostBody = RequestBody<paths, '/posts', 'post'>; // method is required
 type User = ResponseBody<paths, '/users/{userId}'>; // method defaults to 'get'
 ```
 

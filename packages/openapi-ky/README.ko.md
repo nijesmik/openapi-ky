@@ -10,7 +10,7 @@ OpenAPI 스키마로 path / method / request / response 타입이 추론되는 k
 npm install @nijesmik/openapi-ky ky
 ```
 
-`ky`는 peer dependency입니다.
+`ky`는 peer dependency입니다. `paths` 타입은 [`openapi-typescript`](https://github.com/openapi-ts/openapi-typescript)로 OpenAPI 문서에서 생성한 뒤 아래 예제처럼 import하세요.
 
 ## 사용법
 
@@ -36,6 +36,9 @@ const created = await client
 ## 기본 메서드
 
 ```ts
+import { createClient } from '@nijesmik/openapi-ky';
+import type { paths } from './schema';
+
 const client = createClient<paths, 'post'>({
   prefixUrl: 'https://api.example.com',
   method: 'post',
@@ -54,7 +57,7 @@ await client('/posts', { json: { title: 'Hello' } }).json();
 import type { RequestBody, ResponseBody } from '@nijesmik/openapi-ky';
 import type { paths } from './schema';
 
-type CreatePostBody = RequestBody<paths, '/posts', 'post'>;
+type CreatePostBody = RequestBody<paths, '/posts', 'post'>; // method 필수
 type User = ResponseBody<paths, '/users/{userId}'>; // method 기본값은 'get'
 ```
 

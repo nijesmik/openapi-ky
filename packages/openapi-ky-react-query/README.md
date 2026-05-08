@@ -10,7 +10,7 @@ Type-safe React Query option builders for [@nijesmik/openapi-ky](https://www.npm
 npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/react-query ky
 ```
 
-`@nijesmik/openapi-ky` and `@tanstack/react-query` are peer dependencies.
+`@nijesmik/openapi-ky` and `@tanstack/react-query` are peer dependencies. Generate the `paths` type from your OpenAPI document with [`openapi-typescript`](https://github.com/openapi-ts/openapi-typescript) and import it as shown below.
 
 ## Setup
 
@@ -107,14 +107,13 @@ const { mutate: createPost } = useMutation(
   mutationOptions.post({ path: '/posts' }),
 );
 
-// Explicit method (e.g. when method is dynamic)
-const method = isUpdate ? 'put' : 'patch';
-useMutation(mutationOptions({ method, path: '/posts/{postId}' }));
+// Explicit method (e.g. when method is computed at runtime)
+useMutation(mutationOptions({ method: someMethod, path: '/posts/{postId}' }));
 ```
 
 ### Static vs dynamic mode
 
-`mutate`'s argument shape depends on whether `params` / `searchParams` are bound at create time.
+`mutate`'s argument shape depends on whether `params` / `searchParams` are passed at create time.
 
 **Dynamic** (default — neither `params` nor `searchParams` at create time):
 
@@ -178,6 +177,7 @@ Both `queryOptions` and `mutationOptions` chain `.json()` internally to return p
 For "stop retrying on a specific error" cases, use react-query's `retry`:
 
 ```tsx
+import { useQuery } from '@tanstack/react-query';
 import { HTTPError } from 'ky';
 
 useQuery({

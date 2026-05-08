@@ -10,7 +10,7 @@
 npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/react-query ky
 ```
 
-`@nijesmik/openapi-ky`와 `@tanstack/react-query`는 peer dependency입니다.
+`@nijesmik/openapi-ky`와 `@tanstack/react-query`는 peer dependency입니다. `paths` 타입은 [`openapi-typescript`](https://github.com/openapi-ts/openapi-typescript)로 OpenAPI 문서에서 생성한 뒤 아래 예제처럼 import하세요.
 
 ## 셋업
 
@@ -107,14 +107,13 @@ const { mutate: createPost } = useMutation(
   mutationOptions.post({ path: '/posts' }),
 );
 
-// 명시 method (method가 동적인 경우)
-const method = isUpdate ? 'put' : 'patch';
-useMutation(mutationOptions({ method, path: '/posts/{postId}' }));
+// 명시 method (런타임에 method가 결정되는 경우)
+useMutation(mutationOptions({ method: someMethod, path: '/posts/{postId}' }));
 ```
 
 ### Static vs dynamic 모드
 
-`mutate`의 인자 형태는 create-time에 `params` / `searchParams`를 바인딩했는지 여부에 따라 달라집니다.
+`mutate`의 인자 형태는 create-time에 `params` / `searchParams`를 전달했는지 여부에 따라 달라집니다.
 
 **Dynamic** (기본 — create-time에 `params`/`searchParams` 미지정):
 
@@ -178,6 +177,7 @@ await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 특정 에러에서 retry를 멈추고 싶다면 react-query의 `retry`를 사용하세요:
 
 ```tsx
+import { useQuery } from '@tanstack/react-query';
 import { HTTPError } from 'ky';
 
 useQuery({

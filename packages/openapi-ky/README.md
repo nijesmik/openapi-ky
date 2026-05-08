@@ -44,6 +44,8 @@ const client = createClient<paths, 'post'>({
 await client('/posts', { json: { title: 'Hello' } }).json();
 ```
 
+The client is callable directly (`client(path, opts)`); this dispatches with the instance default method. The shortcut methods (`client.get`, `client.post`, …) always use the method named on the shortcut.
+
 Method resolution: `options.method` (per call) → `defaultOptions.method` (instance) → `'get'` (ky's fallback).
 
 ## Type helpers
@@ -56,7 +58,7 @@ type CreatePostBody = RequestBody<paths, '/posts', 'post'>;
 type User = ResponseBody<paths, '/users/{userId}'>; // method defaults to 'get'
 ```
 
-Also exported: `PathsFor`, `PathParams`, `Options`, `OptionsWithRequiredMethod`, `JsonField`, `KyOptions`, `SearchParams`, `HttpMethod`.
+Also exported: `Client`, `PathsFor`, `PathParams`, `Options`, `OptionsWithRequiredMethod`, `JsonField`, `KyOptions`, `SearchParams`, `HttpMethod`.
 
 ## `isHTTPError`
 

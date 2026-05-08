@@ -108,6 +108,7 @@ const { mutate: createPost } = useMutation(
 );
 
 // Explicit method (e.g. when method is dynamic)
+const method = isUpdate ? 'put' : 'patch';
 useMutation(mutationOptions({ method, path: '/posts/{postId}' }));
 ```
 
@@ -162,7 +163,7 @@ setQueryData({
   updater: userData,
 });
 
-// Invalidate (TanStack filter / option fields are flat alongside path/params)
+// Invalidate (TanStack filter fields are flat alongside path/params)
 await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 ```
 

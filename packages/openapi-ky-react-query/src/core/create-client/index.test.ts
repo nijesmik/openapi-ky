@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 
 import { createFakeCallableClient, getCallableMock } from "@/__fixtures__/fake-client";
 
-import { createQueryOptions } from "./index";
+import { createClient } from "./index";
+import { useInfiniteQuery } from "./use-infinite-query";
+import { useQuery } from "./use-query";
+import { useSuspenseQuery } from "./use-suspense-query";
 
 type TestPaths = {
   "/posts": {
@@ -20,15 +23,15 @@ type TestPaths = {
   };
 };
 
-const createFakeApi = () => createFakeCallableClient<TestPaths>({ id: 1, title: "test" });
+const createFakeClient = () => createFakeCallableClient<TestPaths>({ id: 1, title: "test" });
 
-describe("createQueryOptions", () => {
+describe("createClient", () => {
   describe("params: null → skipToken", () => {
     it("params: null이면 queryFn이 skipToken이다", () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeClient();
+      const api = createClient(client);
 
-      const opts = queryOptions({ path: "/posts/{postId}", params: null });
+      const opts = api.queryOptions({ path: "/posts/{postId}", params: null });
 
       expect(opts.queryFn).toBe(skipToken);
     });
@@ -44,11 +47,11 @@ describe("createQueryOptions", () => {
     ] as const)(
       "params가 %s queryFn이 api를 호출한다",
       async (_label, input, expectedPath, expectedParams) => {
-        const api = createFakeApi();
-        const queryOptions = createQueryOptions(api);
+        const client = createFakeClient();
+        const api = createClient(client);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const opts = queryOptions(input as any);
+        const opts = api.queryOptions(input as any);
 
         const queryFn = opts.queryFn;
         if (typeof queryFn !== "function") {
@@ -56,7 +59,7 @@ describe("createQueryOptions", () => {
         }
         await queryFn({} as never);
 
-        expect(getCallableMock(api)).toHaveBeenCalledWith(expectedPath, {
+        expect(getCallableMock(client)).toHaveBeenCalledWith(expectedPath, {
           method: "get",
           params: expectedParams,
           searchParams: undefined,
@@ -65,10 +68,10 @@ describe("createQueryOptions", () => {
     );
 
     it("[회귀 테스트] queryFn은 .json()으로 파싱된 본문을 반환한다", async () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeClient();
+      const api = createClient(client);
 
-      const opts = queryOptions({
+      const opts = api.queryOptions({
         path: "/posts/{postId}",
         params: { postId: 1 },
       });
@@ -81,12 +84,12 @@ describe("createQueryOptions", () => {
     });
   });
 
-  describe("suspense", () => {
+  describe("suspenseQueryOptions", () => {
     it("queryFn은 .json()으로 파싱된 본문을 반환한다", async () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeClient();
+      const api = createClient(client);
 
-      const opts = queryOptions.suspense({
+      const opts = api.suspenseQueryOptions({
         path: "/posts/{postId}",
         params: { postId: 1 },
       });
@@ -99,12 +102,12 @@ describe("createQueryOptions", () => {
     });
   });
 
-  describe("infinite query — pageParam spread", () => {
+  describe("infiniteQueryOptions — pageParam spread", () => {
     it("기본 pageParamKey('cursor')로 pageParam을 searchParams에 주입한다", async () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeClient();
+      const api = createClient(client);
 
-      const opts = queryOptions.infinite({
+      const opts = api.infiniteQueryOptions({
         path: "/posts",
         searchParams: { size: 10 },
         initialPageParam: undefined,
@@ -113,7 +116,7 @@ describe("createQueryOptions", () => {
 
       await opts.queryFn?.({ pageParam: "abc" } as never);
 
-      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
+      expect(getCallableMock(client)).toHaveBeenCalledWith("/posts", {
         method: "get",
         params: undefined,
         searchParams: { size: 10, cursor: "abc" },
@@ -121,10 +124,10 @@ describe("createQueryOptions", () => {
     });
 
     it("커스텀 pageParamKey를 사용해 pageParam을 searchParams에 주입한다", async () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeClient();
+      const api = createClient(client);
 
-      const opts = queryOptions.infinite({
+      const opts = api.infiniteQueryOptions({
         path: "/posts",
         searchParams: { size: 10 },
         pageParamKey: "page",
@@ -134,7 +137,7 @@ describe("createQueryOptions", () => {
 
       await opts.queryFn?.({ pageParam: 2 } as never);
 
-      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
+      expect(getCallableMock(client)).toHaveBeenCalledWith("/posts", {
         method: "get",
         params: undefined,
         searchParams: { size: 10, page: 2 },
@@ -142,10 +145,10 @@ describe("createQueryOptions", () => {
     });
 
     it("기존 searchParams의 pageParamKey 값을 pageParam이 덮어쓴다", async () => {
-      const api = createFakeApi();
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeClient();
+      const api = createClient(client);
 
-      const opts = queryOptions.infinite({
+      const opts = api.infiniteQueryOptions({
         path: "/posts",
         searchParams: { cursor: "stale", size: 10 },
         initialPageParam: undefined,
@@ -154,7 +157,7 @@ describe("createQueryOptions", () => {
 
       await opts.queryFn?.({ pageParam: "fresh" } as never);
 
-      expect(getCallableMock(api)).toHaveBeenCalledWith("/posts", {
+      expect(getCallableMock(client)).toHaveBeenCalledWith("/posts", {
         method: "get",
         params: undefined,
         searchParams: { cursor: "fresh", size: 10 },
@@ -172,10 +175,10 @@ describe("createQueryOptions", () => {
           };
         };
       };
-      const api = createFakeCallableClient<PostPaths>({ items: [1, 2] });
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeCallableClient<PostPaths>({ items: [1, 2] });
+      const api = createClient(client);
 
-      const opts = queryOptions({
+      const opts = api.queryOptions({
         method: "post",
         path: "/search",
         json: { criteria: "ts" },
@@ -184,7 +187,7 @@ describe("createQueryOptions", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (opts.queryFn as any)?.({} as never);
 
-      const callArgs = getCallableMock(api).mock.calls[0];
+      const callArgs = getCallableMock(client).mock.calls[0];
       expect(callArgs?.[0]).toBe("/search");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((callArgs?.[1] as any)?.method).toBe("post");
@@ -201,10 +204,10 @@ describe("createQueryOptions", () => {
           };
         };
       };
-      const api = createFakeCallableClient<PostPaths>({ items: [] });
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeCallableClient<PostPaths>({ items: [] });
+      const api = createClient(client);
 
-      const opts = queryOptions({
+      const opts = api.queryOptions({
         method: "post",
         path: "/search",
         json: { criteria: "x" },
@@ -214,10 +217,10 @@ describe("createQueryOptions", () => {
     });
 
     it("method 미지정 시 queryKey는 method 미포함 (기존 GET 동작 보존)", () => {
-      const api = createFakeCallableClient<TestPaths>([]);
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeCallableClient<TestPaths>([]);
+      const api = createClient(client);
 
-      const opts = queryOptions({ path: "/posts" });
+      const opts = api.queryOptions({ path: "/posts" });
 
       expect(opts.queryKey).toEqual(["/posts"]);
     });
@@ -235,10 +238,10 @@ describe("createQueryOptions", () => {
         };
       };
 
-      const api = createFakeCallableClient<_Paths>([]);
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeCallableClient<_Paths>([]);
+      const api = createClient(client);
 
-      queryOptions({
+      api.queryOptions({
         path: "/posts/{postId}",
         // @ts-expect-error '/posts/{postId}'.get expects { postId: number }, not { wrongKey: number }
         params: { wrongKey: 1 },
@@ -255,14 +258,28 @@ describe("createQueryOptions", () => {
         };
       };
 
-      const api = createFakeCallableClient<_Paths>({ items: [] });
-      const queryOptions = createQueryOptions(api);
+      const client = createFakeCallableClient<_Paths>({ items: [] });
+      const api = createClient(client);
 
       // @ts-expect-error TMethod='post'를 explicit하게 바인딩했으면 method 값이 필수
-      queryOptions<"/search", "post">({
+      api.queryOptions<"/search", "post">({
         path: "/search",
         json: { criteria: "x" },
       });
+    });
+
+    it("hook factory는 잘못 짝지어진 builder를 거부한다", () => {
+      const client = createFakeCallableClient<TestPaths>([]);
+      const api = createClient(client);
+
+      // @ts-expect-error suspense builder는 useQuery factory가 거부 (QueryOptions에 없는 필드)
+      useQuery(api.suspenseQueryOptions);
+      // @ts-expect-error infinite builder는 useQuery factory가 거부
+      useQuery(api.infiniteQueryOptions);
+      // @ts-expect-error query builder는 useSuspenseQuery factory가 거부 (params: null 허용)
+      useSuspenseQuery(api.queryOptions);
+      // @ts-expect-error query builder는 useInfiniteQuery factory가 거부
+      useInfiniteQuery(api.queryOptions);
     });
   });
 });

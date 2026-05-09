@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Options } from "./types/options";
 
-import { createClient } from "./client";
+import { createKyClient } from "./client";
 
 type Post = { id: number; title: string };
 
@@ -42,7 +42,7 @@ const jsonResponse = (body: unknown, init?: ResponseInit) =>
   });
 
 const createTestClient = (fetchImpl: typeof fetch) =>
-  createClient<TestPaths>({
+  createKyClient<TestPaths>({
     prefixUrl: "https://api.test/",
     fetch: fetchImpl,
     retry: 0,
@@ -143,7 +143,7 @@ describe("Client", () => {
             headers: { "content-type": "application/json" },
           }),
       );
-      const client = createClient<TestPaths, "post">({
+      const client = createKyClient<TestPaths, "post">({
         prefixUrl: "https://api.test/",
         fetch: fetchImpl,
         retry: 0,

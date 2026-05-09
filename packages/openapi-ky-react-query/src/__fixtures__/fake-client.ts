@@ -24,7 +24,7 @@ const buildResponseMock = (returnValue: unknown) =>
  *
  * Return type is plain `Client<TPaths>` (not the intersection
  * `Client<TPaths> & { [M]: Mock }`) on purpose: an intersection breaks
- * `TPaths` inference inside `createMutationOptions` / `createQueryOptions`,
+ * `TPaths` inference inside `createMutationOptions` / `createClient`,
  * collapsing every downstream generic to `never`. Mock access goes through
  * the separate {@link getMock} helper.
  */

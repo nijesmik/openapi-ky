@@ -15,76 +15,64 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 ## Setup
 
 ```ts
-import { createClient } from '@nijesmik/openapi-ky';
+import { createKyClient } from '@nijesmik/openapi-ky';
 import {
-  createQueryOptions,
+  createClient,
   createMutationOptions,
 } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
-const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
+const client = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-export const queryOptions = createQueryOptions(client);
+export const api = createClient(client);
 export const mutationOptions = createMutationOptions(client);
 ```
 
-`queryOptions(...)` builds options for `useQuery`; `.suspense` and `.infinite` cover the other variants. `mutationOptions(...)` takes `method` explicitly; `.post` / `.put` / `.patch` / `.delete` shortcuts pre-bind it.
+`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, and `api.infiniteQueryOptions(...)` build typed options for `useQuery` / `useSuspenseQuery` / `useInfiniteQuery`. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` are convenience hooks — each equivalent to passing the matching options builder to the matching TanStack hook. `mutationOptions(...)` takes `method` explicitly; `.post` / `.put` / `.patch` / `.delete` shortcuts pre-bind it.
 
 ## Queries
 
 ```tsx
-import { useQuery } from '@tanstack/react-query';
-
-const { data } = useQuery(
-  queryOptions({
-    path: '/users/{userId}',
-    params: { userId },
-    searchParams: { include: 'posts' },
-    select: (response) => response.data,
-    staleTime: 60_000,
-  }),
-);
+const { data } = api.useQuery({
+  path: '/users/{userId}',
+  params: { userId },
+  searchParams: { include: 'posts' },
+  select: (response) => response.data,
+  staleTime: 60_000,
+});
 ```
 
 `select`, `staleTime`, and any other React Query field sit alongside `path` / `params` / `searchParams`. ky-specific options (`headers`, `timeout`, `hooks`, …) go under `kyOptions`.
 
+For external composition (prefetch, `useQueries`, etc.), use the options form: `useQuery(api.queryOptions({ path: '/users' }))`.
+
 ### `params: null` — disable the query
 
 ```tsx
-const { data } = useQuery(
-  queryOptions({
-    path: '/users/{userId}',
-    params: userId ? { userId } : null,
-  }),
-);
+const { data } = api.useQuery({
+  path: '/users/{userId}',
+  params: userId ? { userId } : null,
+});
 ```
 
-`params: null` swaps `queryFn` for TanStack's `skipToken`. Available on the default `queryOptions(...)` only — `.suspense` and `.infinite` always fire.
+`params: null` swaps `queryFn` for TanStack's `skipToken`. Available on `api.queryOptions(...)` and `api.useQuery(...)` only — `.suspenseQueryOptions` and `.infiniteQueryOptions` always fire.
 
 ### Suspense
 
 ```tsx
-import { useSuspenseQuery } from '@tanstack/react-query';
-
-const { data } = useSuspenseQuery(
-  queryOptions.suspense({ path: '/categories' }),
-);
+const { data } = api.useSuspenseQuery({ path: '/categories' });
 ```
 
 ### Infinite
 
 ```tsx
-import { useInfiniteQuery } from '@tanstack/react-query';
-
-const { data } = useInfiniteQuery(
-  queryOptions.infinite({
-    path: '/posts',
-    searchParams: { categoryId, size: 10 },
-    initialPageParam: undefined,
-    getNextPageParam: ({ data }) =>
-      data.hasNext ? data.nextCursor : undefined,
-  }),
-);
+const { data } = api.useInfiniteQuery({
+  path: '/posts',
+  searchParams: { categoryId, size: 10 },
+  initialPageParam: undefined,
+  getNextPageParam: ({ data }) =>
+    data.hasNext ? data.nextCursor : undefined,
+});
 ```
 
 `pageParamKey` defaults to `'cursor'`. Override per call when your API uses a different key.
@@ -94,7 +82,7 @@ const { data } = useInfiniteQuery(
 For read endpoints that aren't `GET` (e.g. `POST /search`), pass `method` explicitly:
 
 ```tsx
-useQuery(queryOptions({ method: 'post', path: '/search', json: { q } }));
+api.useQuery({ method: 'post', path: '/search', json: { q } });
 ```
 
 ## Mutations
@@ -172,16 +160,15 @@ The factory's return value is callable — `queryClient()` is equivalent to `que
 
 ### `ky.stop` is not compatible with this package
 
-Both `queryOptions` and `mutationOptions` chain `.json()` internally to return parsed bodies. If a `beforeRetry` hook returns [`ky.stop`](https://github.com/sindresorhus/ky#stop), the response resolves to `undefined` and the internal `.json()` call throws `TypeError`. Upstream limitation — see [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats) for the underlying behavior.
+Both `api`'s query helpers (`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.useQuery(...)`, `api.useSuspenseQuery(...)`, `api.useInfiniteQuery(...)`) and `mutationOptions` chain `.json()` internally to return parsed bodies. If a `beforeRetry` hook returns [`ky.stop`](https://github.com/sindresorhus/ky#stop), the response resolves to `undefined` and the internal `.json()` call throws `TypeError`. Upstream limitation — see [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats) for the underlying behavior.
 
 For "stop retrying on a specific error" cases, use react-query's `retry`:
 
 ```tsx
-import { useQuery } from '@tanstack/react-query';
 import { HTTPError } from 'ky';
 
-useQuery({
-  ...queryOptions({ path: '/users' }),
+api.useQuery({
+  path: '/users',
   retry: (failureCount, error) =>
     error instanceof HTTPError && error.response.status === 401
       ? false

@@ -15,76 +15,64 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 ## 셋업
 
 ```ts
-import { createClient } from '@nijesmik/openapi-ky';
+import { createKyClient } from '@nijesmik/openapi-ky';
 import {
-  createQueryOptions,
+  createClient,
   createMutationOptions,
 } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
-const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
+const client = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-export const queryOptions = createQueryOptions(client);
+export const api = createClient(client);
 export const mutationOptions = createMutationOptions(client);
 ```
 
-`queryOptions(...)`는 `useQuery` 옵션을 만들고, `.suspense`와 `.infinite`로 다른 변형을 지원합니다. `mutationOptions(...)`는 `method`를 명시하는 형태이며, `.post` / `.put` / `.patch` / `.delete` 단축 메서드는 `method`를 자동으로 주입합니다.
+`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`는 각각 `useQuery` / `useSuspenseQuery` / `useInfiniteQuery` 옵션을 만듭니다. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)`는 편의 훅으로, 대응하는 옵션 빌더를 TanStack 훅에 그대로 넘긴 것과 동치입니다. `mutationOptions(...)`는 `method`를 명시하는 형태이며, `.post` / `.put` / `.patch` / `.delete` 단축 메서드는 `method`를 자동으로 주입합니다.
 
 ## Queries
 
 ```tsx
-import { useQuery } from '@tanstack/react-query';
-
-const { data } = useQuery(
-  queryOptions({
-    path: '/users/{userId}',
-    params: { userId },
-    searchParams: { include: 'posts' },
-    select: (response) => response.data,
-    staleTime: 60_000,
-  }),
-);
+const { data } = api.useQuery({
+  path: '/users/{userId}',
+  params: { userId },
+  searchParams: { include: 'posts' },
+  select: (response) => response.data,
+  staleTime: 60_000,
+});
 ```
 
 `select`, `staleTime` 등 React Query 옵션은 `path` / `params` / `searchParams`와 같은 객체에 그대로 전달합니다. ky 전용 옵션(`headers`, `timeout`, `hooks`, …)은 `kyOptions` 아래로 분리합니다.
 
+prefetch, `useQueries` 등 외부 합성이 필요할 때는 옵션 형태를 사용하세요: `useQuery(api.queryOptions({ path: '/users' }))`.
+
 ### `params: null` — 쿼리 비활성화
 
 ```tsx
-const { data } = useQuery(
-  queryOptions({
-    path: '/users/{userId}',
-    params: userId ? { userId } : null,
-  }),
-);
+const { data } = api.useQuery({
+  path: '/users/{userId}',
+  params: userId ? { userId } : null,
+});
 ```
 
-`params: null`을 넘기면 `queryFn`이 TanStack의 `skipToken`으로 교체되어 쿼리가 비활성화됩니다. 기본 `queryOptions(...)`에서만 동작하며 `.suspense` / `.infinite`는 항상 fetch합니다.
+`params: null`을 넘기면 `queryFn`이 TanStack의 `skipToken`으로 교체되어 쿼리가 비활성화됩니다. `api.queryOptions(...)`와 `api.useQuery(...)`에서만 동작하며 `.suspenseQueryOptions` / `.infiniteQueryOptions`는 항상 fetch합니다.
 
 ### Suspense
 
 ```tsx
-import { useSuspenseQuery } from '@tanstack/react-query';
-
-const { data } = useSuspenseQuery(
-  queryOptions.suspense({ path: '/categories' }),
-);
+const { data } = api.useSuspenseQuery({ path: '/categories' });
 ```
 
 ### Infinite
 
 ```tsx
-import { useInfiniteQuery } from '@tanstack/react-query';
-
-const { data } = useInfiniteQuery(
-  queryOptions.infinite({
-    path: '/posts',
-    searchParams: { categoryId, size: 10 },
-    initialPageParam: undefined,
-    getNextPageParam: ({ data }) =>
-      data.hasNext ? data.nextCursor : undefined,
-  }),
-);
+const { data } = api.useInfiniteQuery({
+  path: '/posts',
+  searchParams: { categoryId, size: 10 },
+  initialPageParam: undefined,
+  getNextPageParam: ({ data }) =>
+    data.hasNext ? data.nextCursor : undefined,
+});
 ```
 
 `pageParamKey`의 기본값은 `'cursor'`입니다. 다른 키를 쓰는 API라면 호출 시 override하세요.
@@ -94,7 +82,7 @@ const { data } = useInfiniteQuery(
 `GET`이 아닌 read 엔드포인트(예: `POST /search`)는 `method`를 명시합니다:
 
 ```tsx
-useQuery(queryOptions({ method: 'post', path: '/search', json: { q } }));
+api.useQuery({ method: 'post', path: '/search', json: { q } });
 ```
 
 ## Mutations
@@ -172,16 +160,15 @@ await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 
 ### `ky.stop`은 이 패키지와 호환되지 않습니다
 
-`queryOptions`와 `mutationOptions`는 본문을 파싱해 반환하기 위해 내부적으로 `.json()`을 체이닝합니다. `beforeRetry` 훅이 [`ky.stop`](https://github.com/sindresorhus/ky#stop)을 반환하면 응답이 `undefined`로 resolve되고 내부 `.json()`에서 `TypeError`가 발생합니다. upstream 한계 — [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats)의 동일 항목 참고.
+`api`의 query 헬퍼(`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.useQuery(...)`, `api.useSuspenseQuery(...)`, `api.useInfiniteQuery(...)`)와 `mutationOptions`는 본문을 파싱해 반환하기 위해 내부적으로 `.json()`을 체이닝합니다. `beforeRetry` 훅이 [`ky.stop`](https://github.com/sindresorhus/ky#stop)을 반환하면 응답이 `undefined`로 resolve되고 내부 `.json()`에서 `TypeError`가 발생합니다. upstream 한계 — [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats)의 동일 항목 참고.
 
 특정 에러에서 retry를 멈추고 싶다면 react-query의 `retry`를 사용하세요:
 
 ```tsx
-import { useQuery } from '@tanstack/react-query';
 import { HTTPError } from 'ky';
 
-useQuery({
-  ...queryOptions({ path: '/users' }),
+api.useQuery({
+  path: '/users',
   retry: (failureCount, error) =>
     error instanceof HTTPError && error.response.status === 401
       ? false

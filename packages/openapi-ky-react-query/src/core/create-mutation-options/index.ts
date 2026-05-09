@@ -37,7 +37,7 @@ import { mutationOptionsWithMethod } from "./mutation-options-with-method";
  * mutate({ title: "..." }); // body only
  * ```
  *
- * For read endpoints (queries), use `createQueryOptions` instead.
+ * For read endpoints (queries), use `createClient` instead.
  */
 export function createMutationOptions<TPaths extends object>(api: Client<TPaths>) {
   const mutationOptionsForApi = mutationOptions(api);

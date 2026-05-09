@@ -12,7 +12,7 @@ export interface Client<TPaths extends object, TDefaultMethod extends HttpMethod
    * `await`ing the response and parsing it manually.
    *
    * Method resolution priority: `options.method` (call-site) → `defaultOptions.method`
-   * (instance, set via `createClient`) → ky's built-in `"get"` fallback.
+   * (instance, set via `createKyClient`) → ky's built-in `"get"` fallback.
    *
    * If a `beforeRetry` hook returns `ky.stop`, the resolved value is `undefined`
    * at runtime, and chained body methods will throw `TypeError`. This is an

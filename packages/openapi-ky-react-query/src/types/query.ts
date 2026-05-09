@@ -43,7 +43,7 @@ export type QueryRequestOptions<
     kyOptions?: KyOptions;
   };
 
-export type CreateQueryOptions<
+export type QueryOptions<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod = "get",
@@ -55,14 +55,14 @@ export type CreateQueryOptions<
   Omit<QueryRequestOptions<TPaths, TPath, TMethod>, "params"> & {
     /**
      * `null` is a sentinel that switches `queryFn` to TanStack's `skipToken`
-     * (disables the query). Only `CreateQueryOptions` accepts it — suspense /
+     * (disables the query). Only `QueryOptions` accepts it — suspense /
      * infinite always fire the query and do not expose this disable knob.
      */
     params?: PathParams<TPaths, TPath, TMethod> | null;
     select?: (data: ResponseBody<TPaths, TPath, TMethod>) => TData;
   };
 
-export type CreateSuspenseQueryOptions<
+export type SuspenseQueryOptions<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod = "get",
@@ -75,7 +75,7 @@ export type CreateSuspenseQueryOptions<
     select?: (data: ResponseBody<TPaths, TPath, TMethod>) => TData;
   };
 
-export type CreateInfiniteQueryOptions<
+export type InfiniteQueryOptions<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod,

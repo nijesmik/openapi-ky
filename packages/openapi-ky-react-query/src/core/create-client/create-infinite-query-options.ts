@@ -12,18 +12,18 @@ import {
 } from "@tanstack/react-query";
 
 import type { Flat } from "@/types/internal";
-import type { CreateInfiniteQueryOptions } from "@/types/query";
+import type { InfiniteQueryOptions } from "@/types/query";
 
 import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
 
-export function infiniteQueryOptions<TPaths extends object>(api: Client<TPaths>) {
+export function createInfiniteQueryOptions<TPaths extends object>(api: Client<TPaths>) {
   return function infiniteQueryOptions<
     TPath extends PathsFor<TPaths, TMethod>,
     TMethod extends HttpMethod = "get",
     TPageParam extends string | number | undefined = string | undefined,
     TData = InfiniteData<ResponseBody<TPaths, TPath, TMethod>, TPageParam>,
-  >(options: CreateInfiniteQueryOptions<TPaths, TPath, TMethod, TPageParam, TData>) {
+  >(options: InfiniteQueryOptions<TPaths, TPath, TMethod, TPageParam, TData>) {
     const {
       path,
       method,
@@ -36,7 +36,7 @@ export function infiniteQueryOptions<TPaths extends object>(api: Client<TPaths>)
       json,
       ...rest
     } = options as Flat<
-      CreateInfiniteQueryOptions<TPaths, TPath, TMethod, TPageParam, TData>,
+      InfiniteQueryOptions<TPaths, TPath, TMethod, TPageParam, TData>,
       TPaths,
       TPath,
       TMethod

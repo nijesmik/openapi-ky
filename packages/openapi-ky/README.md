@@ -33,7 +33,9 @@ const created = await client
 
 `params` is a path-template substitution field added on top of ky (e.g. `{userId}` → `1`). All other ky options (`headers`, `searchParams`, `hooks`, `retry`, `timeout`, …) pass through. See [ky docs](https://github.com/sindresorhus/ky).
 
-## Default method
+## Configuring a default method
+
+Optional. By default the client dispatches `GET` when called directly (`client(path, opts)`). To bind a different default, pass it as the second generic and as `defaultOptions.method`:
 
 ```ts
 import createClient from '@nijesmik/openapi-ky';
@@ -47,7 +49,7 @@ const client = createClient<paths, 'post'>({
 await client('/posts', { json: { title: 'Hello' } }).json();
 ```
 
-The client is callable directly (`client(path, opts)`); this dispatches with the instance default method. The shortcut methods (`client.get`, `client.post`, …) always use the method named on the shortcut.
+The shortcut methods (`client.get`, `client.post`, …) always use the method named on the shortcut, regardless of the instance default.
 
 Method resolution: `options.method` (per call) → `defaultOptions.method` (instance) → `'get'` (ky's fallback).
 
@@ -69,12 +71,14 @@ Also exported: `Client`, `PathsFor`, `PathParams`, `Options`, `OptionsWithRequir
 import { isHTTPError } from '@nijesmik/openapi-ky';
 
 try {
-  await client.get('/users');
+  const users = await client.get('/users').json();
+  return users;
 } catch (error) {
   if (isHTTPError<{ message: string }>(error)) {
     const body = await error.response.json();
     console.error(body.message);
   }
+  throw error;
 }
 ```
 

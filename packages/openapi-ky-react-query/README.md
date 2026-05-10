@@ -26,6 +26,8 @@ export const queryClient = createQueryClient({
 export const api = createClient(kyClient, queryClient);
 ```
 
+`createQueryClient` returns a **getter function**, not a `QueryClient` instance. Call it (`queryClient()`) wherever an instance is expected — on the server it returns a fresh client per request, in the browser it returns the same cached client after the first call.
+
 ```tsx
 import { QueryClientProvider } from '@tanstack/react-query';
 
@@ -34,15 +36,24 @@ import { QueryClientProvider } from '@tanstack/react-query';
 </QueryClientProvider>;
 ```
 
-`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, and `api.mutationOptions(...)` build typed options for the matching TanStack hooks. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)` are convenience hooks — each equivalent to passing the matching options builder to the matching TanStack hook.
+`api` exposes a builder + matching hook for each TanStack primitive:
+
+| Builder                    | Hook                    |
+| -------------------------- | ----------------------- |
+| `api.queryOptions`         | `api.useQuery`          |
+| `api.suspenseQueryOptions` | `api.useSuspenseQuery`  |
+| `api.infiniteQueryOptions` | `api.useInfiniteQuery`  |
+| `api.mutationOptions`      | `api.useMutation`       |
+
+Each hook is sugar for passing the matching builder's result into TanStack's hook of the same name.
 
 When `queryClient` is passed (as above), `api` also gets path-typed cache helpers `api.getQueryKey(...)` / `api.setQueryData(...)` / `api.invalidateQueries(...)`. Omit `queryClient` (`createClient(kyClient)`) for a hooks-only `api`.
-
-`createQueryClient(config)` is a callable getter following TanStack's SSR singleton pattern: server-fresh per request, browser-cached after first call. Invoke it (`queryClient()`) to obtain the underlying `QueryClient` for the provider.
 
 ## Queries
 
 ```tsx
+const userId = useUserId(); // your route param / state / etc.
+
 const { data } = api.useQuery({
   path: '/users/{userId}',
   params: { userId },

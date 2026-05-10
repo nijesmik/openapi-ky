@@ -26,6 +26,8 @@ export const queryClient = createQueryClient({
 export const api = createClient(kyClient, queryClient);
 ```
 
+`createQueryClient`는 `QueryClient` 인스턴스가 아니라 **getter 함수**를 반환합니다. 인스턴스가 필요한 곳에서 호출(`queryClient()`)해 사용 — 서버에서는 요청마다 새 클라이언트, 브라우저에서는 첫 호출 후 캐시된 동일 클라이언트가 반환됩니다.
+
 ```tsx
 import { QueryClientProvider } from '@tanstack/react-query';
 
@@ -34,15 +36,24 @@ import { QueryClientProvider } from '@tanstack/react-query';
 </QueryClientProvider>;
 ```
 
-`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.mutationOptions(...)`는 각각 대응하는 TanStack 훅의 옵션을 만듭니다. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)`는 편의 훅으로, 대응하는 옵션 빌더를 TanStack 훅에 그대로 넘긴 것과 동치입니다.
+`api`는 TanStack의 각 primitive마다 빌더와 대응 훅을 노출합니다:
+
+| 빌더                       | 훅                      |
+| -------------------------- | ----------------------- |
+| `api.queryOptions`         | `api.useQuery`          |
+| `api.suspenseQueryOptions` | `api.useSuspenseQuery`  |
+| `api.infiniteQueryOptions` | `api.useInfiniteQuery`  |
+| `api.mutationOptions`      | `api.useMutation`       |
+
+각 훅은 대응 빌더의 결과를 동명 TanStack 훅에 그대로 넘긴 것과 동치입니다.
 
 위처럼 `queryClient`를 전달하면 `api`는 path 타입이 적용된 캐시 헬퍼 `api.getQueryKey(...)` / `api.setQueryData(...)` / `api.invalidateQueries(...)`도 노출합니다. `queryClient`를 생략하면(`createClient(kyClient)`) 훅 전용 `api`가 됩니다.
-
-`createQueryClient(config)`는 TanStack의 SSR singleton 패턴을 따르는 callable getter입니다 — 서버에서는 요청마다 새로 생성하고 브라우저에서는 첫 호출 후 캐시. `queryClient()`로 호출해 provider에 넘길 `QueryClient` 인스턴스를 얻습니다.
 
 ## Queries
 
 ```tsx
+const userId = useUserId(); // route param / state 등
+
 const { data } = api.useQuery({
   path: '/users/{userId}',
   params: { userId },

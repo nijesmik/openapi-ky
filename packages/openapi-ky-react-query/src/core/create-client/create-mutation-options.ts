@@ -106,11 +106,13 @@ function mutationApiOptions<
     });
   }
 
+  // mutate-time `params` / `searchParams`가 명시적으로 `undefined`인 경우
+  // create-time 값을 silently 클로버하지 않도록 nullish coalesce.
   return {
     ...kyOptions,
-    params,
-    searchParams,
     ...variables,
+    params: variables.params ?? params,
+    searchParams: variables.searchParams ?? searchParams,
     method,
   } as OptionsWithRequiredMethod<TPaths, TPath, TMethod>;
 }

@@ -143,6 +143,27 @@ describe("createMutationOptions", () => {
       );
     });
 
+    it("[회귀 테스트] mutate-time params가 create-time params를 override한다", async () => {
+      const api = createFakeApi();
+      const mutationOptions = createMutationOptions(api);
+
+      const opts = mutationOptions({
+        method: "put",
+        path: "/posts/{postId}",
+        params: { postId: 1 },
+      });
+      await opts.mutationFn?.({ json: { title: "Hello" }, params: { postId: 99 } }, {} as never);
+
+      expect(getCallableMock(api)).toHaveBeenCalledWith(
+        "/posts/{postId}",
+        expect.objectContaining({
+          method: "put",
+          params: { postId: 99 },
+          json: { title: "Hello" },
+        }),
+      );
+    });
+
     it("kyOptions가 params/searchParams와 함께 api 호출에 전달된다", async () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);

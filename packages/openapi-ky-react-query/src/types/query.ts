@@ -14,9 +14,7 @@ import type {
   UseSuspenseQueryOptions,
 } from "@tanstack/react-query";
 
-import type { queryKey } from "@/lib/query-key";
-
-export type QueryKey = ReturnType<typeof queryKey>;
+import type { QueryKey } from "./query-key";
 
 /**
  * `TMethod` must be inferable from an unconditional intersection position —

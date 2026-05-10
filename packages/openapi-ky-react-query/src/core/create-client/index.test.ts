@@ -1,5 +1,5 @@
-import { skipToken } from "@tanstack/react-query";
-import { describe, expect, it } from "vitest";
+import { skipToken, QueryClient } from "@tanstack/react-query";
+import { describe, expect, it, vi } from "vitest";
 
 import { createFakeCallableClient, getCallableMock } from "@/__fixtures__/fake-client";
 
@@ -226,6 +226,78 @@ describe("createClient", () => {
     });
   });
 
+  describe("imperative ops (queryClient 인자 제공 시)", () => {
+    describe("setQueryData", () => {
+      it("queryKey와 updater를 그대로 QueryClient에 전달한다", () => {
+        const client = createFakeClient();
+        const queryClient = new QueryClient();
+        const setSpy = vi.spyOn(queryClient, "setQueryData");
+        const api = createClient(client, () => queryClient);
+        const updater = (prev: { id: number; title: string } | undefined) => prev;
+
+        api.setQueryData({
+          path: "/posts/{postId}",
+          params: { postId: 1 },
+          updater,
+        });
+
+        expect(setSpy).toHaveBeenCalledTimes(1);
+        expect(setSpy.mock.calls[0]?.[0]).toEqual(["/posts/{postId}", { postId: 1 }]);
+        expect(setSpy.mock.calls[0]?.[1]).toBe(updater);
+      });
+
+      it("[회귀 테스트] QueryClient.setQueryData의 리턴 값을 그대로 전파한다", () => {
+        const client = createFakeClient();
+        const queryClient = new QueryClient();
+        const sentinel = Symbol("setQueryData result");
+        vi.spyOn(queryClient, "setQueryData").mockReturnValue(sentinel as never);
+        const api = createClient(client, () => queryClient);
+
+        const result = api.setQueryData({ path: "/posts", updater: [] });
+
+        expect(result).toBe(sentinel);
+      });
+    });
+
+    describe("invalidateQueries", () => {
+      it("filter 옵션과 invalidate 옵션을 분리해 전달한다", () => {
+        const client = createFakeClient();
+        const queryClient = new QueryClient();
+        const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+        const api = createClient(client, () => queryClient);
+
+        api.invalidateQueries(
+          {
+            path: "/posts/{postId}",
+            params: { postId: 1 },
+            exact: true,
+          },
+          { cancelRefetch: false, throwOnError: true },
+        );
+
+        expect(invalidateSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ exact: true, queryKey: expect.any(Array) }),
+          { cancelRefetch: false, throwOnError: true },
+        );
+      });
+    });
+
+    describe("queryClient getter lazy resolution", () => {
+      it("getter는 createClient 시점이 아니라 imperative 호출 시점에 매번 해석된다 (SSR 안전)", () => {
+        const client = createFakeClient();
+        const getter = vi.fn(() => new QueryClient());
+
+        const api = createClient(client, getter);
+        expect(getter).not.toHaveBeenCalled();
+
+        api.invalidateQueries({ path: "/posts" });
+        api.invalidateQueries({ path: "/posts" });
+        // 매 호출마다 새로 해석 — memoize하면 SSR마다 같은 인스턴스 공유.
+        expect(getter).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
   describe("타입 추론 (compile-time)", () => {
     it("path-param 키가 schema와 다르면 컴파일 에러", () => {
       type _Paths = {
@@ -266,6 +338,18 @@ describe("createClient", () => {
         path: "/search",
         json: { criteria: "x" },
       });
+    });
+
+    it("queryClient 인자 없이 만든 client는 imperative ops가 노출되지 않는다", () => {
+      const client = createFakeCallableClient<TestPaths>([]);
+      const api = createClient(client);
+
+      // @ts-expect-error setQueryData는 ClientHooks에 없음 (Client만 가짐)
+      void api.setQueryData;
+      // @ts-expect-error invalidateQueries는 ClientHooks에 없음
+      void api.invalidateQueries;
+      // @ts-expect-error getQueryKey는 ClientHooks에 없음
+      void api.getQueryKey;
     });
 
     it("hook factory는 잘못 짝지어진 builder를 거부한다", () => {

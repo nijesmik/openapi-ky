@@ -1,26 +1,36 @@
-import type { HttpMethod, PathParams, SearchParams } from "@nijesmik/openapi-ky";
-import type { QueryClient } from "@tanstack/react-query";
+import type { HttpMethod, PathsFor } from "@nijesmik/openapi-ky";
 
-export type QueryKeyOptions<
-  TPaths extends object,
-  TPath extends keyof TPaths,
-  TMethod extends HttpMethod = HttpMethod,
-> = {
-  method?: TMethod;
-  params?: PathParams<TPaths, TPath, TMethod>;
-  searchParams?: SearchParams;
+import type { createInfiniteQueryOptions } from "@/core/create-client/create-infinite-query-options";
+import type { createMutationOptions } from "@/core/create-client/create-mutation-options";
+import type { createQueryOptions } from "@/core/create-client/create-query-options";
+import type { createSuspenseQueryOptions } from "@/core/create-client/create-suspense-query-options";
+import type { invalidateQueries } from "@/core/create-client/invalidate-queries";
+import type { setQueryData } from "@/core/create-client/set-query-data";
+import type { useInfiniteQuery } from "@/core/create-client/use-infinite-query";
+import type { useMutation } from "@/core/create-client/use-mutation";
+import type { useQuery } from "@/core/create-client/use-query";
+import type { useSuspenseQuery } from "@/core/create-client/use-suspense-query";
+
+import type { QueryKey, QueryKeyOptions } from "./query-key";
+
+export type ClientHooks<TPaths extends object> = {
+  queryOptions: ReturnType<typeof createQueryOptions<TPaths>>;
+  suspenseQueryOptions: ReturnType<typeof createSuspenseQueryOptions<TPaths>>;
+  infiniteQueryOptions: ReturnType<typeof createInfiniteQueryOptions<TPaths>>;
+  mutationOptions: ReturnType<typeof createMutationOptions<TPaths>>;
+  useQuery: ReturnType<typeof useQuery<TPaths>>;
+  useSuspenseQuery: ReturnType<typeof useSuspenseQuery<TPaths>>;
+  useInfiniteQuery: ReturnType<typeof useInfiniteQuery<TPaths>>;
+  useMutation: ReturnType<typeof useMutation<TPaths>>;
 };
 
-declare const _queryClient: QueryClient;
+export type ClientImperative<TPaths extends object> = {
+  setQueryData: ReturnType<typeof setQueryData<TPaths>>;
+  invalidateQueries: ReturnType<typeof invalidateQueries<TPaths>>;
+  getQueryKey: <TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod = "get">(
+    path: TPath,
+    options?: QueryKeyOptions<TPaths, TPath, TMethod>,
+  ) => QueryKey;
+};
 
-/**
- * Updater type extracted from `QueryClient.setQueryData<T>`'s signature.
- *
- * React Query 5 wraps the updater's `T` with `NoInfer<T>`. When `T` is a
- * deeply computed type like `ResponseBody<TPaths, TPath, TMethod>`, TypeScript
- * cannot unify `Updater<X, X>` with `Updater<NoInfer<X>, NoInfer<X>>` and
- * rejects every form of cast — including `as unknown as Updater<NoInfer<X>>`.
- * Re-using the parameter type via `Parameters<>` preserves the symbolic
- * identity of the type expression, so the call site matches without a cast.
- */
-export type SetQueryDataUpdater<T> = Parameters<typeof _queryClient.setQueryData<T>>[1];
+export type Client<TPaths extends object> = ClientHooks<TPaths> & ClientImperative<TPaths>;

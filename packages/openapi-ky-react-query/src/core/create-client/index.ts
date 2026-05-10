@@ -1,9 +1,15 @@
-import type { Client } from "@nijesmik/openapi-ky";
+import type { Client as KyClient } from "@nijesmik/openapi-ky";
+import type { QueryClient } from "@tanstack/react-query";
+
+import type { Client, ClientHooks } from "@/types/client";
 
 import { createInfiniteQueryOptions } from "./create-infinite-query-options";
 import { createMutationOptions } from "./create-mutation-options";
 import { createQueryOptions } from "./create-query-options";
 import { createSuspenseQueryOptions } from "./create-suspense-query-options";
+import { getQueryKey } from "./get-query-key";
+import { invalidateQueries } from "./invalidate-queries";
+import { setQueryData } from "./set-query-data";
 import { useInfiniteQuery } from "./use-infinite-query";
 import { useMutation } from "./use-mutation";
 import { useQuery } from "./use-query";
@@ -12,47 +18,42 @@ import { useSuspenseQuery } from "./use-suspense-query";
 /**
  * Creates a typed React Query factory bound to an `openapi-ky` `Client`.
  *
- * The returned object exposes:
- * - `.queryOptions` / `.suspenseQueryOptions` / `.infiniteQueryOptions` /
- *   `.mutationOptions` — options builders for the matching TanStack hooks
- * - `.useQuery` / `.useSuspenseQuery` / `.useInfiniteQuery` /
- *   `.useMutation` — typed hooks, each equivalent to calling the matching
- *   TanStack hook with the matching options builder
+ * Without `queryClient`, returns hooks + options builders only.
+ * With `queryClient` (a callable getter — typically `createQueryClient(config)`),
+ * additionally exposes path-based imperative ops: `getQueryKey`, `setQueryData`,
+ * `invalidateQueries`. The getter is invoked lazily per call to preserve SSR
+ * singleton semantics.
  *
  * ```ts
- * const api = createClient(client);
+ * const queryClient = createQueryClient(config);
+ * const api = createClient(kyClient, queryClient);
  *
  * api.useQuery({ path: "/posts" });
- * api.useSuspenseQuery({ path: "/posts" });
- * api.useInfiniteQuery({ path: "/posts", initialPageParam: undefined, getNextPageParam });
- * api.useMutation({ method: "post", path: "/posts" });
- * useQuery(api.queryOptions({ path: "/posts" })); // composable form for prefetch / useQueries
+ * api.invalidateQueries({ path: "/posts" });
  * ```
  *
  * **TMethod default:** `method` defaults to `"get"` when omitted on the query
- * builders (query semantics ≡ HTTP GET). The default is applied by the
- * options builders and takes precedence over any `method` configured on the
- * `Client` via `createKyClient`. For read endpoints that aren't `GET` (e.g.
- * `POST /search`), pass `method` explicitly per call. Mutation builders
- * always require `method`:
+ * builders. Mutation builders always require `method`.
  *
- * ```ts
- * api.queryOptions({ method: "post", path: "/search", json: { ... } });
- * api.mutationOptions({ method: "post", path: "/posts" });
- * ```
- *
- * **Disabling a query:** Pass `params: null` to return options with
- * `queryFn: skipToken`. TanStack Query treats this as a disabled query —
- * useful when a path parameter isn't ready yet. Available on `.queryOptions`
- * (and `.useQuery`) only — `.suspenseQueryOptions` / `.infiniteQueryOptions`
- * and their hook counterparts always fire.
+ * **Disabling a query:** Pass `params: null` to switch `queryFn` to
+ * `skipToken`. Only `queryOptions` / `useQuery` honor this; suspense and
+ * infinite builders always fire.
  */
-export function createClient<TPaths extends object>(api: Client<TPaths>) {
+export function createClient<TPaths extends object>(api: KyClient<TPaths>): ClientHooks<TPaths>;
+export function createClient<TPaths extends object>(
+  api: KyClient<TPaths>,
+  queryClient: () => QueryClient,
+): Client<TPaths>;
+export function createClient<TPaths extends object>(
+  api: KyClient<TPaths>,
+  queryClient?: () => QueryClient,
+): ClientHooks<TPaths> | Client<TPaths> {
   const queryOptions = createQueryOptions(api);
   const suspenseQueryOptions = createSuspenseQueryOptions(api);
   const infiniteQueryOptions = createInfiniteQueryOptions(api);
   const mutationOptions = createMutationOptions(api);
-  return {
+
+  const hooks: ClientHooks<TPaths> = {
     queryOptions,
     suspenseQueryOptions,
     infiniteQueryOptions,
@@ -61,5 +62,16 @@ export function createClient<TPaths extends object>(api: Client<TPaths>) {
     useSuspenseQuery: useSuspenseQuery(suspenseQueryOptions),
     useInfiniteQuery: useInfiniteQuery(infiniteQueryOptions),
     useMutation: useMutation(mutationOptions),
+  };
+
+  if (!queryClient) {
+    return hooks;
+  }
+
+  return {
+    ...hooks,
+    getQueryKey,
+    setQueryData: setQueryData(queryClient),
+    invalidateQueries: invalidateQueries(queryClient),
   };
 }

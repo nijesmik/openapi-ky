@@ -106,12 +106,12 @@ function mutationApiOptions<
     });
   }
 
-  // mutate-time이 우선이지만 `params` / `searchParams`가 명시적으로
-  // `undefined`인 경우 create-time 값이 silently 클로버되지 않도록 nullish coalesce.
   return {
     ...kyOptions,
     ...variables.kyOptions,
     json: variables.json,
+    // mutate-time normally overrides, but `??` keeps create-time `params` /
+    // `searchParams` from being silently clobbered by explicit `undefined`.
     params: variables.params ?? params,
     searchParams: variables.searchParams ?? searchParams,
     method,

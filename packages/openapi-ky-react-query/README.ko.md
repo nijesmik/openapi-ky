@@ -15,13 +15,13 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 ## 셋업
 
 ```ts
-import { createKyClient } from '@nijesmik/openapi-ky';
+import createKyClient from '@nijesmik/openapi-ky';
 import { createClient } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
-const client = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
+const kyClient = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-export const api = createClient(client);
+export const api = createClient(kyClient);
 ```
 
 `api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.mutationOptions(...)`는 각각 대응하는 TanStack 훅의 옵션을 만듭니다. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)`는 편의 훅으로, 대응하는 옵션 빌더를 TanStack 훅에 그대로 넘긴 것과 동치입니다.

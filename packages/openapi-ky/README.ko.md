@@ -15,10 +15,10 @@ npm install @nijesmik/openapi-ky ky
 ## 사용법
 
 ```ts
-import { createKyClient } from '@nijesmik/openapi-ky';
+import createClient from '@nijesmik/openapi-ky';
 import type { paths } from './schema'; // openapi-typescript로 생성
 
-const client = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
+const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
 
 // path params가 있는 GET
 const user = await client
@@ -36,10 +36,10 @@ const created = await client
 ## 기본 메서드
 
 ```ts
-import { createKyClient } from '@nijesmik/openapi-ky';
+import createClient from '@nijesmik/openapi-ky';
 import type { paths } from './schema';
 
-const client = createKyClient<paths, 'post'>({
+const client = createClient<paths, 'post'>({
   prefixUrl: 'https://api.example.com',
   method: 'post',
 });

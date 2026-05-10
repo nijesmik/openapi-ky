@@ -15,13 +15,13 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 ## Setup
 
 ```ts
-import { createKyClient } from '@nijesmik/openapi-ky';
+import createKyClient from '@nijesmik/openapi-ky';
 import { createClient } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
-const client = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
+const kyClient = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
 
-export const api = createClient(client);
+export const api = createClient(kyClient);
 ```
 
 `api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, and `api.mutationOptions(...)` build typed options for the matching TanStack hooks. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)` are convenience hooks — each equivalent to passing the matching options builder to the matching TanStack hook.

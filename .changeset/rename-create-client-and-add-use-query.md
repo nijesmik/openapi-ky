@@ -5,16 +5,20 @@
 
 ### Breaking Changes / 호환성 깨짐
 
-#### `createClient` → `createKyClient` (`@nijesmik/openapi-ky`)
+#### `createClient`를 default export로 (`@nijesmik/openapi-ky`)
 
-ky 기반 client factory를 `createClient`에서 `createKyClient`로 rename. `@nijesmik/openapi-ky-react-query`가 노출하는 새 `createClient` factory와 import 이름 충돌을 막기 위함.
+ky 기반 client factory를 named export(`{ createClient }`)에서 default export로 변경. `@nijesmik/openapi-ky-react-query`가 같은 이름의 `createClient`를 named export하기 때문에, default로 노출해 import 시점에 자유롭게 이름 지정할 수 있도록 함.
 
 ```ts
 // Before
 import { createClient } from '@nijesmik/openapi-ky';
 
-// After
-import { createKyClient } from '@nijesmik/openapi-ky';
+// After (예: 단독 사용)
+import createClient from '@nijesmik/openapi-ky';
+
+// After (예: react-query와 함께 — 충돌 회피)
+import createKyClient from '@nijesmik/openapi-ky';
+import { createClient } from '@nijesmik/openapi-ky-react-query';
 ```
 
 #### `createQueryOptions` → `createClient` + flat naming + React Query hooks 추가 (`@nijesmik/openapi-ky-react-query`)
@@ -34,11 +38,11 @@ useSuspenseQuery(queryOptions.suspense({ path: '/categories' }));
 useInfiniteQuery(queryOptions.infinite({ path: '/posts', initialPageParam: undefined, getNextPageParam: ... }));
 
 // After
-import { createKyClient } from '@nijesmik/openapi-ky';
+import createKyClient from '@nijesmik/openapi-ky';
 import { createClient } from '@nijesmik/openapi-ky-react-query';
 
-const client = createKyClient<paths>({ prefixUrl: '...' });
-const api = createClient(client);
+const kyClient = createKyClient<paths>({ prefixUrl: '...' });
+const api = createClient(kyClient);
 
 api.useQuery({ path: '/posts' });                                                              // hook 단축형
 api.useSuspenseQuery({ path: '/categories' });
@@ -49,6 +53,6 @@ useQuery(api.queryOptions({ path: '/posts' }));                                 
 
 ### Renames
 
-In `@nijesmik/openapi-ky`, the ky-based client factory is renamed from `createClient` to `createKyClient` to avoid an import-name collision with the new `createClient` exported from `@nijesmik/openapi-ky-react-query`.
+In `@nijesmik/openapi-ky`, the ky-based client factory `createClient` is now a default export (previously a named export). This lets consumers rename it on import (e.g. to `createKyClient`) when used alongside `@nijesmik/openapi-ky-react-query`, which exports its own named `createClient`.
 
 In `@nijesmik/openapi-ky-react-query`, `createQueryOptions` is renamed to `createClient`. The returned value is now a plain object — the callable form (`api({ ... })`) is removed in favor of an explicit `api.queryOptions({ ... })` method, and `.suspense` / `.infinite` are renamed to `.suspenseQueryOptions` / `.infiniteQueryOptions` to align with TanStack Query's flat naming. `useQuery`, `useSuspenseQuery`, and `useInfiniteQuery` convenience methods are added — each equivalent to passing the matching options builder to the matching TanStack hook.

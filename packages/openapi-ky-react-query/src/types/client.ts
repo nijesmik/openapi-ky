@@ -1,15 +1,15 @@
 import type { HttpMethod, PathsFor } from "@nijesmik/openapi-ky";
 
-import type { createInfiniteQueryOptions } from "@/core/create-client/create-infinite-query-options";
-import type { createMutationOptions } from "@/core/create-client/create-mutation-options";
-import type { createQueryOptions } from "@/core/create-client/create-query-options";
-import type { createSuspenseQueryOptions } from "@/core/create-client/create-suspense-query-options";
-import type { invalidateQueries } from "@/core/create-client/invalidate-queries";
-import type { setQueryData } from "@/core/create-client/set-query-data";
-import type { useInfiniteQuery } from "@/core/create-client/use-infinite-query";
-import type { useMutation } from "@/core/create-client/use-mutation";
-import type { useQuery } from "@/core/create-client/use-query";
-import type { useSuspenseQuery } from "@/core/create-client/use-suspense-query";
+import type { createInfiniteQueryOptions } from "@/core/create-infinite-query-options";
+import type { createMutationOptions } from "@/core/create-mutation-options";
+import type { createQueryOptions } from "@/core/create-query-options";
+import type { createSuspenseQueryOptions } from "@/core/create-suspense-query-options";
+import type { invalidateQueries } from "@/core/invalidate-queries";
+import type { setQueryData } from "@/core/set-query-data";
+import type { useInfiniteQuery } from "@/core/use-infinite-query";
+import type { useMutation } from "@/core/use-mutation";
+import type { useQuery } from "@/core/use-query";
+import type { useSuspenseQuery } from "@/core/use-suspense-query";
 
 import type { QueryKey, QueryKeyOptions } from "./query-key";
 

@@ -10,93 +10,50 @@ import type {
 } from "@nijesmik/openapi-ky";
 import type { UseMutationOptions } from "@tanstack/react-query";
 
-export type StaticMutationFunctionVariables<
-  TPaths extends object,
-  TPath extends PathsFor<TPaths, TMethod>,
-  TMethod extends HttpMethod,
-> = RequestBody<TPaths, TPath, TMethod>;
+/** Paths without `{...}` parameters (e.g. `/posts`, not `/posts/{id}`). */
+export type StaticPathsFor<TPaths extends object, TMethod extends HttpMethod> = {
+  [TPath in PathsFor<TPaths, TMethod>]: [PathParams<TPaths, TPath, TMethod>] extends [never]
+    ? TPath
+    : never;
+}[PathsFor<TPaths, TMethod>];
 
-export type DynamicMutationFunctionVariables<
+export type MutationFnOptions<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod,
 > = Omit<Options<TPaths, TPath, TMethod>, "method">;
 
-export type MutationFunctionVariables<
+export type StrictMutationFnOptions<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod,
-> =
-  | StaticMutationFunctionVariables<TPaths, TPath, TMethod>
-  | DynamicMutationFunctionVariables<TPaths, TPath, TMethod>;
+> = MutationFnOptions<TPaths, TPath, TMethod> &
+  ([PathParams<TPaths, TPath, TMethod>] extends [never]
+    ? unknown
+    : { params: PathParams<TPaths, TPath, TMethod> });
 
-type CreateBaseMutationOptions<
+export type MutationFnVariables<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod,
-  TVariables extends MutationFunctionVariables<TPaths, TPath, TMethod>,
+> = RequestBody<TPaths, TPath, TMethod> | MutationFnOptions<TPaths, TPath, TMethod>;
+
+export type CreateMutationOptions<
+  TPaths extends object,
+  TPath extends PathsFor<TPaths, TMethod>,
+  TMethod extends HttpMethod,
+  TVariables extends MutationFnVariables<TPaths, TPath, TMethod> = MutationFnVariables<
+    TPaths,
+    TPath,
+    TMethod
+  >,
 > = Omit<
   UseMutationOptions<ResponseBody<TPaths, TPath, TMethod>, Error, TVariables>,
   "mutationFn"
 > & {
   method: TMethod;
   path: TPath;
+  params?: PathParams<TPaths, TPath, TMethod>;
+  searchParams?: SearchParams;
   kyOptions?: KyOptions;
 };
-
-export type CreateStaticMutationOptions<
-  TPaths extends object,
-  TPath extends PathsFor<TPaths, TMethod>,
-  TMethod extends HttpMethod,
-> = CreateBaseMutationOptions<
-  TPaths,
-  TPath,
-  TMethod,
-  StaticMutationFunctionVariables<TPaths, TPath, TMethod>
-> &
-  (
-    | { params: PathParams<TPaths, TPath, TMethod>; searchParams?: SearchParams }
-    | { params?: never; searchParams: SearchParams }
-  );
-
-export type CreateDynamicMutationOptions<
-  TPaths extends object,
-  TPath extends PathsFor<TPaths, TMethod>,
-  TMethod extends HttpMethod,
-> = CreateBaseMutationOptions<
-  TPaths,
-  TPath,
-  TMethod,
-  DynamicMutationFunctionVariables<TPaths, TPath, TMethod>
-> & {
-  params?: never;
-  searchParams?: never;
-};
-
-export type CreateMutationOptions<
-  TPaths extends object,
-  TPath extends PathsFor<TPaths, TMethod>,
-  TMethod extends HttpMethod,
-> =
-  | CreateStaticMutationOptions<TPaths, TPath, TMethod>
-  | CreateDynamicMutationOptions<TPaths, TPath, TMethod>;
-
-export type UseStaticMutationOptions<
-  TPaths extends object,
-  TPath extends PathsFor<TPaths, TMethod>,
-  TMethod extends HttpMethod,
-> = UseMutationOptions<
-  ResponseBody<TPaths, TPath, TMethod>,
-  Error,
-  StaticMutationFunctionVariables<TPaths, TPath, TMethod>
->;
-
-export type UseDynamicMutationOptions<
-  TPaths extends object,
-  TPath extends PathsFor<TPaths, TMethod>,
-  TMethod extends HttpMethod,
-> = UseMutationOptions<
-  ResponseBody<TPaths, TPath, TMethod>,
-  Error,
-  DynamicMutationFunctionVariables<TPaths, TPath, TMethod>
->;

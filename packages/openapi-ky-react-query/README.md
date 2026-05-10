@@ -16,19 +16,15 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 
 ```ts
 import { createKyClient } from '@nijesmik/openapi-ky';
-import {
-  createClient,
-  createMutationOptions,
-} from '@nijesmik/openapi-ky-react-query';
+import { createClient } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
 const client = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
 
 export const api = createClient(client);
-export const mutationOptions = createMutationOptions(client);
 ```
 
-`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, and `api.infiniteQueryOptions(...)` build typed options for `useQuery` / `useSuspenseQuery` / `useInfiniteQuery`. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` are convenience hooks — each equivalent to passing the matching options builder to the matching TanStack hook. `mutationOptions(...)` takes `method` explicitly; `.post` / `.put` / `.patch` / `.delete` shortcuts pre-bind it.
+`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, and `api.mutationOptions(...)` build typed options for the matching TanStack hooks. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)` are convenience hooks — each equivalent to passing the matching options builder to the matching TanStack hook.
 
 ## Queries
 
@@ -88,42 +84,43 @@ api.useQuery({ method: 'post', path: '/search', json: { q } });
 ## Mutations
 
 ```tsx
-import { useMutation } from '@tanstack/react-query';
-
-// Method shortcut
-const { mutate: createPost } = useMutation(
-  mutationOptions.post({ path: '/posts' }),
-);
-
-// Explicit method (e.g. when method is computed at runtime)
-useMutation(mutationOptions({ method: someMethod, path: '/posts/{postId}' }));
+const { mutate: createPost } = api.useMutation({ method: 'post', path: '/posts' });
 ```
 
-### Static vs dynamic mode
+`mutate` accepts two forms — discriminated at runtime by the presence of `'json'` / `'params'` / `'searchParams'` fields.
 
-`mutate`'s argument shape depends on whether `params` / `searchParams` are passed at create time.
-
-**Dynamic** (default — neither `params` nor `searchParams` at create time):
+### Body form
 
 ```tsx
-const { mutate } = useMutation(
-  mutationOptions.put({ path: '/posts/{postId}' }),
-);
+const { mutate } = api.useMutation({
+  method: 'put',
+  path: '/posts/{postId}',
+  params: { postId: 1 },          // bound at create-time
+});
+
+mutate({ title: 'Updated' });     // variables IS body
+```
+
+### Options form
+
+```tsx
+const { mutate } = api.useMutation({ method: 'put', path: '/posts/{postId}' });
 
 mutate({ params: { postId: 1 }, json: { title: 'Updated' } });
 ```
 
-**Static** (bind `params` and/or `searchParams` at create time):
+Mutate-time `params` / `searchParams` override the create-time defaults.
+
+### Compile-time path-params enforcement
+
+If the path requires `{...}` placeholders and `params` are not bound at create-time, only the options form with `params` is accepted — the body form is rejected at compile time:
 
 ```tsx
-const { mutate } = useMutation(
-  mutationOptions.put({ path: '/posts/{postId}', params: { postId: 1 } }),
-);
+const { mutate } = api.useMutation({ method: 'put', path: '/posts/{postId}' });
 
-mutate({ title: 'Updated' }); // body only
+mutate({ title: 'x' });           // ❌ TS error — params required
+mutate({ json: { title: 'x' }, params: { postId: 1 } });  // ✅
 ```
-
-Passing `params` or `searchParams` to the builder switches to static mode.
 
 ## Cache — `createQueryClient`
 
@@ -160,7 +157,7 @@ The factory's return value is callable — `queryClient()` is equivalent to `que
 
 ### `ky.stop` is not compatible with this package
 
-Both `api`'s query helpers (`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.useQuery(...)`, `api.useSuspenseQuery(...)`, `api.useInfiniteQuery(...)`) and `mutationOptions` chain `.json()` internally to return parsed bodies. If a `beforeRetry` hook returns [`ky.stop`](https://github.com/sindresorhus/ky#stop), the response resolves to `undefined` and the internal `.json()` call throws `TypeError`. Upstream limitation — see [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats) for the underlying behavior.
+All of `api`'s helpers (`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.mutationOptions(...)`, `api.useQuery(...)`, `api.useSuspenseQuery(...)`, `api.useInfiniteQuery(...)`, `api.useMutation(...)`) chain `.json()` internally to return parsed bodies. If a `beforeRetry` hook returns [`ky.stop`](https://github.com/sindresorhus/ky#stop), the response resolves to `undefined` and the internal `.json()` call throws `TypeError`. Upstream limitation — see [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats) for the underlying behavior.
 
 For "stop retrying on a specific error" cases, use react-query's `retry`:
 
@@ -177,6 +174,10 @@ api.useQuery({
 ```
 
 If you genuinely need `ky.stop`, call `client` directly outside the wrapper and handle the `undefined` case yourself.
+
+### Mutation body fields named `json` / `params` / `searchParams`
+
+`mutate` discriminates body form vs options form by the presence of `'json'` / `'params'` / `'searchParams'` keys at the top level of the variables. If your endpoint's request body happens to have one of these as a top-level field name (rare in practice), the body form would be misdispatched as the options form. Workaround: always use the options form explicitly — `mutate({ json: { yourBody } })` — for that endpoint.
 
 ## License
 

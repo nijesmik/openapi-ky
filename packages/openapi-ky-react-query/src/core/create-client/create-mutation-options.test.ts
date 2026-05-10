@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createFakeCallableClient, getCallableMock } from "@/__fixtures__/fake-client";
 
-import { createMutationOptions } from "./index";
+import { createMutationOptions } from "./create-mutation-options";
 
 type TestPaths = {
   "/posts": {
@@ -182,97 +182,9 @@ describe("createMutationOptions", () => {
     });
   });
 
-  describe("HTTP method 단축 메서드", () => {
-    it.each([
-      ["post", "/posts"],
-      ["put", "/posts/{postId}"],
-      ["patch", "/posts/{postId}"],
-    ] as const)(
-      "%s 단축 메서드는 method='%s'로 client callable을 호출한다",
-      async (method, path) => {
-        const api = createFakeApi();
-        const mutationOptions = createMutationOptions(api);
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const opts = (mutationOptions[method] as any)({ path });
-        const body = { title: "x" };
-        await opts.mutationFn?.({ json: body }, {} as never);
-
-        expect(getCallableMock(api)).toHaveBeenCalledWith(path, {
-          method,
-          json: body,
-        });
-      },
-    );
-
-    it("[회귀 테스트] 각 단축 메서드는 서로 다른 method를 캡처한다", async () => {
-      const api = createFakeApi();
-      const mutationOptions = createMutationOptions(api);
-
-      await mutationOptions
-        .post({ path: "/posts" })
-        .mutationFn?.({ json: { title: "p" } }, {} as never);
-      await mutationOptions
-        .put({ path: "/posts/{postId}" })
-        .mutationFn?.({ json: { title: "u" } }, {} as never);
-      await mutationOptions
-        .patch({ path: "/posts/{postId}" })
-        .mutationFn?.({ json: { title: "a" } }, {} as never);
-      await mutationOptions.delete({ path: "/posts/{postId}" }).mutationFn?.({}, {} as never);
-
-      const methods = getCallableMock(api).mock.calls.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (call) => (call[1] as any).method,
-      );
-      expect(methods).toEqual(["post", "put", "patch", "delete"]);
-    });
-
-    it("단축 메서드도 params 지정 시 static 모드로 동작한다", async () => {
-      const api = createFakeApi();
-      const mutationOptions = createMutationOptions(api);
-
-      const opts = mutationOptions.put({
-        path: "/posts/{postId}",
-        params: { postId: 1 },
-      });
-      await opts.mutationFn?.({ title: "Hello" }, {} as never);
-
-      expect(getCallableMock(api)).toHaveBeenCalledWith(
-        "/posts/{postId}",
-        expect.objectContaining({
-          method: "put",
-          params: { postId: 1 },
-          json: { title: "Hello" },
-        }),
-      );
-    });
-  });
-
   describe("타입 추론 (compile-time)", () => {
-    describe("HTTP method별 path 필터링", () => {
-      it("post 단축 메서드는 POST가 정의된 path만 받는다", () => {
-        const api = createFakeApi();
-        const mutationOptions = createMutationOptions(api);
-
-        mutationOptions.post({ path: "/posts" });
-
-        // @ts-expect-error — '/posts/{postId}'에는 POST가 없음
-        mutationOptions.post({ path: "/posts/{postId}" });
-      });
-
-      it("delete 단축 메서드는 DELETE가 정의된 path만 받는다", () => {
-        const api = createFakeApi();
-        const mutationOptions = createMutationOptions(api);
-
-        mutationOptions.delete({ path: "/posts/{postId}" });
-
-        // @ts-expect-error — '/posts'에는 DELETE가 없음
-        mutationOptions.delete({ path: "/posts" });
-      });
-    });
-
-    describe("static 모드: TVariables = RequestBody (body 직접)", () => {
-      it("params 지정 시 mutationFn 인자는 body 그대로이며 ky options 래핑은 거부된다", () => {
+    describe("variables 양쪽 형태 모두 수용", () => {
+      it("body 형태와 options 형태가 모두 mutationFn 인자로 허용된다", () => {
         const api = createFakeApi();
         const mutationOptions = createMutationOptions(api);
 
@@ -282,75 +194,33 @@ describe("createMutationOptions", () => {
           params: { postId: 1 },
         });
 
+        // body 형태 (variables IS body, create-time params 사용)
         opts.mutationFn?.({ title: "x" }, {} as never);
 
-        // @ts-expect-error — static 모드에서는 { json: ... }로 래핑할 수 없음
+        // options 형태 (mutate-time에 모든 ky options 명시 가능, params override)
         opts.mutationFn?.({ json: { title: "x" } }, {} as never);
-
-        // @ts-expect-error — static 모드 TVariables는 RequestBody이므로 ky options 키 거부
-        opts.mutationFn?.({ params: { postId: 1 } }, {} as never);
-      });
-
-      it("searchParams만 지정해도 TVariables는 body 그대로다", () => {
-        const api = createFakeApi();
-        const mutationOptions = createMutationOptions(api);
-
-        const opts = mutationOptions({
-          method: "post",
-          path: "/posts",
-          searchParams: { lang: "ko" },
-        });
-
-        opts.mutationFn?.({ title: "x" }, {} as never);
-
-        // @ts-expect-error — static 모드에서는 { json: ... }로 래핑할 수 없음
-        opts.mutationFn?.({ json: { title: "x" } }, {} as never);
-      });
-
-      it("단축 메서드도 params 지정 시 static 추론된다", () => {
-        const api = createFakeApi();
-        const mutationOptions = createMutationOptions(api);
-
-        const opts = mutationOptions.put({
-          path: "/posts/{postId}",
-          params: { postId: 1 },
-        });
-
-        opts.mutationFn?.({ title: "x" }, {} as never);
-
-        // @ts-expect-error — static 모드에서는 { json: ... } 래핑 불가
-        opts.mutationFn?.({ json: { title: "x" } }, {} as never);
+        opts.mutationFn?.({ json: { title: "x" }, params: { postId: 2 } }, {} as never);
       });
     });
 
-    describe("dynamic 모드: TVariables = Omit<Options, 'method'> (ky options 형태)", () => {
-      it("params/searchParams 미지정 시 mutationFn 인자는 ky options 형태이며 body 직접 전달은 거부된다", () => {
-        const api = createFakeApi();
-        const mutationOptions = createMutationOptions(api);
+    it("[회귀 테스트] path requires params + create-time 미바인딩 시 mutate에 params 강제", () => {
+      const api = createFakeApi();
+      const mutationOptions = createMutationOptions(api);
 
-        const opts = mutationOptions({ method: "post", path: "/posts" });
+      // create-time에 params 없음, path는 {postId} 필요
+      const opts = mutationOptions({ method: "put", path: "/posts/{postId}" });
 
-        opts.mutationFn?.({ json: { title: "x" } }, {} as never);
-        opts.mutationFn?.({ json: { title: "x" }, searchParams: { lang: "ko" } }, {} as never);
+      // params 명시한 options form은 OK
+      opts.mutationFn?.({ json: { title: "x" }, params: { postId: 1 } }, {} as never);
 
-        // @ts-expect-error — dynamic 모드에서는 body를 { json: ... }로 래핑해야 함
-        opts.mutationFn?.({ title: "x" }, {} as never);
-      });
+      // @ts-expect-error — body form 거부 (params 공급 경로 없음)
+      opts.mutationFn?.({ title: "x" }, {} as never);
 
-      it("단축 메서드도 params/searchParams 미지정 시 dynamic 추론된다", () => {
-        const api = createFakeApi();
-        const mutationOptions = createMutationOptions(api);
-
-        const opts = mutationOptions.put({ path: "/posts/{postId}" });
-
-        opts.mutationFn?.({ json: { title: "x" }, params: { postId: 1 } }, {} as never);
-
-        // @ts-expect-error — dynamic 모드는 { json: ... } 래핑 필수
-        opts.mutationFn?.({ title: "x" }, {} as never);
-      });
+      // @ts-expect-error — options form이라도 params 누락 시 거부
+      opts.mutationFn?.({ json: { title: "x" } }, {} as never);
     });
 
-    it("static mode: path-param 키가 schema와 다르면 컴파일 에러", () => {
+    it("path-param 키가 schema와 다르면 컴파일 에러", () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
 

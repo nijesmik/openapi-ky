@@ -16,19 +16,15 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 
 ```ts
 import { createKyClient } from '@nijesmik/openapi-ky';
-import {
-  createClient,
-  createMutationOptions,
-} from '@nijesmik/openapi-ky-react-query';
+import { createClient } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
 const client = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
 
 export const api = createClient(client);
-export const mutationOptions = createMutationOptions(client);
 ```
 
-`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`는 각각 `useQuery` / `useSuspenseQuery` / `useInfiniteQuery` 옵션을 만듭니다. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)`는 편의 훅으로, 대응하는 옵션 빌더를 TanStack 훅에 그대로 넘긴 것과 동치입니다. `mutationOptions(...)`는 `method`를 명시하는 형태이며, `.post` / `.put` / `.patch` / `.delete` 단축 메서드는 `method`를 자동으로 주입합니다.
+`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.mutationOptions(...)`는 각각 대응하는 TanStack 훅의 옵션을 만듭니다. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)`는 편의 훅으로, 대응하는 옵션 빌더를 TanStack 훅에 그대로 넘긴 것과 동치입니다.
 
 ## Queries
 
@@ -88,42 +84,43 @@ api.useQuery({ method: 'post', path: '/search', json: { q } });
 ## Mutations
 
 ```tsx
-import { useMutation } from '@tanstack/react-query';
-
-// 단축 메서드
-const { mutate: createPost } = useMutation(
-  mutationOptions.post({ path: '/posts' }),
-);
-
-// 명시 method (런타임에 method가 결정되는 경우)
-useMutation(mutationOptions({ method: someMethod, path: '/posts/{postId}' }));
+const { mutate: createPost } = api.useMutation({ method: 'post', path: '/posts' });
 ```
 
-### Static vs dynamic 모드
+`mutate`는 두 가지 형태를 받습니다 — variables에 `'json'` / `'params'` / `'searchParams'` 필드가 있는지로 runtime에서 분기.
 
-`mutate`의 인자 형태는 create-time에 `params` / `searchParams`를 전달했는지 여부에 따라 달라집니다.
-
-**Dynamic** (기본 — create-time에 `params`/`searchParams` 미지정):
+### Body 형태
 
 ```tsx
-const { mutate } = useMutation(
-  mutationOptions.put({ path: '/posts/{postId}' }),
-);
+const { mutate } = api.useMutation({
+  method: 'put',
+  path: '/posts/{postId}',
+  params: { postId: 1 },          // create-time에 바인딩
+});
+
+mutate({ title: 'Updated' });     // variables가 곧 body
+```
+
+### Options 형태
+
+```tsx
+const { mutate } = api.useMutation({ method: 'put', path: '/posts/{postId}' });
 
 mutate({ params: { postId: 1 }, json: { title: 'Updated' } });
 ```
 
-**Static** (create-time에 `params` 또는 `searchParams` 지정):
+mutate-time `params` / `searchParams`는 create-time 기본값을 override 합니다.
+
+### Compile-time path-params 강제
+
+path가 `{...}` placeholder를 가지면서 `params`를 create-time에 바인딩하지 않으면, `params`를 포함한 options 형태만 허용됩니다 — body 형태는 컴파일 에러:
 
 ```tsx
-const { mutate } = useMutation(
-  mutationOptions.put({ path: '/posts/{postId}', params: { postId: 1 } }),
-);
+const { mutate } = api.useMutation({ method: 'put', path: '/posts/{postId}' });
 
-mutate({ title: 'Updated' }); // body만
+mutate({ title: 'x' });           // ❌ TS error — params 필수
+mutate({ json: { title: 'x' }, params: { postId: 1 } });  // ✅
 ```
-
-빌더에 `params` 또는 `searchParams`를 넘기면 static 모드로 전환됩니다.
 
 ## Cache — `createQueryClient`
 
@@ -160,7 +157,7 @@ await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 
 ### `ky.stop`은 이 패키지와 호환되지 않습니다
 
-`api`의 query 헬퍼(`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.useQuery(...)`, `api.useSuspenseQuery(...)`, `api.useInfiniteQuery(...)`)와 `mutationOptions`는 본문을 파싱해 반환하기 위해 내부적으로 `.json()`을 체이닝합니다. `beforeRetry` 훅이 [`ky.stop`](https://github.com/sindresorhus/ky#stop)을 반환하면 응답이 `undefined`로 resolve되고 내부 `.json()`에서 `TypeError`가 발생합니다. upstream 한계 — [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats)의 동일 항목 참고.
+`api`의 모든 헬퍼(`api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.mutationOptions(...)`, `api.useQuery(...)`, `api.useSuspenseQuery(...)`, `api.useInfiniteQuery(...)`, `api.useMutation(...)`)는 본문을 파싱해 반환하기 위해 내부적으로 `.json()`을 체이닝합니다. `beforeRetry` 훅이 [`ky.stop`](https://github.com/sindresorhus/ky#stop)을 반환하면 응답이 `undefined`로 resolve되고 내부 `.json()`에서 `TypeError`가 발생합니다. upstream 한계 — [`@nijesmik/openapi-ky`](https://www.npmjs.com/package/@nijesmik/openapi-ky#caveats)의 동일 항목 참고.
 
 특정 에러에서 retry를 멈추고 싶다면 react-query의 `retry`를 사용하세요:
 
@@ -177,6 +174,10 @@ api.useQuery({
 ```
 
 `ky.stop`이 꼭 필요하다면 wrapper 밖에서 `client`를 직접 호출하고 `undefined` 케이스를 처리하세요.
+
+### 본문 필드명이 `json` / `params` / `searchParams`인 경우
+
+`mutate`는 variables 최상위에 `'json'` / `'params'` / `'searchParams'` 필드 유무로 body 형태와 options 형태를 분기합니다. 만약 endpoint의 request body가 우연히 이 이름을 최상위 필드로 가진다면 (실무에선 드뭄), body 형태가 options 형태로 잘못 dispatch됩니다. 우회: 해당 endpoint에서는 항상 options 형태를 명시적으로 사용 — `mutate({ json: { yourBody } })`.
 
 ## 라이선스
 

@@ -37,7 +37,7 @@ type TestPaths = {
 const createFakeApi = () => createFakeCallableClient<TestPaths>({ id: 1 });
 
 describe("createMutationOptions", () => {
-  describe("dynamic 모드 (create 시 params/searchParams 미지정)", () => {
+  describe("create-time params/searchParams 미바인딩", () => {
     it("mutationFn 인자(ky options)를 api 호출에 spread한다", async () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
@@ -125,7 +125,7 @@ describe("createMutationOptions", () => {
     });
   });
 
-  describe("static 모드 (create 시 params 또는 searchParams 지정)", () => {
+  describe("create-time params 또는 searchParams 바인딩", () => {
     it("params 지정 시: mutationFn은 body를 직접 받고 create의 params가 api에 합쳐진다", async () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
@@ -147,7 +147,7 @@ describe("createMutationOptions", () => {
       );
     });
 
-    it("searchParams만 지정 시에도 static 모드로 라우팅되어 body를 직접 받는다", async () => {
+    it("searchParams만 바인딩해도 mutationFn이 body를 직접 받는다", async () => {
       const api = createFakeApi();
       const mutationOptions = createMutationOptions(api);
 

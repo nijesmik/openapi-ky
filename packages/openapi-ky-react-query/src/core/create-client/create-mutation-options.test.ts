@@ -98,6 +98,31 @@ describe("createMutationOptions", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((callArgs?.[1] as any).json).toEqual({ title: "real" });
     });
+
+    it("[회귀 테스트] mutate-time kyOptions가 options form으로 dispatch되고 create-time kyOptions와 합쳐진다", async () => {
+      const api = createFakeApi();
+      const mutationOptions = createMutationOptions(api);
+
+      const opts = mutationOptions({
+        method: "post",
+        path: "/posts",
+        kyOptions: { timeout: 5000 },
+      });
+      await opts.mutationFn?.(
+        { json: { title: "x" }, kyOptions: { headers: { "X-Foo": "bar" } } },
+        {} as never,
+      );
+
+      expect(getCallableMock(api)).toHaveBeenCalledWith(
+        "/posts",
+        expect.objectContaining({
+          method: "post",
+          json: { title: "x" },
+          timeout: 5000,
+          headers: { "X-Foo": "bar" },
+        }),
+      );
+    });
   });
 
   describe("static 모드 (create 시 params 또는 searchParams 지정)", () => {

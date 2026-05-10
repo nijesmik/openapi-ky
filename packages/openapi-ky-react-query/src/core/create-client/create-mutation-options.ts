@@ -106,11 +106,12 @@ function mutationApiOptions<
     });
   }
 
-  // mutate-time `params` / `searchParams`가 명시적으로 `undefined`인 경우
-  // create-time 값을 silently 클로버하지 않도록 nullish coalesce.
+  // mutate-time이 우선이지만 `params` / `searchParams`가 명시적으로
+  // `undefined`인 경우 create-time 값이 silently 클로버되지 않도록 nullish coalesce.
   return {
     ...kyOptions,
-    ...variables,
+    ...variables.kyOptions,
+    json: variables.json,
     params: variables.params ?? params,
     searchParams: variables.searchParams ?? searchParams,
     method,
@@ -127,6 +128,11 @@ function isRequestBody<
   return (
     variables === null ||
     typeof variables !== "object" ||
-    !("json" in variables || "params" in variables || "searchParams" in variables)
+    !(
+      "json" in variables ||
+      "params" in variables ||
+      "searchParams" in variables ||
+      "kyOptions" in variables
+    )
   );
 }

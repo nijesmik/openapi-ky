@@ -1,7 +1,7 @@
 import type {
   HttpMethod,
+  JsonField,
   KyOptions,
-  Options,
   PathsFor,
   PathParams,
   RequestBody,
@@ -21,7 +21,11 @@ export type MutationFnOptions<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod,
-> = Omit<Options<TPaths, TPath, TMethod>, "method">;
+> = JsonField<TPaths, TPath, TMethod> & {
+  params?: PathParams<TPaths, TPath, TMethod>;
+  searchParams?: SearchParams;
+  kyOptions?: KyOptions;
+};
 
 export type StrictMutationFnOptions<
   TPaths extends object,

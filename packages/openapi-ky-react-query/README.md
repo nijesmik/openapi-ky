@@ -16,15 +16,29 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 
 ```ts
 import createKyClient from '@nijesmik/openapi-ky';
-import { createClient } from '@nijesmik/openapi-ky-react-query';
+import { createClient, createQueryClient } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
 const kyClient = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
+export const queryClient = createQueryClient({
+  defaultOptions: { queries: { staleTime: 60_000 } },
+});
+export const api = createClient(kyClient, queryClient);
+```
 
-export const api = createClient(kyClient);
+```tsx
+import { QueryClientProvider } from '@tanstack/react-query';
+
+<QueryClientProvider client={queryClient()}>
+  <App />
+</QueryClientProvider>;
 ```
 
 `api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, and `api.mutationOptions(...)` build typed options for the matching TanStack hooks. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)` are convenience hooks — each equivalent to passing the matching options builder to the matching TanStack hook.
+
+When `queryClient` is passed (as above), `api` also gets path-typed cache helpers `api.getQueryKey(...)` / `api.setQueryData(...)` / `api.invalidateQueries(...)`. Omit `queryClient` (`createClient(kyClient)`) for a hooks-only `api`.
+
+`createQueryClient(config)` is a callable getter following TanStack's SSR singleton pattern: server-fresh per request, browser-cached after first call. Invoke it (`queryClient()`) to obtain the underlying `QueryClient` for the provider.
 
 ## Queries
 
@@ -122,36 +136,26 @@ mutate({ title: 'x' });           // ❌ TS error — params required
 mutate({ json: { title: 'x' }, params: { postId: 1 } });  // ✅
 ```
 
-## Cache — `createQueryClient`
+## Cache helpers
+
+When `createClient` is given a `queryClient` (see [Setup](#setup)), `api` exposes path-typed helpers for direct cache access:
 
 ```ts
-import { createQueryClient } from '@nijesmik/openapi-ky-react-query';
-import type { paths } from './schema';
-
-export const {
-  getQueryClient,
-  getQueryKey,
-  setQueryData,
-  invalidateQueries,
-} = createQueryClient<paths>({
-  defaultOptions: { queries: { staleTime: 60_000 } },
-});
-
 // Cache key
-const key = getQueryKey('/posts/{postId}', { params: { postId } });
+const key = api.getQueryKey('/posts/{postId}', { params: { postId } });
 
 // Update
-setQueryData({
+api.setQueryData({
   path: '/users/{userId}',
   params: { userId },
   updater: userData,
 });
 
 // Invalidate (TanStack filter fields are flat alongside path/params)
-await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
+await api.invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 ```
 
-The factory's return value is callable — `queryClient()` is equivalent to `queryClient.getQueryClient()`. SSR: a fresh `QueryClient` is created per request on the server, and a closure-scoped singleton is reused on the client (TanStack's SSR singleton guidance).
+For non-GET cache entries, pass `method` alongside `path` / `params`. Defaults to `'get'` when omitted.
 
 ## Caveats
 
@@ -173,7 +177,7 @@ api.useQuery({
 });
 ```
 
-If you genuinely need `ky.stop`, call `client` directly outside the wrapper and handle the `undefined` case yourself.
+If you genuinely need `ky.stop`, call `kyClient` directly outside the wrapper and handle the `undefined` case yourself.
 
 ### Mutation body fields named `json` / `params` / `searchParams`
 

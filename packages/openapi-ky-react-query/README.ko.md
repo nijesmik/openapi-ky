@@ -16,15 +16,29 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 
 ```ts
 import createKyClient from '@nijesmik/openapi-ky';
-import { createClient } from '@nijesmik/openapi-ky-react-query';
+import { createClient, createQueryClient } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
 const kyClient = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
+export const queryClient = createQueryClient({
+  defaultOptions: { queries: { staleTime: 60_000 } },
+});
+export const api = createClient(kyClient, queryClient);
+```
 
-export const api = createClient(kyClient);
+```tsx
+import { QueryClientProvider } from '@tanstack/react-query';
+
+<QueryClientProvider client={queryClient()}>
+  <App />
+</QueryClientProvider>;
 ```
 
 `api.queryOptions(...)`, `api.suspenseQueryOptions(...)`, `api.infiniteQueryOptions(...)`, `api.mutationOptions(...)`는 각각 대응하는 TanStack 훅의 옵션을 만듭니다. `api.useQuery(...)` / `api.useSuspenseQuery(...)` / `api.useInfiniteQuery(...)` / `api.useMutation(...)`는 편의 훅으로, 대응하는 옵션 빌더를 TanStack 훅에 그대로 넘긴 것과 동치입니다.
+
+위처럼 `queryClient`를 전달하면 `api`는 path 타입이 적용된 캐시 헬퍼 `api.getQueryKey(...)` / `api.setQueryData(...)` / `api.invalidateQueries(...)`도 노출합니다. `queryClient`를 생략하면(`createClient(kyClient)`) 훅 전용 `api`가 됩니다.
+
+`createQueryClient(config)`는 TanStack의 SSR singleton 패턴을 따르는 callable getter입니다 — 서버에서는 요청마다 새로 생성하고 브라우저에서는 첫 호출 후 캐시. `queryClient()`로 호출해 provider에 넘길 `QueryClient` 인스턴스를 얻습니다.
 
 ## Queries
 
@@ -122,36 +136,26 @@ mutate({ title: 'x' });           // ❌ TS error — params 필수
 mutate({ json: { title: 'x' }, params: { postId: 1 } });  // ✅
 ```
 
-## Cache — `createQueryClient`
+## 캐시 헬퍼
+
+`createClient`에 `queryClient`를 전달하면([셋업](#셋업) 참고), `api`가 path 타입이 적용된 직접 캐시 접근 헬퍼를 노출합니다:
 
 ```ts
-import { createQueryClient } from '@nijesmik/openapi-ky-react-query';
-import type { paths } from './schema';
-
-export const {
-  getQueryClient,
-  getQueryKey,
-  setQueryData,
-  invalidateQueries,
-} = createQueryClient<paths>({
-  defaultOptions: { queries: { staleTime: 60_000 } },
-});
-
 // 캐시 키
-const key = getQueryKey('/posts/{postId}', { params: { postId } });
+const key = api.getQueryKey('/posts/{postId}', { params: { postId } });
 
 // 갱신
-setQueryData({
+api.setQueryData({
   path: '/users/{userId}',
   params: { userId },
   updater: userData,
 });
 
 // 무효화 (TanStack 필터 필드는 path/params와 같은 레벨에 flat으로 전달)
-await invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
+await api.invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
 ```
 
-팩토리의 반환값은 callable이라 `queryClient()`는 `queryClient.getQueryClient()`와 동일합니다. SSR: 서버에서는 매 요청마다 새 `QueryClient`를 만들고, 클라이언트에서는 클로저 스코프 싱글톤을 재사용합니다 (TanStack의 SSR singleton 가이드 따름).
+GET이 아닌 캐시 엔트리는 `path` / `params`와 함께 `method`를 명시합니다. 생략 시 `'get'` 기본값.
 
 ## 주의사항
 
@@ -173,7 +177,7 @@ api.useQuery({
 });
 ```
 
-`ky.stop`이 꼭 필요하다면 wrapper 밖에서 `client`를 직접 호출하고 `undefined` 케이스를 처리하세요.
+`ky.stop`이 꼭 필요하다면 wrapper 밖에서 `kyClient`를 직접 호출하고 `undefined` 케이스를 처리하세요.
 
 ### 본문 필드명이 `json` / `params` / `searchParams`인 경우
 

@@ -42,7 +42,7 @@ export type MutationFnVariables<
   TMethod extends HttpMethod,
 > = RequestBody<TPaths, TPath, TMethod> | MutationFnOptions<TPaths, TPath, TMethod>;
 
-export type CreateMutationOptions<
+export type MutationOptions<
   TPaths extends object,
   TPath extends PathsFor<TPaths, TMethod>,
   TMethod extends HttpMethod,

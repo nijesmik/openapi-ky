@@ -16,8 +16,8 @@ import {
 } from "@tanstack/react-query";
 
 import type {
-  CreateMutationOptions,
   MutationFnVariables,
+  MutationOptions,
   StaticPathsFor,
   StrictMutationFnOptions,
 } from "@/types/mutation";
@@ -30,7 +30,7 @@ import { apiOptions } from "@/lib/api-options";
  */
 export function createMutationOptions<TPaths extends object>(api: Client<TPaths>) {
   function mutationOptions<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
-    options: CreateMutationOptions<TPaths, TPath, TMethod> & {
+    options: MutationOptions<TPaths, TPath, TMethod> & {
       params: PathParams<TPaths, TPath, TMethod>;
     },
   ): UseMutationOptions<
@@ -42,21 +42,21 @@ export function createMutationOptions<TPaths extends object>(api: Client<TPaths>
     TPath extends StaticPathsFor<TPaths, TMethod>,
     TMethod extends HttpMethod,
   >(
-    options: CreateMutationOptions<TPaths, TPath, TMethod>,
+    options: MutationOptions<TPaths, TPath, TMethod>,
   ): UseMutationOptions<
     ResponseBody<TPaths, TPath, TMethod>,
     Error,
     MutationFnVariables<TPaths, TPath, TMethod>
   >;
   function mutationOptions<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
-    options: CreateMutationOptions<TPaths, TPath, TMethod>,
+    options: MutationOptions<TPaths, TPath, TMethod>,
   ): UseMutationOptions<
     ResponseBody<TPaths, TPath, TMethod>,
     Error,
     StrictMutationFnOptions<TPaths, TPath, TMethod>
   >;
   function mutationOptions<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
-    options: CreateMutationOptions<TPaths, TPath, TMethod>,
+    options: MutationOptions<TPaths, TPath, TMethod>,
   ) {
     const { method, path, params, searchParams, kyOptions, ...rest } = options;
 

@@ -3,8 +3,8 @@ import type { HttpMethod, PathsFor, PathParams, ResponseBody } from "@nijesmik/o
 import { useMutation as tanstackUseMutation, type UseMutationResult } from "@tanstack/react-query";
 
 import type {
-  CreateMutationOptions,
   MutationFnVariables,
+  MutationOptions,
   StaticPathsFor,
   StrictMutationFnOptions,
 } from "@/types/mutation";
@@ -15,7 +15,7 @@ export function useMutation<TPaths extends object>(
   mutationOptions: ReturnType<typeof createMutationOptions<TPaths>>,
 ) {
   function useMutation<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
-    options: CreateMutationOptions<TPaths, TPath, TMethod> & {
+    options: MutationOptions<TPaths, TPath, TMethod> & {
       params: PathParams<TPaths, TPath, TMethod>;
     },
   ): UseMutationResult<
@@ -24,21 +24,21 @@ export function useMutation<TPaths extends object>(
     MutationFnVariables<TPaths, TPath, TMethod>
   >;
   function useMutation<TPath extends StaticPathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
-    options: CreateMutationOptions<TPaths, TPath, TMethod>,
+    options: MutationOptions<TPaths, TPath, TMethod>,
   ): UseMutationResult<
     ResponseBody<TPaths, TPath, TMethod>,
     Error,
     MutationFnVariables<TPaths, TPath, TMethod>
   >;
   function useMutation<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
-    options: CreateMutationOptions<TPaths, TPath, TMethod>,
+    options: MutationOptions<TPaths, TPath, TMethod>,
   ): UseMutationResult<
     ResponseBody<TPaths, TPath, TMethod>,
     Error,
     StrictMutationFnOptions<TPaths, TPath, TMethod>
   >;
   function useMutation<TPath extends PathsFor<TPaths, TMethod>, TMethod extends HttpMethod>(
-    options: CreateMutationOptions<TPaths, TPath, TMethod>,
+    options: MutationOptions<TPaths, TPath, TMethod>,
   ):
     | UseMutationResult<
         ResponseBody<TPaths, TPath, TMethod>,

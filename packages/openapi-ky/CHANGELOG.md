@@ -43,22 +43,23 @@ Users generating their schema with `openapi-typescript` get this with no migrati
 - `isHTTPError`: type-narrowing ky `HTTPError` check that also narrows `error.response.json<T>()`.
 - Types: `Client`, `Fetcher`, `Options`, `OptionsWithRequiredMethod`, `PathsFor`, `PathParams`, `RequestBody`, `ResponseBody`, `JsonField`, `KyOptions`, `SearchParams`, `HttpMethod`.
 
-## 0.2.0
+## ~~0.2.0~~ (deprecated)
 
-### Minor Changes
+### ~~Minor Changes~~
 
-- ### Breaking Changes
-  - Rename `API` class to `Client` / `API` 클래스를 `Client`로 리네이밍
-  - Remove `ErrorOptions`; use `beforeHTTPError` and `beforeAnyError` hooks instead / `ErrorOptions` 제거; `beforeHTTPError`, `beforeAnyError` 훅으로 대체
-  - Add `createClient` factory function / `createClient` 팩토리 함수 추가
-  - Add `beforeHTTPError` hook (maps to ky's `beforeError`) / `beforeHTTPError` 훅 추가 (ky의 `beforeError`에 매핑)
-  - Add `beforeAnyError` hook for all error types / `beforeAnyError` 훅 추가 (모든 에러에 대해 동작)
+#### ~~Breaking Changes~~
+
+- ~~Rename `API` class to `Client`~~
+- ~~Remove `ErrorOptions`; use `beforeHTTPError` and `beforeAnyError` hooks instead~~
+- ~~Add `createClient` factory function~~
+- ~~Add `beforeHTTPError` hook (maps to ky's `beforeError`)~~
+- ~~Add `beforeAnyError` hook for all error types~~
 
 ## 0.1.1
 
 ### Patch Changes
 
-- Fix JSON parsing error on 204 No Content responses / 204 No Content 응답 시 JSON 파싱 오류 수정
+- Fix JSON parsing error on 204 No Content responses
 
 ## 0.1.0
 

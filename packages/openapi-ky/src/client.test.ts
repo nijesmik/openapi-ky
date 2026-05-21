@@ -43,7 +43,7 @@ const jsonResponse = (body: unknown, init?: ResponseInit) =>
 
 const createTestClient = (fetchImpl: typeof fetch) =>
   createClient<TestPaths>({
-    prefixUrl: "https://api.test/",
+    baseUrl: "https://api.test/",
     fetch: fetchImpl,
     retry: 0,
   });
@@ -144,7 +144,7 @@ describe("Client", () => {
           }),
       );
       const client = createClient<TestPaths, "post">({
-        prefixUrl: "https://api.test/",
+        baseUrl: "https://api.test/",
         fetch: fetchImpl,
         retry: 0,
         method: "post",

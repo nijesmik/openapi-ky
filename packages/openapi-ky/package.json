@@ -26,10 +26,10 @@
     "openapi-typescript-helpers": "^0.1.0"
   },
   "peerDependencies": {
-    "ky": "^1.14.3"
+    "ky": "^2.0.0"
   },
   "devDependencies": {
-    "ky": "^1.14.3",
+    "ky": "^2.0.0",
     "typescript": "5.9.3"
   }
 }

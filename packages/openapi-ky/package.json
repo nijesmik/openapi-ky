@@ -31,5 +31,8 @@
   "devDependencies": {
     "ky": "^2.0.0",
     "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

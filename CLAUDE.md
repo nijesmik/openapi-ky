@@ -7,4 +7,7 @@
 - Extract repeated code only after 3+ identical instances with a clear "must change together" pattern emerge.
 - When unsure whether to add something: don't. Removal is hard; adding later is cheap.
 
-@.claude/rules/testing.md
+## Publishing checklist
+
+- Before running `changeset version`, verify that README code examples match the current API (option names, import paths, default vs named exports, etc.).
+- Confirm CHANGELOG structure is consistent with previous versions.

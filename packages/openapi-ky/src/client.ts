@@ -22,31 +22,7 @@ function createClient(defaultOptions: Omit<KyOptions, "method"> & { method?: Htt
   const request = (path: string, options: Internal.Options = {}): ResponsePromise => {
     const { params, ...kyOptions } = options;
     const url = buildUrl(path, params);
-    const promise = api(url, kyOptions);
-
-    void promise
-      .then((response) => {
-        // `response` is `undefined` at runtime when `ky.stop` is returned in a `beforeRetry` hook, despite ky's types.
-        if (!response) {
-          return;
-        }
-        // Patch native `Response.json()` to match ky's chained `.json()` behavior on empty bodies (returns `""` instead of throwing).
-        const parseJson = response.json.bind(response);
-        response.json = async <J>(): Promise<J> => {
-          const text = await response.clone().text();
-          if (!text) {
-            return "" as J;
-          }
-          return parseJson<J>();
-        };
-      })
-      .catch(() => {
-        // `.then()` creates a derived promise that rejects independently when `promise` rejects.
-        // The caller awaits/catches `promise` itself, so swallow only this derived branch
-        // (not `promise`) to avoid `unhandledRejection`.
-      });
-
-    return promise;
+    return api(url, kyOptions);
   };
 
   return Object.assign(request, {

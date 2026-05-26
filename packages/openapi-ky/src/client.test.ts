@@ -35,12 +35,6 @@ type TestPaths = {
   };
 };
 
-const jsonResponse = (body: unknown, init?: ResponseInit) =>
-  new Response(JSON.stringify(body), {
-    headers: { "content-type": "application/json" },
-    ...init,
-  });
-
 const createTestClient = (fetchImpl: typeof fetch) =>
   createClient<TestPaths>({
     baseUrl: "https://api.test/",
@@ -49,28 +43,6 @@ const createTestClient = (fetchImpl: typeof fetch) =>
   });
 
 describe("Client", () => {
-  describe("response.json override", () => {
-    it("1. [회귀 테스트] 본문이 있을 때 override가 원본 body를 소비하지 않고 파싱한다", async () => {
-      const fetchImpl = vi.fn(async () => jsonResponse([{ id: 1, title: "hi" }]));
-      const client = createTestClient(fetchImpl);
-
-      const response = await client.get("/posts");
-      const data = await response!.json();
-
-      expect(data).toEqual([{ id: 1, title: "hi" }]);
-    });
-
-    it("2. [회귀 테스트] 본문이 비어있으면 빈 문자열을 반환한다", async () => {
-      const fetchImpl = vi.fn(async () => new Response("", { status: 200 }));
-      const client = createTestClient(fetchImpl);
-
-      const response = await client.get("/posts");
-      const data = await response!.json();
-
-      expect(data).toBe("");
-    });
-  });
-
   describe("HTTP 메서드 dispatch", () => {
     it.each([
       ["get", "GET", (c: ReturnType<typeof createTestClient>) => c.get("/posts")],
@@ -153,28 +125,6 @@ describe("Client", () => {
       await client.get("/posts");
 
       expect((fetchImpl.mock.calls[0]![0] as Request).method).toBe("GET");
-    });
-  });
-
-  describe("실패 처리", () => {
-    it("7. [회귀 테스트] 호출자가 catch한 요청 실패가 unhandledRejection을 발동시키지 않는다", async () => {
-      const fetchImpl = vi.fn(async () => {
-        throw new TypeError("network down");
-      });
-      const client = createTestClient(fetchImpl);
-      const unhandled = vi.fn();
-      process.on("unhandledRejection", unhandled);
-
-      try {
-        await expect(client.get("/posts")).rejects.toThrow("network down");
-        // 모든 microtask가 끝나도록 한 틱 더 기다림 — derived promise의 rejection은
-        // 다음 microtask에 흐를 수 있음
-        await new Promise((resolve) => setImmediate(resolve));
-
-        expect(unhandled).not.toHaveBeenCalled();
-      } finally {
-        process.off("unhandledRejection", unhandled);
-      }
     });
   });
 

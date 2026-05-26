@@ -1,5 +1,13 @@
 # @nijesmik/openapi-ky-react-query
 
+## 2.0.1
+
+### Patch Changes
+
+- d7ca1e5: Fix README examples: `prefixUrl` → `baseUrl`, `createClient` default import
+- Updated dependencies [d7ca1e5]
+  - @nijesmik/openapi-ky@2.0.1
+
 ## 2.0.0
 
 ### Major Changes

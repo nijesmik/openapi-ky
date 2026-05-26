@@ -1,5 +1,11 @@
 # @nijesmik/openapi-ky
 
+## 2.0.1
+
+### Patch Changes
+
+- d7ca1e5: Fix README examples: `prefixUrl` → `baseUrl`
+
 ## 2.0.0
 
 ### Major Changes

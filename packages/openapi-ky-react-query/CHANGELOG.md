@@ -1,5 +1,32 @@
 # @nijesmik/openapi-ky-react-query
 
+## 2.0.0
+
+### Major Changes
+
+- 5fd572d: ### Requires Node.js ≥ 22 (BREAKING)
+
+  Follows the ky v2 / `@nijesmik/openapi-ky` v2 engine requirement.
+
+  ### Empty-body responses return `undefined` instead of throwing
+
+  `queryFn` and `mutationFn` now use `safeJson` — a helper that reads `response.text()` and returns `undefined` when the body is empty, instead of throwing `SyntaxError` from `JSON.parse`. This covers `204 No Content` and any other response with an empty body.
+
+  ### `createClient` is now a default export (BREAKING)
+
+  ```ts
+  // Before
+  import { createClient } from "@nijesmik/openapi-ky-react-query";
+
+  // After
+  import createClient from "@nijesmik/openapi-ky-react-query";
+  ```
+
+### Patch Changes
+
+- Updated dependencies [5fd572d]
+  - @nijesmik/openapi-ky@2.0.0
+
 ## 1.0.0
 
 ### Major Changes
@@ -48,15 +75,15 @@ Renames:
 ```tsx
 // body form — params bound at create-time
 const { mutate } = api.useMutation({
-  method: 'put',
-  path: '/posts/{postId}',
+  method: "put",
+  path: "/posts/{postId}",
   params: { postId: 1 },
 });
-mutate({ title: 'Updated' }); // variables IS the body
+mutate({ title: "Updated" }); // variables IS the body
 
 // options form — params at mutate-time
-const { mutate } = api.useMutation({ method: 'put', path: '/posts/{postId}' });
-mutate({ params: { postId: 1 }, json: { title: 'Updated' } });
+const { mutate } = api.useMutation({ method: "put", path: "/posts/{postId}" });
+mutate({ params: { postId: 1 }, json: { title: "Updated" } });
 ```
 
 If the path has `{...}` placeholders and `params` is not bound at create-time, only the options form (with `params`) compiles.
@@ -66,8 +93,8 @@ If the path has `{...}` placeholders and `params` is not bound at create-time, o
 Passing `queryClient` as the second argument to `createClient` exposes path-typed `api.getQueryKey` / `api.setQueryData` / `api.invalidateQueries`. These methods previously lived on the value returned by `createQueryClient`.
 
 ```ts
-api.setQueryData({ path: '/users/{userId}', params: { userId }, updater: userData });
-await api.invalidateQueries({ path: '/posts', exact: true, refetchType: 'active' });
+api.setQueryData({ path: "/users/{userId}", params: { userId }, updater: userData });
+await api.invalidateQueries({ path: "/posts", exact: true, refetchType: "active" });
 ```
 
 #### `createQueryClient` is now a pure callable (BREAKING)
@@ -95,7 +122,7 @@ On `api.queryOptions(...)` / `api.useQuery(...)`, `params: null` swaps `queryFn`
 
 ```tsx
 api.useQuery({
-  path: '/users/{userId}',
+  path: "/users/{userId}",
   params: userId ? { userId } : null, // disabled when userId is falsy
 });
 ```

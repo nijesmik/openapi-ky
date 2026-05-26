@@ -6,8 +6,16 @@
 
 Follows the ky v2 / `@nijesmik/openapi-ky` v2 engine requirement.
 
-### 204 responses return `undefined` instead of throwing
+### Empty-body responses return `undefined` instead of throwing
 
-`queryFn` and `mutationFn` now use `safeJson` — a helper that checks `response.status` before calling `.json()`. When the status is `204`, it returns `undefined` (typed as `T`) instead of throwing.
+`queryFn` and `mutationFn` now use `safeJson` — a helper that reads `response.text()` and returns `undefined` when the body is empty, instead of throwing `SyntaxError` from `JSON.parse`. This covers `204 No Content` and any other response with an empty body.
 
-This means mutations targeting endpoints that return `204 No Content` (e.g. `DELETE`) no longer error by default.
+### `createClient` is now a default export (BREAKING)
+
+```ts
+// Before
+import { createClient } from '@nijesmik/openapi-ky-react-query';
+
+// After
+import createClient from '@nijesmik/openapi-ky-react-query';
+```

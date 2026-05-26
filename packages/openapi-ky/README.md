@@ -65,43 +65,6 @@ type User = ResponseBody<paths, '/users/{userId}'>; // method defaults to 'get'
 
 Also exported: `Client`, `PathsFor`, `PathParams`, `Options`, `OptionsWithRequiredMethod`, `JsonField`, `KyOptions`, `SearchParams`, `HttpMethod`.
 
-## `isHTTPError`
-
-```ts
-import { isHTTPError } from '@nijesmik/openapi-ky';
-
-try {
-  const users = await client.get('/users').json();
-  return users;
-} catch (error) {
-  if (isHTTPError<{ message: string }>(error)) {
-    const body = await error.response.json();
-    console.error(body.message);
-  }
-  throw error;
-}
-```
-
-The generic narrows the response body type returned by `error.response.json()`.
-
-## Caveats
-
-### `ky.stop`
-
-If a `beforeRetry` hook returns [`ky.stop`](https://github.com/sindresorhus/ky#stop), the resolved response is `undefined`. Chained body methods (`.json()`, `.text()`, …) throw `TypeError`. Use the `await` pattern with an `undefined` guard:
-
-```ts
-const response = await client.get('/users');
-if (!response) {
-  return; // ky.stop was returned in a beforeRetry hook
-}
-const users = await response.json();
-```
-
-### Empty response body
-
-`.json()` returns `""` (empty string) for empty bodies (e.g. `204 No Content`), matching ky's chained `.json()` behavior. Type assertions like `.json<Post[]>()` lie about the runtime shape — check `response.status` or read with `.text()` and parse conditionally.
-
 ## License
 
 MIT

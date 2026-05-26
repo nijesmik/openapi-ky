@@ -65,43 +65,6 @@ type User = ResponseBody<paths, '/users/{userId}'>; // method 기본값은 'get'
 
 이 외에 `Client`, `PathsFor`, `PathParams`, `Options`, `OptionsWithRequiredMethod`, `JsonField`, `KyOptions`, `SearchParams`, `HttpMethod`를 export합니다.
 
-## `isHTTPError`
-
-```ts
-import { isHTTPError } from '@nijesmik/openapi-ky';
-
-try {
-  const users = await client.get('/users').json();
-  return users;
-} catch (error) {
-  if (isHTTPError<{ message: string }>(error)) {
-    const body = await error.response.json();
-    console.error(body.message);
-  }
-  throw error;
-}
-```
-
-제네릭으로 `error.response.json()`의 반환 타입을 좁힐 수 있습니다.
-
-## 주의사항
-
-### `ky.stop`
-
-`beforeRetry` 훅이 [`ky.stop`](https://github.com/sindresorhus/ky#stop)을 반환하면 응답이 `undefined`로 resolve됩니다. 체이닝된 body 메서드(`.json()`, `.text()`, …)는 `TypeError`를 던집니다. `await` 패턴에 `undefined` 가드를 사용하세요:
-
-```ts
-const response = await client.get('/users');
-if (!response) {
-  return; // beforeRetry에서 ky.stop을 반환한 경우
-}
-const users = await response.json();
-```
-
-### 빈 응답 body
-
-`.json()`은 빈 body (예: `204 No Content`)에 대해 `""` (빈 문자열)을 반환합니다 — ky의 체이닝 `.json()` 동작과 일치합니다. `.json<Post[]>()` 같은 타입 단언은 런타임 형태와 불일치할 수 있으니 `response.status`를 확인하거나 `.text()`로 읽어 조건부로 파싱하세요.
-
 ## 라이선스
 
 MIT

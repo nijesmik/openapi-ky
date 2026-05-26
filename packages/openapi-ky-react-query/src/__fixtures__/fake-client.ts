@@ -2,10 +2,16 @@ import type { Client } from "@nijesmik/openapi-ky";
 
 import { vi, type Mock } from "vitest";
 
-const buildResponseMock = (returnValue: unknown, status = 200) =>
-  Object.assign(Promise.resolve({ status, json: () => Promise.resolve(returnValue) }), {
-    json: () => Promise.resolve(returnValue),
-  });
+const buildResponseMock = (returnValue: unknown) => {
+  const text = returnValue === undefined ? "" : JSON.stringify(returnValue);
+  return Object.assign(
+    Promise.resolve({
+      text: () => Promise.resolve(text),
+      json: () => Promise.resolve(returnValue),
+    }),
+    { json: () => Promise.resolve(returnValue) },
+  );
+};
 
 /**
  * Fakes a single shortcut method on `Client<TPaths>` (e.g. `"get"`, `"post"`).

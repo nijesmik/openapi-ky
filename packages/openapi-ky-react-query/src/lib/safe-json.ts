@@ -1,9 +1,10 @@
 export async function safeJson<T>(
-  promise: PromiseLike<{ status: number; json(): Promise<T> }>,
+  promise: PromiseLike<{ text(): Promise<string>; json(): Promise<T> }>,
 ): Promise<T> {
   const response = await promise;
-  if (response.status === 204) {
+  const text = await response.text();
+  if (text === "") {
     return undefined as T;
   }
-  return response.json();
+  return JSON.parse(text) as T;
 }

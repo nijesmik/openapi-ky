@@ -10,4 +10,7 @@
 ## Publishing checklist
 
 - Before running `changeset version`, verify that README code examples match the current API (option names, import paths, default vs named exports, etc.).
-- Confirm CHANGELOG structure is consistent with previous versions.
+- After running `changeset version`, review the generated CHANGELOG entries:
+  - Remove commit hash prefixes from bullet items (`- d7ca1e5: message` → `- message`). Keep `[hash]` in `Updated dependencies [hash]`.
+  - Fix heading structure: use `####` not `###` inside bullet items.
+  - Confirm consistency with previous versions.

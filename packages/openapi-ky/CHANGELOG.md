@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- d7ca1e5: Fix README examples: `prefixUrl` → `baseUrl`
+- Fix README examples: `prefixUrl` → `baseUrl`
 
 ## 2.0.0
 

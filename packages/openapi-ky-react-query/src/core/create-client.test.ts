@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createFakeCallableClient, getCallableMock } from "@/__fixtures__/fake-client";
 
-import { createClient } from "./create-client";
+import createClient from "./create-client";
 import { useInfiniteQuery } from "./use-infinite-query";
 import { useQuery } from "./use-query";
 import { useSuspenseQuery } from "./use-suspense-query";

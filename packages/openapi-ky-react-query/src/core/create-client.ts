@@ -39,12 +39,14 @@ import { useSuspenseQuery } from "./use-suspense-query";
  * `skipToken`. Only `queryOptions` / `useQuery` honor this; suspense and
  * infinite builders always fire.
  */
-export function createClient<TPaths extends object>(api: KyClient<TPaths>): ClientHooks<TPaths>;
-export function createClient<TPaths extends object>(
+export default function createClient<TPaths extends object>(
+  api: KyClient<TPaths>,
+): ClientHooks<TPaths>;
+export default function createClient<TPaths extends object>(
   api: KyClient<TPaths>,
   queryClient: () => QueryClient,
 ): Client<TPaths>;
-export function createClient<TPaths extends object>(
+export default function createClient<TPaths extends object>(
   api: KyClient<TPaths>,
   queryClient?: () => QueryClient,
 ): ClientHooks<TPaths> | Client<TPaths> {

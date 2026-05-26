@@ -16,10 +16,11 @@ npm install @nijesmik/openapi-ky-react-query @nijesmik/openapi-ky @tanstack/reac
 
 ```ts
 import createKyClient from '@nijesmik/openapi-ky';
-import { createClient, createQueryClient } from '@nijesmik/openapi-ky-react-query';
+import createClient from '@nijesmik/openapi-ky-react-query';
+import { createQueryClient } from '@nijesmik/openapi-ky-react-query';
 import type { paths } from './schema';
 
-const kyClient = createKyClient<paths>({ prefixUrl: 'https://api.example.com' });
+const kyClient = createKyClient<paths>({ baseUrl: 'https://api.example.com' });
 export const queryClient = createQueryClient({
   defaultOptions: { queries: { staleTime: 60_000 } },
 });

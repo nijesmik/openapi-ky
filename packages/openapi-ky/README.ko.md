@@ -18,7 +18,7 @@ npm install @nijesmik/openapi-ky ky
 import createClient from '@nijesmik/openapi-ky';
 import type { paths } from './schema'; // openapi-typescript로 생성
 
-const client = createClient<paths>({ prefixUrl: 'https://api.example.com' });
+const client = createClient<paths>({ baseUrl: 'https://api.example.com' });
 
 // path params가 있는 GET
 const user = await client
@@ -42,7 +42,7 @@ import createClient from '@nijesmik/openapi-ky';
 import type { paths } from './schema';
 
 const client = createClient<paths, 'post'>({
-  prefixUrl: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   method: 'post',
 });
 

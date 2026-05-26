@@ -16,6 +16,7 @@ import type { InfiniteQueryOptions } from "@/types/query";
 
 import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
+import { safeJson } from "@/lib/safe-json";
 
 export function createInfiniteQueryOptions<TPaths extends object>(api: Client<TPaths>) {
   return function infiniteQueryOptions<
@@ -45,19 +46,21 @@ export function createInfiniteQueryOptions<TPaths extends object>(api: Client<TP
     return tanstackInfiniteQueryOptions({
       queryKey: queryKey(path, { method, params: params as Internal.PathParams, searchParams }),
       queryFn: ({ pageParam }) =>
-        api(
-          path,
-          apiOptions<TPaths, TPath, TMethod>({
-            method,
-            params,
-            searchParams: {
-              ...searchParams,
-              [pageParamKey]: pageParam as TPageParam,
-            },
-            kyOptions,
-            json,
-          }),
-        ).json(),
+        safeJson(
+          api(
+            path,
+            apiOptions<TPaths, TPath, TMethod>({
+              method,
+              params,
+              searchParams: {
+                ...searchParams,
+                [pageParamKey]: pageParam as TPageParam,
+              },
+              kyOptions,
+              json,
+            }),
+          ),
+        ),
       initialPageParam,
       select,
       ...rest,

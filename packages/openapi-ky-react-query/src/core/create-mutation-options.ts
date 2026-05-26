@@ -23,6 +23,7 @@ import type {
 } from "@/types/mutation";
 
 import { apiOptions } from "@/lib/api-options";
+import { safeJson } from "@/lib/safe-json";
 
 /**
  * When the path has placeholders and `params` is not bound at create time,
@@ -62,16 +63,18 @@ export function createMutationOptions<TPaths extends object>(api: Client<TPaths>
 
     return tanstackMutationOptions({
       mutationFn: (variables: MutationFnVariables<TPaths, TPath, TMethod>) =>
-        api(
-          path,
-          mutationApiOptions({
-            method,
-            params,
-            searchParams,
-            kyOptions,
-            variables,
-          }),
-        ).json(),
+        safeJson(
+          api(
+            path,
+            mutationApiOptions({
+              method,
+              params,
+              searchParams,
+              kyOptions,
+              variables,
+            }),
+          ),
+        ),
       ...rest,
     });
   }

@@ -13,6 +13,7 @@ import type { SuspenseQueryOptions } from "@/types/query";
 
 import { apiOptions } from "@/lib/api-options";
 import { queryKey } from "@/lib/query-key";
+import { safeJson } from "@/lib/safe-json";
 
 export function createSuspenseQueryOptions<TPaths extends object>(api: Client<TPaths>) {
   return function suspenseQueryOptions<
@@ -26,16 +27,18 @@ export function createSuspenseQueryOptions<TPaths extends object>(api: Client<TP
     return tanstackQueryOptions({
       queryKey: queryKey(path, { method, params: params as Internal.PathParams, searchParams }),
       queryFn: () =>
-        api(
-          path,
-          apiOptions<TPaths, TPath, TMethod>({
-            method,
-            params,
-            searchParams,
-            kyOptions,
-            json,
-          }),
-        ).json(),
+        safeJson(
+          api(
+            path,
+            apiOptions<TPaths, TPath, TMethod>({
+              method,
+              params,
+              searchParams,
+              kyOptions,
+              json,
+            }),
+          ),
+        ),
       select,
       ...rest,
     });

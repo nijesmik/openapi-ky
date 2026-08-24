@@ -10,10 +10,10 @@ import { createSuspenseQueryOptions } from "./create-suspense-query-options";
 import { getQueryKey } from "./get-query-key";
 import { invalidateQueries } from "./invalidate-queries";
 import { setQueryData } from "./set-query-data";
-import { useInfiniteQuery as createUseInfiniteQuery } from "./use-infinite-query";
-import { useMutation as createUseMutation } from "./use-mutation";
-import { useQuery as createUseQuery } from "./use-query";
-import { useSuspenseQuery as createUseSuspenseQuery } from "./use-suspense-query";
+import { useInfiniteQuery } from "./use-infinite-query";
+import { useMutation } from "./use-mutation";
+import { useQuery } from "./use-query";
+import { useSuspenseQuery } from "./use-suspense-query";
 
 /**
  * Creates a typed React Query factory bound to an `openapi-ky` `Client`.
@@ -60,10 +60,10 @@ export default function createClient<TPaths extends object>(
     suspenseQueryOptions,
     infiniteQueryOptions,
     mutationOptions,
-    useQuery: createUseQuery(queryOptions),
-    useSuspenseQuery: createUseSuspenseQuery(suspenseQueryOptions),
-    useInfiniteQuery: createUseInfiniteQuery(infiniteQueryOptions),
-    useMutation: createUseMutation(mutationOptions),
+    useQuery: useQuery(queryOptions),
+    useSuspenseQuery: useSuspenseQuery(suspenseQueryOptions),
+    useInfiniteQuery: useInfiniteQuery(infiniteQueryOptions),
+    useMutation: useMutation(mutationOptions),
   };
 
   if (!queryClient) {
